@@ -1,0 +1,5 @@
+invalid structure
+<nt='http://www.jcp.org/jcr/nt/1.0'>
+<test='http://tourniquet.io/jcr/test/1.0'>
+
+[test:testType]>nt:hierarchyNode

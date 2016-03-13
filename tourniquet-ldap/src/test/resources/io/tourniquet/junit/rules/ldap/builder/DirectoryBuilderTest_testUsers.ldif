@@ -1,0 +1,31 @@
+dn: dc=tourniquet
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: tourniquet.io
+
+dn: ou=groups,dc=tourniquet
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=testgroup,ou=groups,dc=tourniquet
+objectClass: top
+objectClass: groupOfUniqueNames
+cn: mailqusers
+uniqueMember: uid=testuser,ou=users,dc=tourniquet
+
+dn: ou=users,dc=tourniquet
+objectClass: organizationalUnit
+ou: users
+
+dn: uid=testuser,ou=users,dc=tourniquet
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: test
+sn: user
+uid: tu1
+userPassword: Password1
+mail: test.user1@junit.tourniquet.io
+

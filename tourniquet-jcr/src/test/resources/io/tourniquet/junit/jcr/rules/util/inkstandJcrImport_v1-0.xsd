@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015-2016 DevCon5 GmbH, info@devcon5.ch
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://tourniquet.io/schemas/jcr-import"
+           xmlns="http://tourniquet.io/schemas/jcr-import"
+           elementFormDefault="qualified">
+
+    <xs:element name="rootNode" type="nodeDescriptor">
+        <xs:annotation>
+            <xs:documentation>The root element of an import definition.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="nodeDescriptor">
+        <xs:annotation>
+            <xs:documentation>Defines the structure of a node definition.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="mixin" type="mixinDescriptor" minOccurs="0"
+                        maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Add 0..n mixin types to the node. The mixin types
+                        define which additional properties can be added to the node.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="property" type="propertyDescriptor"
+                        minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Add 0..n properties to the node. Some node types
+                        require specific properties to be set.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="node" type="nodeDescriptor" minOccurs="0"
+                        maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Add 0..n child nodes to the node.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>The name of the node to add.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="path" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>The path to add the property. The path is applied
+                    relative to the parent node.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="primaryType" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>The primary node type of the node.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="id" type="xs:ID">
+            <xs:annotation>
+                <xs:documentation>The id of the node. The id is only valid inside
+                    the xml document. It may be used to define REFERENCE or
+                    WEAKREFERENCE types property values among nodes defined in the same
+                    xml.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="mixinDescriptor">
+        <xs:annotation>
+            <xs:documentation>Defines the structure for defining a mixinType
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>The name of the mixin type</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="propertyDescriptor">
+        <xs:simpleContent>
+            <xs:annotation>
+                <xs:documentation>Defines the structure for defining a JCR Property.
+                </xs:documentation>
+            </xs:annotation>
+            <xs:extension base="xs:anySimpleType">
+                <xs:attribute name="name" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>Specifies the name of the property. The name
+                            must be defined in the primary type or one of the mixin types of
+                            the node.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="jcrType" type="propertyValueType"
+                              use="required">
+                    <xs:annotation>
+                        <xs:documentation>Specifies the JCR Value type of the property
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+
+                <xs:attribute name="ref" type="xs:anyURI" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Optional attribute to reference an external
+                            resource whose content is
+                            used as value for the property. The ref attributes overrides a
+                            textual value.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+
+    </xs:complexType>
+
+    <xs:simpleType name="propertyValueType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="BINARY"></xs:enumeration>
+            <xs:enumeration value="DATE"></xs:enumeration>
+            <xs:enumeration value="DECIMAL"></xs:enumeration>
+            <xs:enumeration value="DOUBLE"></xs:enumeration>
+            <xs:enumeration value="LONG"></xs:enumeration>
+            <xs:enumeration value="NAME"></xs:enumeration>
+            <xs:enumeration value="PATH"></xs:enumeration>
+            <xs:enumeration value="REFERENCE"></xs:enumeration>
+            <xs:enumeration value="WEAKREFERENCE"></xs:enumeration>
+            <xs:enumeration value="STRING"></xs:enumeration>
+            <xs:enumeration value="UNDEFINED"></xs:enumeration>
+            <xs:enumeration value="URI"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
