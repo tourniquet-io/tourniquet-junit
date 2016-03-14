@@ -23,12 +23,12 @@
 		<groupId>io.tourniquet</groupId>
 		<artifactId>parent</artifactId>
 		<version>1.1</version>
-        <relativePath/>
+        <relativePath />
 	</parent>
 
     <artifactId>parent</artifactId>
     <groupId>io.tourniquet.junit</groupId>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.4.0-M1</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>A testing framework for developing unit tests that required
@@ -441,6 +441,26 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- WORKAROUND for javadoc errors -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <additionalJOptions>
+                        <additionalJOption>-Xdoclint:none</additionalJOption>
+                    </additionalJOptions>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>
