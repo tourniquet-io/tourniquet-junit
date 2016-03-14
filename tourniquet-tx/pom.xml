@@ -20,11 +20,11 @@
      <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
-        <version>0.4.0-M1-SNAPSHOT</version>
+        <version>0.4.0-M1</version>
     </parent>
 
     <artifactId>tourniquet-tx</artifactId>
-	<version>0.4.0-M1-SNAPSHOT</version>
+	<version>0.4.0-M1</version>
 
     <name>${project.artifactId}</name>
     <description>Dealing with user transactions in tests.</description>
@@ -47,13 +47,13 @@
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-measure</artifactId>
-            <version>0.4.0-M1-SNAPSHOT</version>
+            <version>0.4.0-M1</version>
         </dependency>
 
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-core</artifactId>
-            <version>0.4.0-M1-SNAPSHOT</version>
+            <version>0.4.0-M1</version>
         </dependency>
     </dependencies>
 
