@@ -44,6 +44,7 @@
 		<module>tourniquet-pdf</module>
 		<module>tourniquet-measure</module>
 		<module>tourniquet-tx</module>
+		<module>tourniquet-pageobjects</module>
 	</modules>
 
 	<dependencies>
