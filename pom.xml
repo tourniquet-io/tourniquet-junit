@@ -43,6 +43,7 @@
 		<module>tourniquet-http</module>
 		<module>tourniquet-pdf</module>
 		<module>tourniquet-measure</module>
+		<module>tourniquet-tx</module>
 	</modules>
 
 	<dependencies>

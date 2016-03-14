@@ -17,19 +17,39 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
+     <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
         <version>0.4.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tourniquet-measure</artifactId>
+    <artifactId>tourniquet-tx</artifactId>
 	<version>0.4-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
-    <description>Measurement of execution times.</description>
+    <description>Dealing with user transactions in tests.</description>
+
+   <properties>
+            <devcon5.commons>1.3</devcon5.commons>
+    </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.devcon5</groupId>
+            <artifactId>classutils</artifactId>
+            <version>${devcon5.commons}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>io.tourniquet.junit</groupId>
+            <artifactId>tourniquet-measure</artifactId>
+            <version>0.4-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-core</artifactId>
