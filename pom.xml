@@ -42,7 +42,7 @@
 		<module>tourniquet-parent</module>
 		<module>tourniquet-http</module>
 		<module>tourniquet-pdf</module>
-		<module>tourniquet-smtp</module>
+		<module>tourniquet-measure</module>
 	</modules>
 
 	<dependencies>
@@ -58,23 +58,27 @@
 			<artifactId>mockito-all</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 		<!-- SLF4J & Log4J2 Bindings are added so that tests can produce log-output -->
 		<!-- Binding for Log4J -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<!-- Log4j API and Core implementation required for binding -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
