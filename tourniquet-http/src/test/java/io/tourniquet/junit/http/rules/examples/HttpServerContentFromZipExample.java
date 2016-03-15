@@ -26,9 +26,6 @@ import io.tourniquet.junit.http.rules.HttpServerBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 
-/**
- * Created by Gerald Muecke on 04.12.2015.
- */
 public class HttpServerContentFromZipExample {
 
     @Rule

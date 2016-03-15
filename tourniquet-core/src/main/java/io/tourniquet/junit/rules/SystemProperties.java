@@ -26,7 +26,6 @@ import org.junit.runners.model.Statement;
  * A TestRule that restores the System Properties after test execution to the state as they have been before.
  * This is useful for tests, that modifiy the System's Properties either for setup or as a result of the test
  * execution.
- * Created by Gerald Muecke on 18.11.2015.
  */
 public class SystemProperties implements TestRule {
 

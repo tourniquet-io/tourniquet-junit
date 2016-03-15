@@ -29,9 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald Muecke on 07.12.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class HttpServerBuilderTest {
 

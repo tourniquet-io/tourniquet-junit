@@ -32,9 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald Muecke on 09.12.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemResourceManagerTest {
 

@@ -26,7 +26,6 @@ import org.apache.commons.io.IOUtils;
 /**
  * A {@link ResourceHttpHandler} that serves the content of a URL. It's intended for serving classpath resources
  * referenced by URL but it may also serves resource from the local filesystem or from a network resource.
- * Created by Gerald Muecke on 11.12.2015.
  */
 public class UrlResourceHandler extends ResourceHttpHandler{
 

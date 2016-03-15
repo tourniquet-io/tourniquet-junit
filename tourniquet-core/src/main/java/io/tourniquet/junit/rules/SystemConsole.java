@@ -29,7 +29,6 @@ import org.junit.runners.model.Statement;
  * This rule may be used to record output written onto the System.out or System.err print streams. The output will
  * still be written to those stream, but the content written is available as String.
  *
- * Created by Gerald Muecke on 19.11.2015.
  */
 public class SystemConsole implements TestRule {
 

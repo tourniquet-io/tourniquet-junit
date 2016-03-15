@@ -21,7 +21,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import org.slf4j.Logger;
 
 /**
- * Helper class for operations on the call stack Created by Gerald Muecke on 26.11.2015.
+ * Helper class for operations on the call stack
  */
 public final class CallStack {
 

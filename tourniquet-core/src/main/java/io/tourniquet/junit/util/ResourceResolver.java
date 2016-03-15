@@ -20,7 +20,6 @@ import java.net.URL;
 
 /**
  * A resolver to locate resources on the local classpath.
- * Created by Gerald Muecke on 24.11.2015.
  */
 public class ResourceResolver {
 

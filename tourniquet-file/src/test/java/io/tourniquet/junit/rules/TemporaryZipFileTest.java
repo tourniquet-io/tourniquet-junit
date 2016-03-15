@@ -31,9 +31,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.InjectMocks;
 
-/**
- * Created by Gerald Muecke on 02.12.2015.
- */
 public class TemporaryZipFileTest {
 
     /**

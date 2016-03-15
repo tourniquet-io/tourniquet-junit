@@ -24,9 +24,6 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 
-/**
- * Created by Gerald Muecke on 23.11.2015.
- */
 public class TemporaryZipFileExample {
 
     public TemporaryFolder folder = new TemporaryFolder();

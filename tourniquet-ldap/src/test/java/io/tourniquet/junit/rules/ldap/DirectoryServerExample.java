@@ -38,7 +38,6 @@ import org.junit.rules.TemporaryFolder;
 /**
  * This example shows how to setup and connect to the ldap server. The suite contains two tests simply to prove,
  * the rule is re-usable as classrule without having to restart.
- * Created by Gerald Muecke on 23.11.2015.
  */
 public class DirectoryServerExample {
 

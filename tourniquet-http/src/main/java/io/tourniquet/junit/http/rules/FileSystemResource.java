@@ -40,8 +40,7 @@ import org.slf4j.Logger;
 
 /**
  * A resource inside a {@link java.nio.file.FileSystem}. This resource uses the java.nio Files API which makes it
- * flexible for hosting files from various types of filesystems, such as ZipFileSystem. Created by Gerald Muecke on
- * 08.12.2015.
+ * flexible for hosting files from various types of filesystems, such as ZipFileSystem.
  */
 public class FileSystemResource implements Resource {
 

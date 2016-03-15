@@ -31,9 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald Muecke on 14.12.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class UrlResourceHandlerTest {
 
