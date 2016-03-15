@@ -24,7 +24,6 @@ import java.nio.file.Path;
 /**
  * ResourceHandler that serves resources from a FileSystem {@link java.nio.file.Path}. The path may be of a physical
  * {@link java.nio.file.FileSystem} or a virtual one, such as a ZipFileSystem.
- * Created by Gerald Muecke on 11.12.2015.
  */
 public class PathResourceHandler extends ResourceHttpHandler {
 

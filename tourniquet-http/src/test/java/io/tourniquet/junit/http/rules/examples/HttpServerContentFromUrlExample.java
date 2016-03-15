@@ -28,9 +28,6 @@ import io.tourniquet.junit.http.rules.HttpServerBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 
-/**
- * Created by Gerald Muecke on 04.12.2015.
- */
 public class HttpServerContentFromUrlExample {
 
     private final URL resource = HttpServerContentFromUrlExample.class.getResource("index.html");

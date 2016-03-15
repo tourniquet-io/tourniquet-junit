@@ -26,8 +26,6 @@ import io.undertow.server.handlers.resource.ResourceManager;
 /**
  * A {@link io.undertow.server.handlers.resource.ResourceManager} to provide access to resources on a FileSystem.
  * Using this manager, resources from various types of {@link java.nio.file.FileSystem} s can be hosted by undertow.
- * <br>
- * Created by Gerald Muecke on 08.12.2015.
  */
 public class FileSystemResourceManager implements ResourceManager {
 

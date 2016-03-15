@@ -28,9 +28,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 
-/**
- * Created by Gerald Muecke on 02.12.2015.
- */
 public final class ZipAssert {
     private ZipAssert(){}
 

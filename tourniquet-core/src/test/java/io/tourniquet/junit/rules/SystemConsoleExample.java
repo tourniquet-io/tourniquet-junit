@@ -21,9 +21,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Rule;
 import org.junit.Test;
 
-/**
- * Created by Gerald Muecke on 20.11.2015.
- */
 public class SystemConsoleExample {
 
 

@@ -26,7 +26,7 @@ import io.undertow.server.HttpServerExchange;
  * A base class for serving the content of a single resource via Undertow HTTP. <br> This Undertow {@link
  * io.undertow.server.HttpHandler} that dispatches an incoming thread and writes data to the response's output stream.
  * Implementing classes have to implement the {@link #writeResource(java.io.OutputStream)} method in order to write the
- * resource content to the stream. Created by Gerald Muecke on 14.12.2015.
+ * resource content to the stream.
  */
 public abstract class ResourceHttpHandler implements HttpHandler {
 

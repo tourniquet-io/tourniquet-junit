@@ -30,9 +30,6 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 
-/**
- * Created by Gerald Muecke on 04.12.2015.
- */
 public class HttpServerContentFromTemporaryFileExample {
 
     public TemporaryFolder folder = new TemporaryFolder();

@@ -21,7 +21,6 @@ import java.io.OutputStream;
 
 /**
  * Handler for serving data from a byte array.
- * Created by Gerald Muecke on 11.12.2015.
  */
 public class ByteArrayHandler extends ResourceHttpHandler {
 

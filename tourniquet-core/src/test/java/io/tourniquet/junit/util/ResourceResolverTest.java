@@ -27,9 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald Muecke on 25.11.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceResolverTest{
 

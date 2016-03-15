@@ -1,0 +1,13 @@
+h1. ${pageTitle}
+
+${project.summary}
+
+h2. Dependency Info
+
+{code}
+    <dependency>
+      <groupId>io.tourniquet.junit</groupId>
+      <artifactId>${artifactId}</artifactId>
+      <version>${version}</version>
+    </dependency>
+{code}

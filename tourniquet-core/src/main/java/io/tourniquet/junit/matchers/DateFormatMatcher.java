@@ -27,9 +27,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.slf4j.Logger;
 
-/**
- * Created by Gerald Muecke on 03.12.2015.
- */
 public class DateFormatMatcher extends BaseMatcher<String>{
 
     private static final Logger LOG = getLogger(DateFormatMatcher.class);

@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 
 /**
  * Class for fluently create http get responses.
- * Created by Gerald Muecke on 07.12.2015.
  */
 public class GetResponseStubbing {
 

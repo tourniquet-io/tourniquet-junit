@@ -29,7 +29,7 @@ import io.tourniquet.junit.util.ResourceResolver;
 import org.junit.rules.TemporaryFolder;
 
 /**
- * A builder to build a temporary zip file from resources. Created by Gerald Muecke on 24.11.2015.
+ * A builder to build a temporary zip file from resources.
  */
 public class ZipFileBuilder implements Builder<TemporaryFile> {
 

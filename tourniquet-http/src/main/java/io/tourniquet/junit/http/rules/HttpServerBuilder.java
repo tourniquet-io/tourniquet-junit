@@ -30,7 +30,6 @@ import org.junit.rules.TemporaryFolder;
 /**
  * A Builder for creating an embedded HTTP server. Hostname and tcpPort can be optionally specified and which resources
  * the server should host.
- * Created by Gerald Muecke on 07.12.2015.
  */
 public class HttpServerBuilder implements Builder<HttpServer> {
 

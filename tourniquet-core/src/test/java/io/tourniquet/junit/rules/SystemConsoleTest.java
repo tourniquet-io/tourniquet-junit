@@ -31,9 +31,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald Muecke on 19.11.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class SystemConsoleTest  {
 
