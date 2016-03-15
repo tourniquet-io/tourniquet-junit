@@ -20,7 +20,7 @@
         xmlns:bsc='https://github.com/bsorrentino/maven-confluence-plugin'
         xsi:schemaLocation='https://github.com/bsorrentino/maven-confluence-plugin https://raw.githubusercontent.com/bsorrentino/maven-confluence-plugin/master/schemas/site-schema-3.4.0.xsd'>
 
-    <home name="API" uri="index.confluence">
+    <home name="TX" uri="index.confluence">
           <child name="Usage" uri="../markdown/usage.md"/>
     </home>
 
