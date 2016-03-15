@@ -541,7 +541,7 @@
                                     <goal>deploy</goal>
                                 </goals>
                                 <configuration>
-                                    <parentPageTitle>Tourniquet Home</parentPageTitle>
+                                    <parentPageTitle>Tourniquet JUnit Home</parentPageTitle>
                                     <title>Documentation</title>
                                     <siteDescriptor>null</siteDescriptor>
                                     <templateWiki>${basedir}/src/site/confluence/rootTemplate.confluence</templateWiki>
