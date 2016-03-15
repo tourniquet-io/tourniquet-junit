@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/tourniquet-io/tourniquet-junit.svg?branch=development)](https://travis-ci
+[![Build Status](https://travis-ci.org/tourniquet-io/tourniquet-junit.svg?branch=master)](https://travis-ci
 .org/tourniquet-io/tourniquet-junit)
 
 
