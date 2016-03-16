@@ -1,7 +1,6 @@
 package io.tourniquet.junit.util;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.runner.Computer;
@@ -44,7 +43,7 @@ public class JUnitRunner {
      *  if the test could not be executed or result retrieved.
      */
     public static Result runClass(String className, Supplier<ClassLoader> classLoader) throws Exception {
-        final Optional<ClassLoader> oldCl = Optional.ofNullable(Thread.currentThread().getContextClassLoader());
+        final ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
         final ClassLoader cl = classLoader.get();
         try {
             Thread.currentThread().setContextClassLoader(cl);
@@ -53,7 +52,7 @@ public class JUnitRunner {
             final Method run = runner.getClass().getDeclaredMethod("run", Class.class);
             return new ResultHelper().deserialize((byte[])run.invoke(runner, testClass));
         } finally {
-            Thread.currentThread().setContextClassLoader(oldCl.orElse(null));
+            Thread.currentThread().setContextClassLoader(oldCl);
         }
     }
 
