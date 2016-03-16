@@ -31,7 +31,7 @@ public class TestClassLoader extends URLClassLoader {
      */
     public TestClassLoader(Collection<URL> testJars, Collection<String> packages, String... excludePackages) {
 
-        super(getURLs(testJars));
+        super(getURLs(testJars), ClassLoader.getSystemClassLoader().getParent());
         this.packages = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.packages.addAll(packages);
         this.packages.addAll(new JarScanner().addJar(testJars).ignore(excludePackages).scanPackages());
