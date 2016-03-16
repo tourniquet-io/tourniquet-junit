@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import io.devcon5.classutils.ClassStreams;
+import io.tourniquet.junit.util.ClassStreams;
 import io.tourniquet.tx.TransactionHelper;
 import io.tourniquet.tx.TransactionSupport;
 import org.openqa.selenium.SearchContext;

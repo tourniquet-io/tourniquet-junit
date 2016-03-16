@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Callable;
 
+import io.tourniquet.junit.util.ExecutionResult;
+
 /**
  * A functional stop watch for measuring the time for executing a specific task.
  */
@@ -38,7 +40,7 @@ public final class ExecutionStopWatch {
     public static MeasuredExecutionResult runMeasured(Runnable r){
         return runMeasured(() -> {
             r.run();
-            return Void.TYPE;
+            return ExecutionResult.VOID;
         });
     }
 
@@ -52,9 +54,9 @@ public final class ExecutionStopWatch {
      *  the measured execution result which is a wrapper around the return value and includes the
      *  return value or exception.
      */
-    public static <T> MeasuredExecutionResult<T, Exception> runMeasured(Callable<T> callable) {
+    public static <T> MeasuredExecutionResult<T> runMeasured(Callable<T> callable) {
         final Instant start = Instant.now();
-        MeasuredExecutionResult<T, Exception> result;
+        MeasuredExecutionResult<T> result;
         try {
             final T returnValue = callable.call();
             final Duration duration = Duration.between(start, Instant.now());

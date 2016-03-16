@@ -27,6 +27,14 @@
     <description>API for tourniquet entities, providing common classes and interfaces used throughout tourniquet
     </description>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

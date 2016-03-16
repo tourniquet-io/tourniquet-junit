@@ -16,11 +16,12 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.devcon5.classutils.ClassStreams.selfAndSupertypes;
+import static io.tourniquet.junit.util.ClassStreams.selfAndSupertypes;
 
 import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
 
+import io.tourniquet.junit.util.ExecutionHelper;
 import org.openqa.selenium.SearchContext;
 
 /**
@@ -38,13 +39,14 @@ public interface ElementGroup {
      */
     default SearchContext getSearchContext() {
 
-        return SeleniumContext.currentDriver().orElseThrow(() -> new IllegalStateException(
-                "Could not obtain current driver outside of test execution"));
+        return SeleniumContext.currentDriver()
+                              .orElseThrow(() -> new IllegalStateException(
+                                      "Could not obtain current driver outside of test execution"));
     }
 
     /**
-     * Retrieves a nested {@link ElementGroup} from this group by type. The method assumes there
-     * is only one {@link ElementGroup} of a specific type.
+     * Retrieves a nested {@link ElementGroup} from this group by type. The method assumes there is only one {@link
+     * ElementGroup} of a specific type.
      *
      * @param groupType
      *         the type of the element group to retrieve
@@ -58,18 +60,10 @@ public interface ElementGroup {
     default <T extends ElementGroup> T get(Class<T> groupType, Class<? extends Annotation>... qualifiers) {
 
         return (T) selfAndSupertypes(this.getClass()).flatMap(c -> Stream.of(c.getDeclaredFields()))
-                                                     .filter(f -> groupType.isAssignableFrom(f.getType())
-                                                             && (qualifiers.length == 0 || Stream.of(qualifiers)
-                                                                                                 .anyMatch(q -> f.getAnnotation(
-                                                                                                         q) != null)))
+                                                     .filter(new QualifierFilter<>(groupType, qualifiers))
                                                      .map(f -> {
                                                          f.setAccessible(true);
-                                                         try {
-                                                             return f.get(this);
-                                                         } catch (IllegalAccessException e) {
-                                                             throw new RuntimeException("Could not retrieve field " + f,
-                                                                                        e);
-                                                         }
+                                                         return ExecutionHelper.runUnchecked(() -> f.get(this));
                                                      })
                                                      .findFirst()
                                                      .orElseThrow(() -> new IllegalArgumentException(
@@ -79,8 +73,8 @@ public interface ElementGroup {
     /**
      * Locates all elements specified either by field annotation or method annotation and injects the web element
      * suppliers to each element. To properly inject WebElement Suppliers, the fields must be of type {@code
-     * Supplier&lt;WebElement&gt;} and must be annotated with {@link Locator}. Same applies for
-     * setter methods, which must have a return type of void and must accept a single parameter being of type {@code
+     * Supplier&lt;WebElement&gt;} and must be annotated with {@link Locator}. Same applies for setter methods, which
+     * must have a return type of void and must accept a single parameter being of type {@code
      * Supplier&lt;WebElement&gt;}
      */
     default void locateElements() {

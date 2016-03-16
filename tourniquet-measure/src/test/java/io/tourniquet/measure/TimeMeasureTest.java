@@ -36,7 +36,7 @@ public class TimeMeasureTest {
      * The class under test
      */
     @InjectMocks
-    private TimeMeasure subject;
+    private SimpleTimeMeasure subject;
     private Duration duration;
     private Instant timestamp;
 
@@ -44,7 +44,7 @@ public class TimeMeasureTest {
     public void setUp() throws Exception {
         this.timestamp = Instant.now();
         this.duration = Duration.ofMillis(1500);
-        subject = new TimeMeasure(timestamp, duration);
+        subject = new SimpleTimeMeasure(timestamp, duration);
     }
 
     @Test
@@ -64,6 +64,6 @@ public class TimeMeasureTest {
 
     @Test
     public void testIsFinished_false() {
-        assertFalse(new TimeMeasure(timestamp).isFinished());
+        assertFalse(new SimpleTimeMeasure(timestamp).isFinished());
     }
 }
