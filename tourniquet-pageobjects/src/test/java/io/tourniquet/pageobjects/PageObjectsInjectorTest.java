@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.tourniquet.ui;
+package io.tourniquet.pageobjects;
 
-import static io.tourniquet.ui.Locator.ByLocator.ID;
+import static io.tourniquet.pageobjects.Locator.ByLocator.ID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 

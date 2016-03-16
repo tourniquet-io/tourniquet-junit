@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.ui;
+package io.tourniquet.pageobjects;
 
 /**
  * A user object to run a test

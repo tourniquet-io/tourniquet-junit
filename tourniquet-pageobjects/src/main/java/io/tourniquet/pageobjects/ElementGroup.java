@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.ui;
+package io.tourniquet.pageobjects;
 
 import static io.devcon5.classutils.ClassStreams.selfAndSupertypes;
 
