@@ -18,11 +18,14 @@ package io.tourniquet.measure;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
@@ -38,11 +41,12 @@ public class MeasuredExecutionResultTest {
     public void testGetReturnValue() throws Exception {
         //prepare
         Object returnValue = new Object();
-        MeasuredExecutionResult<Object> result = new MeasuredExecutionResult<Object>(timestamp, duration, returnValue);
+        MeasuredExecutionResult<Object, Exception> result =
+                new MeasuredExecutionResult<>(timestamp, duration, returnValue);
 
         //act
         Optional<Object> actual = result.getReturnValue();
-        Optional<Throwable> exception = result.getException();
+        Optional<Exception> exception = result.getException();
 
         //assert
         assertEquals(returnValue, actual.get());
@@ -52,17 +56,107 @@ public class MeasuredExecutionResultTest {
 
     @Test
     public void testGetException() throws Exception {
-        Throwable t = new Throwable();
-        MeasuredExecutionResult<Object> result = new MeasuredExecutionResult<Object>(timestamp, duration, t);
+        Exception t = new Exception();
+        MeasuredExecutionResult<Object, Exception> result = new MeasuredExecutionResult<>(timestamp, duration, t);
 
         //act
         Optional<Object> actual = result.getReturnValue();
-        Optional<Throwable> exception = result.getException();
+        Optional<Exception> exception = result.getException();
 
         //assert
         assertFalse(actual.isPresent());
         assertEquals(t, exception.get());
         assertFalse(result.wasSuccessful());
+    }
+
+    @Test
+    public void testForReturnValue() throws Exception {
+        //prepare
+        Object returnValue = new Object();
+        MeasuredExecutionResult<Object, Exception> result =
+                new MeasuredExecutionResult<>(timestamp, duration, returnValue);
+        final AtomicReference<Object> holder = new AtomicReference<>();
+
+        //act
+        MeasuredExecutionResult<Object, Exception> retVal = result.forReturnValue(holder::set);
+
+        //assert
+        assertSame(result, retVal);
+        assertEquals(returnValue, holder.get());
+
+    }
+
+    @Test
+    public void testForDuration() throws Exception {
+        //prepare
+        Object returnValue = new Object();
+        MeasuredExecutionResult<Object, Exception> result =
+                new MeasuredExecutionResult<>(timestamp, duration, returnValue);
+        final AtomicReference<Object> holder = new AtomicReference<>();
+
+        //act
+        MeasuredExecutionResult<Object, Exception> retVal = result.forDuration(holder::set);
+
+        //assert
+        assertSame(result, retVal);
+        assertEquals(duration, holder.get());
+
+    }
+
+    @Test
+    public void testForException() throws Exception {
+        //prepare
+        Exception t = new Exception();
+        MeasuredExecutionResult<Object, Exception> result = new MeasuredExecutionResult<>(timestamp, duration, t);
+        final AtomicReference<Object> holder = new AtomicReference<>();
+
+        //act
+        MeasuredExecutionResult<Object, Exception> retVal = result.forException(holder::set);
+
+        //assert
+        assertSame(result, retVal);
+        assertEquals(t, holder.get());
+
+    }
+
+    @Test(expected = Exception.class)
+    public void testMapReturn_exception() throws Exception {
+        //prepare
+        Exception t = new Exception();
+        MeasuredExecutionResult<Object, Exception> result = new MeasuredExecutionResult<>(timestamp, duration, t);
+
+        //act
+        result.mapReturn();
+
+        //assert
+
+    }
+
+    @Test
+    public void testMapReturn_null() throws Exception {
+        //prepare
+        MeasuredExecutionResult<Object, Exception> result =
+                new MeasuredExecutionResult<>(timestamp, duration, null);
+        //act
+        Object retVal = result.mapReturn();
+
+        //assert
+        assertNull(retVal);
+
+    }
+
+    @Test
+    public void testMapReturn_value() throws Exception {
+        //prepare
+        Object returnValue = new Object();
+        MeasuredExecutionResult<Object, Exception> result =
+                new MeasuredExecutionResult<>(timestamp, duration, returnValue);
+        //act
+        Object actual = result.mapReturn();
+
+        //assert
+        assertEquals(returnValue, actual);
+
     }
 
 }

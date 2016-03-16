@@ -52,9 +52,9 @@ public final class ExecutionStopWatch {
      *  the measured execution result which is a wrapper around the return value and includes the
      *  return value or exception.
      */
-    public static <T> MeasuredExecutionResult<T> runMeasured(Callable<T> callable) {
+    public static <T> MeasuredExecutionResult<T, Exception> runMeasured(Callable<T> callable) {
         final Instant start = Instant.now();
-        MeasuredExecutionResult<T> result;
+        MeasuredExecutionResult<T, Exception> result;
         try {
             final T returnValue = callable.call();
             final Duration duration = Duration.between(start, Instant.now());

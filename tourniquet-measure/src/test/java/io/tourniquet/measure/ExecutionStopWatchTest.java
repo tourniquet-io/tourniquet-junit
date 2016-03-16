@@ -63,7 +63,7 @@ public class ExecutionStopWatchTest {
 
 
         //act
-        MeasuredExecutionResult<String> watch = ExecutionStopWatch.runMeasured(() -> {
+        MeasuredExecutionResult<String, Exception> watch = ExecutionStopWatch.runMeasured(() -> {
             sleep(100);
             return "out";
         });

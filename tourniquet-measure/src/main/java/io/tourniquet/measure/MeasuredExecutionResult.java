@@ -19,16 +19,17 @@ package io.tourniquet.measure;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * The result of a time measured execution. As this measurement holds a reference to the return value of
  * a measured execution (or the throwable that occured during the execution) you should not keep it in memory
  * for recording execution times as this will fill up memory.
  */
-public class MeasuredExecutionResult<RESULTTYPE> extends TimeMeasure {
+public class MeasuredExecutionResult<RESULTTYPE, EXCEPTIONTYPE extends Throwable> extends TimeMeasure {
 
     private final Optional<RESULTTYPE> result;
-    private final Optional<Throwable> throwable;
+    private final Optional<EXCEPTIONTYPE> throwable;
 
     public MeasuredExecutionResult(final Instant start, final Duration duration, RESULTTYPE result) {
 
@@ -37,11 +38,11 @@ public class MeasuredExecutionResult<RESULTTYPE> extends TimeMeasure {
         this.throwable = Optional.empty();
     }
 
-    public MeasuredExecutionResult(final Instant start, final Duration duration, Throwable throwable) {
+    public MeasuredExecutionResult(final Instant start, final Duration duration, EXCEPTIONTYPE throwable) {
 
         super(start, duration);
         this.result = Optional.empty();
-        this.throwable = Optional.of(throwable);
+        this.throwable = Optional.ofNullable(throwable);
     }
 
     /**
@@ -55,7 +56,7 @@ public class MeasuredExecutionResult<RESULTTYPE> extends TimeMeasure {
         return result;
     }
 
-    public Optional<Throwable> getException(){
+    public Optional<EXCEPTIONTYPE> getException(){
         return throwable;
     }
 
@@ -66,5 +67,55 @@ public class MeasuredExecutionResult<RESULTTYPE> extends TimeMeasure {
      */
     public boolean wasSuccessful(){
         return !throwable.isPresent();
+    }
+
+    /**
+     * Method to fluently process the duration of the measured operation.
+     * @param consumer
+     *  the consumer to process the duration
+     * @return
+     *  this measure
+     */
+    public MeasuredExecutionResult<RESULTTYPE,EXCEPTIONTYPE> forDuration(Consumer<Duration> consumer){
+        consumer.accept(getDuration());
+        return this;
+    }
+
+    /**
+     * Method to fluently process the return value of the operation.
+     * @param consumer
+     *  the consumer to process the return value
+     * @return
+     *  this measure
+     */
+    public MeasuredExecutionResult<RESULTTYPE,EXCEPTIONTYPE> forReturnValue(Consumer<RESULTTYPE> consumer){
+        result.ifPresent(consumer::accept);
+        return this;
+    }
+
+    /**
+     * Method to fluently process the exception of the operation.
+     * @param consumer
+     *  the consumer to process the exceptional throwable
+     * @return
+     *  this measure
+     */
+    public MeasuredExecutionResult<RESULTTYPE,EXCEPTIONTYPE> forException(Consumer<Throwable> consumer){
+        throwable.ifPresent(consumer::accept);
+        return this;
+    }
+
+    /**
+     * Maps the return value to the output. In case the operation was not successful, the throwable is thrown
+     * @return
+     *  the result of the measured operation.
+     * @throws EXCEPTIONTYPE
+     *  the defined exception type
+     */
+    public RESULTTYPE mapReturn() throws EXCEPTIONTYPE {
+        if(!wasSuccessful()){
+            throw this.throwable.get();
+        }
+        return this.result.orElse(null);
     }
 }
