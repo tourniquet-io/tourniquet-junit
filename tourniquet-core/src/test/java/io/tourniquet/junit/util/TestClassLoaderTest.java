@@ -1,12 +1,11 @@
 package io.tourniquet.junit.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertSame;
 
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.junit.Test;
 
 /**
@@ -29,6 +28,7 @@ public class TestClassLoaderTest {
         //assert
         assertEquals(cl, cls1.getClassLoader());
         assertEquals(cls1.getClassLoader(), cls2.getClassLoader());
+        assertSame(cls1, cls2);
     }
 
     @Test
@@ -39,9 +39,10 @@ public class TestClassLoaderTest {
 
         //act
         Class cls1 = cl.loadClass(TestClassLoaderTest.class.getName());
+        Class cls2 = cl.loadClass(TestClassLoaderTest.class.getName());
 
         //assert
-        assertEquals(cls1.getClassLoader(), TestClassLoaderTest.class.getClassLoader());
-        assertNotEquals(cls1.getClassLoader(), cl);
+        assertEquals(cls1.getClassLoader(), cl);
+        assertSame(cls1, cls2);
     }
 }
