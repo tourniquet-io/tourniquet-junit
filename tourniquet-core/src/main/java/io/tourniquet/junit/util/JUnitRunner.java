@@ -15,7 +15,7 @@ public class JUnitRunner {
 
     /**
      * Executes the test using the current classloader that created the instance of the JUnit Runner. The result
-     * is serialized to transfer the result accross classloader boundaries.
+     * is serialized to transfer the result across classloader boundaries.
      * @param testClass
      *  the class to be executed
      * @return
@@ -23,7 +23,7 @@ public class JUnitRunner {
      * @throws Exception
      *  if the test execution or result serialization failed.
      */
-    byte[] run(Class<?> testClass) throws Exception{
+    public byte[] run(Class<?> testClass) throws Exception{
         final Computer computer = new Computer();
         final JUnitCore core = new JUnitCore();
         return new ResultHelper().serialize(core.run(computer, testClass));
