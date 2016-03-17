@@ -16,53 +16,91 @@
 
 package io.tourniquet.measure;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Global Handler for recording response time. As default setting, the response times are stored in a global collection.
+ * Collector for recording response times. The collector has two collections. One per thread and one single global
+ * collection. The thread local collection should meet most cases. But in some cases it might be required
+ * to collect response times centrally for multiple thread that collect their response times using the
+ * {@link ResponseTimeCollector}.
+ *
+ * As default setting, the response times are stored in a global collection.
  * This class allows to record response times of transaction across multiple threads. It must be ensured, that the
  * response are cleared after the measured sequence, otherwise the response remain in memory permanently.
  */
 public final class ResponseTimes {
 
     /**
-     * Global ResponseTime collection.
+     * Global collector
      */
-    private static final Map<UUID, ResponseTime> TIMES = new ConcurrentHashMap<>();
+    private static final ResponseTimes GLOBAL = new ResponseTimes();
+    /**
+     * Flag to indicate, that response times should be collected globally, which is disabled by default
+     */
+    private static final AtomicBoolean GLOBAL_COLLECTION_ENABLED = new AtomicBoolean(false);
+
+    private static final ThreadLocal<ResponseTimes> LOCAL = ThreadLocal.withInitial(ResponseTimes::new);
+    /**
+     * ResponseTime collection.
+     */
+    private final Map<UUID, ResponseTime> times = new ConcurrentHashMap<>();
 
     /**
      * Default consumer putting a response time into the global table
      */
-    private static final Consumer<ResponseTime> DEFAULT_CONSUMER = rt -> TIMES.put(rt.getUuid(), rt);
+    private final Consumer<ResponseTime> defaultConsumer = rt -> times.put(rt.getUuid(), rt);
 
-    private static AtomicReference<Consumer<ResponseTime>> START_TX_CONSUMER = new AtomicReference<>(DEFAULT_CONSUMER);
+    private final AtomicReference<Consumer<ResponseTime>> startTxConsumer = new AtomicReference<>();
 
-    private static AtomicReference<Consumer<ResponseTime>> STOP_TX_CONSUMER = new AtomicReference<>(DEFAULT_CONSUMER);
+    private final AtomicReference<Consumer<ResponseTime>> stopTxConsumer = new AtomicReference<>();
+
+    private final AtomicReference<ScheduledFuture> cleanupStrategy = new AtomicReference<>();
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private ResponseTimes(){}
+
+    public static ResponseTimes current(){
+        return LOCAL.get();
+    }
+
+    public static ResponseTimes global() {
+        return GLOBAL;
+    }
 
     /**
      * Clears the global response time collection
      */
-    public static void clear() {
+    public void clear() {
 
-        TIMES.clear();
+        times.clear();
     }
 
     /**
-     * Resets the response time consumer to the default.
+     * Enables the global response time collection. All per-thread recorded response times are also collected
+     * globally.
+     * Be aware that in scenarios where a log of response times should be collected, the global collection
+     * may lead to an out of memory in long term and should be cleared regularly.
+     * @param enabled
+     *  <code>true</code> if the response times should be collected globally, <code>false</code> if not.
      */
-    public static void resetResponseTimeHandlers(){
-        onMeasureStart(DEFAULT_CONSUMER);
-        onMeasureEnd(DEFAULT_CONSUMER);
+    public static void enableGlobalCollection(boolean enabled){
+        GLOBAL_COLLECTION_ENABLED.set(true);
     }
 
     /**
@@ -70,8 +108,8 @@ public final class ResponseTimes {
      * @param responseTimeConsumer
      *  the consumer to process response times
      */
-    public static void onMeasureStart(Consumer<ResponseTime> responseTimeConsumer){
-        START_TX_CONSUMER.set(responseTimeConsumer);
+    public void onMeasureStart(Consumer<ResponseTime> responseTimeConsumer){
+        startTxConsumer.set(responseTimeConsumer);
     }
 
     /**
@@ -79,8 +117,23 @@ public final class ResponseTimes {
      * @param responseTimeConsumer
      *  the consumer to process response times
      */
-    public static void onMeasureEnd(Consumer<ResponseTime> responseTimeConsumer){
-        STOP_TX_CONSUMER.set(responseTimeConsumer);
+    public void onMeasureEnd(Consumer<ResponseTime> responseTimeConsumer){
+        stopTxConsumer.set(responseTimeConsumer);
+    }
+
+    /**
+     * Sets a cleanup strategy how to cleanup the collected times. Default strategy will keep all response times.
+     * @param cleanupStrategy
+     *  the cleanup strategy to be operated on the response time map.
+     * @param interval
+     *  the interval between the invocations of the cleanup strategy
+     */
+    public void setCleanupStrategy(Consumer<Map<UUID,ResponseTime>> cleanupStrategy, Duration interval){
+
+        Optional.ofNullable(this.cleanupStrategy.get()).ifPresent(f -> f.cancel(true));
+        final long period = interval.toMillis();
+        this.cleanupStrategy.set(this.scheduler.scheduleAtFixedRate(() -> cleanupStrategy.accept(this.times),
+                                                                    period, period, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -91,7 +144,7 @@ public final class ResponseTimes {
      *
      * @return the ResponseTime handle to track the time measure
      */
-    public static ResponseTime startTx(String transaction) {
+    public ResponseTime startTx(String transaction) {
 
         return startTx(transaction, Instant.now());
     }
@@ -106,10 +159,18 @@ public final class ResponseTimes {
      *
      * @return the ResponseTime handle for this response time measure
      */
-    public static ResponseTime startTx(String transaction, Instant start) {
-        final ResponseTime trt = new ResponseTime(transaction, start);
-        START_TX_CONSUMER.get().accept(trt);
-        return trt;
+    public ResponseTime startTx(String transaction, Instant start) {
+        final ResponseTime responseTime = new ResponseTime(transaction, start);
+        startTx(responseTime);
+        return responseTime;
+    }
+
+    void startTx(final ResponseTime responseTime) {
+        defaultConsumer.accept(responseTime);
+        Optional.ofNullable(startTxConsumer.get()).ifPresent(c -> c.accept(responseTime));
+        if(GLOBAL_COLLECTION_ENABLED.get()){
+            global().startTx(responseTime);
+        }
     }
 
     /**
@@ -121,7 +182,7 @@ public final class ResponseTimes {
      *
      * @return the finished ResponseTime
      */
-    public static ResponseTime stopTx(ResponseTime finish) {
+    public  ResponseTime stopTx(ResponseTime finish) {
 
         return collect(finish.isFinished() ? finish : finish.finish());
     }
@@ -132,12 +193,16 @@ public final class ResponseTimes {
      * @param responseTime
      *         the responseTime to collect into the global collection.
      */
-    public static ResponseTime collect(final ResponseTime responseTime) {
+    public  ResponseTime collect(final ResponseTime responseTime) {
 
         if (!responseTime.isFinished()) {
             throw new AssertionError("Collecting of unfinished responseTimes is not allowed");
         }
-        STOP_TX_CONSUMER.get().accept(responseTime);
+        defaultConsumer.accept(responseTime);
+        Optional.ofNullable(stopTxConsumer.get()).ifPresent(c -> c.accept(responseTime));
+        if(GLOBAL_COLLECTION_ENABLED.get()){
+            global().collect(responseTime);
+        }
         return responseTime;
     }
 
@@ -150,7 +215,7 @@ public final class ResponseTimes {
      * @return
      *  the response time recorded
      */
-    public static ResponseTime collect(String transaction, SimpleTimeMeasure result) {
+    public  ResponseTime collect(String transaction, SimpleTimeMeasure result) {
         return collect(new ResponseTime(transaction, result.getStart(), result.getDuration()));
     }
 
@@ -160,10 +225,10 @@ public final class ResponseTimes {
      * @return a map of the response times. The map contains the transaction names as key, and a list of measured
      * responseTimes for that transaction as value.
      */
-    public static Map<String, List<ResponseTime>> getResponseTimes() {
+    public Map<String, List<ResponseTime>> getResponseTimes() {
 
         final Map<String, List<ResponseTime>> result = new HashMap<>();
-        TIMES.values().stream().forEach(trt -> {
+        times.values().stream().forEach(trt -> {
             if (!result.containsKey(trt.getTransaction())) {
                 result.put(trt.getTransaction(), new ArrayList<>());
             }

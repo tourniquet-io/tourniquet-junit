@@ -46,15 +46,16 @@ public class ResponseTimeCollectorTest {
 
     @Before
     public void setUp() throws Exception {
-        ResponseTimes.onMeasureStart(responseTime -> rtStartRef.set(responseTime));
-        ResponseTimes.onMeasureEnd(responseTime -> rtEndRef.set(responseTime));
+        ResponseTimes.current().onMeasureStart(responseTime -> rtStartRef.set(responseTime));
+        ResponseTimes.current().onMeasureEnd(responseTime -> rtEndRef.set(responseTime));
     }
 
     @After
     public void tearDown() throws Exception {
         ResponseTimeCollector.current().ifPresent(ResponseTimeCollector::stopCollecting);
-        ResponseTimes.resetResponseTimeHandlers();
-        ResponseTimes.clear();
+        ResponseTimes.current().onMeasureStart(null);
+        ResponseTimes.current().onMeasureEnd(null);
+        ResponseTimes.current().clear();
     }
 
     @Test
