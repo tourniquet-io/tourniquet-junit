@@ -76,7 +76,7 @@ public final class ExecutionHelper {
      */
     public static ExecutionResult<Void> runProtected(Runnable runnable) {
         try {
-            runnable.run();
+            runnable.run(); //NOSONAR
             return ExecutionResult.ofVoid();
         } catch (Exception e) {
             return ExecutionResult.ofException(e);

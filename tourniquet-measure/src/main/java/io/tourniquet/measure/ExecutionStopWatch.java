@@ -39,7 +39,7 @@ public final class ExecutionStopWatch {
      */
     public static MeasuredExecutionResult runMeasured(Runnable r){
         return runMeasured(() -> {
-            r.run();
+            r.run(); //NOSONAR
             return ExecutionResult.VOID;
         });
     }
