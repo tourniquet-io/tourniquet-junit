@@ -84,7 +84,7 @@ public class ResponseTimeRecording extends ExternalResource {
         collector.stopCollecting();
         if(printTransactions){
             LOG.info("Listing transactions");
-            Map<String, List<ResponseTime>> responseTimes = ResponseTimes.getResponseTimes();
+            Map<String, List<ResponseTime>> responseTimes = ResponseTimes.current().getResponseTimes();
             for(Map.Entry<String, List<ResponseTime>> e : responseTimes.entrySet()){
                 LOG.info("Transaction {}", e.getKey());
                 for(ResponseTime rt : e.getValue()){
@@ -93,7 +93,7 @@ public class ResponseTimeRecording extends ExternalResource {
             }
         }
         if(clearGlobalTable) {
-            ResponseTimes.clear();
+            ResponseTimes.current().clear();
         }
     }
 

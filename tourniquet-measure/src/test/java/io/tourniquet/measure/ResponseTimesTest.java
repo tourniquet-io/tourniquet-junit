@@ -21,56 +21,53 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 
 /**
  *
  */
 public class ResponseTimesTest {
 
+    /**
+     * The class under test
+     */
+    @InjectMocks
+    private ResponseTimes subject = ResponseTimes.current();
+
     @After
     public void tearDown() throws Exception {
-        ResponseTimes.clear();
-        ResponseTimes.resetResponseTimeHandlers();
+        subject.clear();
+        subject.onMeasureStart(null);
+        subject.onMeasureEnd(null);
+        subject.setCleanupStrategy(null, null);
+        ResponseTimes.global().clear();
+        ResponseTimes.enableGlobalCollection(false);
     }
 
     @Test
     public void testClear() throws Exception {
         //prepare
-        ResponseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
-        assumeFalse(ResponseTimes.getResponseTimes().isEmpty());
+        subject.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
+        assumeFalse(subject.getResponseTimes().isEmpty());
 
         //act
-        ResponseTimes.clear();
+        subject.clear();
 
         //assert
-        assertTrue(ResponseTimes.getResponseTimes().isEmpty());
+        assertTrue(subject.getResponseTimes().isEmpty());
 
-    }
-
-    @Test
-    public void testResetResponseTimeHandlers() throws Exception {
-        //prepare
-        ResponseTimes.onMeasureStart(responseTime -> {});
-        ResponseTimes.onMeasureEnd(responseTime -> {});
-        ResponseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
-        assumeTrue(ResponseTimes.getResponseTimes().isEmpty());
-
-        //act
-        ResponseTimes.resetResponseTimeHandlers();
-
-        //assert
-        ResponseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
-        assertFalse(ResponseTimes.getResponseTimes().isEmpty());
     }
 
     @Test
@@ -79,10 +76,10 @@ public class ResponseTimesTest {
         AtomicReference<ResponseTime> rtRef = new AtomicReference<>();
 
         //act
-        ResponseTimes.onMeasureStart(rtRef::set);
+        subject.onMeasureStart(rtRef::set);
 
         //assert
-        ResponseTimes.startTx("test", Instant.now());
+        subject.startTx("test", Instant.now());
         assertNotNull(rtRef.get());
 
     }
@@ -93,10 +90,10 @@ public class ResponseTimesTest {
         AtomicReference<ResponseTime> rtRef = new AtomicReference<>();
 
         //act
-        ResponseTimes.onMeasureEnd(rtRef::set);
+        subject.onMeasureEnd(rtRef::set);
 
         //assert
-        ResponseTimes.stopTx(ResponseTimes.startTx("test", Instant.now()));
+        subject.stopTx(subject.startTx("test", Instant.now()));
         assertNotNull(rtRef.get());
     }
 
@@ -106,7 +103,7 @@ public class ResponseTimesTest {
         Instant now = Instant.now();
 
         //act
-        ResponseTime rt = ResponseTimes.startTx("test", now);
+        ResponseTime rt = subject.startTx("test", now);
 
         //assert
         assertNotNull(rt);
@@ -119,7 +116,7 @@ public class ResponseTimesTest {
         //prepare
 
         //act
-        ResponseTime rt = ResponseTimes.startTx("test");
+        ResponseTime rt = subject.startTx("test");
 
         //assert
         assertNotNull(rt);
@@ -132,7 +129,7 @@ public class ResponseTimesTest {
         ResponseTime rt = new ResponseTime("test", Instant.now(), Duration.ofMillis(100));
 
         //act
-        ResponseTime actual = ResponseTimes.stopTx(rt);
+        ResponseTime actual = subject.stopTx(rt);
 
         //assert
         assertNotNull(actual);
@@ -146,7 +143,7 @@ public class ResponseTimesTest {
         assumeFalse(rt.isFinished());
 
         //act
-        ResponseTime actual = ResponseTimes.stopTx(rt);
+        ResponseTime actual = subject.stopTx(rt);
 
         //assert
         assertNotNull(actual);
@@ -160,7 +157,7 @@ public class ResponseTimesTest {
         ResponseTime rt = new ResponseTime("test", Instant.now());
 
         //act
-        ResponseTimes.collect(rt);
+        subject.collect(rt);
 
     }
 
@@ -170,12 +167,12 @@ public class ResponseTimesTest {
         ResponseTime rt = new ResponseTime("test", Instant.now(), Duration.ofMillis(100));
 
         //act
-        ResponseTime actual = ResponseTimes.collect(rt);
+        ResponseTime actual = subject.collect(rt);
 
         //assert
         assertNotNull(actual);
         assertEquals(rt, actual);
-        assertFalse(ResponseTimes.getResponseTimes().isEmpty());
+        assertFalse(subject.getResponseTimes().isEmpty());
     }
 
     @Test
@@ -186,13 +183,13 @@ public class ResponseTimesTest {
         SimpleTimeMeasure tm = new SimpleTimeMeasure(now, dur);
 
         //act
-        ResponseTime rt = ResponseTimes.collect("test", tm);
+        ResponseTime rt = subject.collect("test", tm);
 
         //assert
         assertNotNull(rt);
         assertEquals(now,rt.getStart());
         assertEquals(dur,rt.getDuration());
-        assertFalse(ResponseTimes.getResponseTimes().isEmpty());
+        assertFalse(subject.getResponseTimes().isEmpty());
     }
 
     @Test(expected = AssertionError.class)
@@ -201,18 +198,18 @@ public class ResponseTimesTest {
         SimpleTimeMeasure tm = new SimpleTimeMeasure(Instant.now());
 
         //act
-        ResponseTimes.collect("test", tm);
+        subject.collect("test", tm);
     }
 
     @Test
     public void testGetResponseTimes() throws Exception {
         //prepare
-        ResponseTimes.collect("tx1", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
-        ResponseTimes.collect("tx1", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
-        ResponseTimes.collect("tx2", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
+        subject.collect("tx1", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
+        subject.collect("tx1", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
+        subject.collect("tx2", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
 
         //act
-        Map<String, List<ResponseTime>> rts = ResponseTimes.getResponseTimes();
+        Map<String, List<ResponseTime>> rts = subject.getResponseTimes();
 
         //assert
         assertNotNull(rts);
@@ -221,5 +218,67 @@ public class ResponseTimesTest {
         assertTrue(rts.containsKey("tx2"));
         assertEquals(2, rts.get("tx1").size());
         assertEquals(1, rts.get("tx2").size());
+    }
+
+    @Test
+    public void testGlobalCollection() throws Exception {
+        //prepare
+        ExecutorService pool = Executors.newFixedThreadPool(3);
+
+        //act
+        for(int i = 0; i < 3; i++){
+            pool.submit(() -> {
+                ResponseTimes local = ResponseTimes.current();
+                local.enableForwardToGlobal(true);
+                local.stopTx(local.startTx("forward"));
+            });
+        }
+        ResponseTimes.enableGlobalCollection(true);
+        for(int i = 0; i < 3; i++){
+            pool.submit(() -> {
+                ResponseTimes local = ResponseTimes.current();
+                local.stopTx(local.startTx("local"));
+            });
+        }
+        pool.submit(() -> {
+            ResponseTimes global = ResponseTimes.global();
+            global.stopTx(global.startTx("global"));
+        });
+        pool.shutdown();
+        pool.awaitTermination(250000, TimeUnit.MILLISECONDS);
+
+        //assert
+        Map<String, List<ResponseTime>> times =  ResponseTimes.global().getResponseTimes();
+        assertNotNull(times);
+        assertEquals(3, times.size());
+        assertEquals(3, times.get("forward").size());
+        assertEquals(3, times.get("local").size());
+        assertEquals(1, times.get("global").size());
+
+    }
+
+    @Test
+    public void testCleanupStrategy() throws Exception {
+        //prepare
+
+        //act
+        subject.setCleanupStrategy(Map::clear, Duration.ofMillis(10));
+
+        subject.stopTx(subject.startTx("test1"));
+        subject.stopTx(subject.startTx("test2"));
+        int before = subject.getResponseTimes().size();
+        Thread.sleep(10);
+        subject.stopTx(subject.startTx("test1"));
+        subject.stopTx(subject.startTx("test2"));
+        subject.stopTx(subject.startTx("test3"));
+        subject.stopTx(subject.startTx("test4"));
+        int middle = subject.getResponseTimes().size();
+        Thread.sleep(10);
+        int after = subject.getResponseTimes().size();
+
+        //assert
+        assertEquals(2, before);
+        assertEquals(4, middle);
+        assertEquals(0, after);
     }
 }

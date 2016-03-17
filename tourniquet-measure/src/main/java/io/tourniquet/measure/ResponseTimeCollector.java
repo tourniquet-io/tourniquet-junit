@@ -40,8 +40,7 @@ public class ResponseTimeCollector {
 
     private static final Logger LOG = getLogger(ResponseTimeCollector.class);
 
-    private static final ThreadLocal<Optional<ResponseTimeCollector>> CURRENT = ThreadLocal.withInitial
-            (Optional::empty);
+    private static final ThreadLocal<Optional<ResponseTimeCollector>> CURRENT = ThreadLocal.withInitial(Optional::empty);
 
     private final Map<String, ResponseTime> responseTimes = new ConcurrentHashMap<>();
 
@@ -95,7 +94,7 @@ public class ResponseTimeCollector {
      */
     public void captureTx(String txName, Instant start, Duration duration) {
         LOG.trace("TX {} started {} took {}", txName, start, duration);
-        ResponseTimes.collect(new ResponseTime(txName, start, duration));
+        ResponseTimes.current().collect(new ResponseTime(txName, start, duration));
     }
 
     /**
@@ -107,7 +106,7 @@ public class ResponseTimeCollector {
 
         final Instant now = Instant.now();
         LOG.trace("TX Start {} at {}", tx, now);
-        responseTimes.put(tx, ResponseTimes.startTx(tx, now));
+        responseTimes.put(tx, ResponseTimes.current().startTx(tx, now));
     }
 
     /**
@@ -134,7 +133,7 @@ public class ResponseTimeCollector {
             throw new IllegalStateException("Transaction " + tx + " not started");
         }
         LOG.trace("TX End {} at {}", tx, now);
-        ResponseTimes.stopTx(responseTimes.remove(tx).finish(now));
+        ResponseTimes.current().stopTx(responseTimes.remove(tx).finish(now));
     }
 
 }
