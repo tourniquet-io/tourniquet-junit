@@ -22,6 +22,7 @@
 
     <home name="Measure" uri="index.confluence">
           <child name="Usage" uri="../markdown/usage.md"/>
+          <child name="Architecute" uri="../markdown/arch.md"/>
     </home>
 
     <label>api</label>

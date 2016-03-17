@@ -21,6 +21,7 @@
         <menu name="Documentation">
             <item name="Overview" href="index.html"/>
             <item name="Usage" href="usage.html"/>
+            <item name="Architecture" href="arch.html"/>
         </menu>
         <menu ref="reports"/>
     </body>

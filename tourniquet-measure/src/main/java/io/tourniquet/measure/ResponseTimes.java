@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 /**
  * Collector for recording response times. The collector has two collections. One per thread and one single global
  * collection. The thread local collection should meet most cases. But in some cases it might be required to collect
- * response times centrally for multiple thread that collect their response times using the {@link
+ * response times centrally for multiple threads that collect their response times using the {@link
  * ResponseTimeCollector}.
  * <p/>
  * As default setting, the response times are stored in a global collection. This class allows to record response times
@@ -74,15 +74,15 @@ public final class ResponseTimes {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
+    private final AtomicBoolean forwardToGlobal = new AtomicBoolean(false);
+
     private ResponseTimes() {
 
     }
 
     /**
-     * The response time collector for the current thread. Every thread has it's own collector. To collect response time
-     * both for local and the global collector, enable global collection (enabled for all threads!) If you want to
-     * enable global collection only for the current thread, you may set the onMeasureStart/End handler to a handler
-     * that also writes to the global collector
+     * The response time collector for the current thread. Every thread has it's own collector, but forwarding to
+     * the global collection can be enabled for all or single threads.
      *
      * @return the current response times collector
      */
@@ -119,7 +119,17 @@ public final class ResponseTimes {
      */
     public static void enableGlobalCollection(boolean enabled) {
 
-        GLOBAL_COLLECTION_ENABLED.set(true);
+        GLOBAL_COLLECTION_ENABLED.set(enabled);
+    }
+
+    /**
+     * Enables response time forwarding to the global collection for the current thread.
+     *
+     * @param enabled
+     *         <code>true</code> if the response times should be forwared, <code>false</code> if not.
+     */
+    public void enableForwardToGlobal(boolean enabled) {
+        forwardToGlobal.set(enabled);
     }
 
     /**
@@ -200,9 +210,14 @@ public final class ResponseTimes {
 
         defaultConsumer.accept(responseTime);
         Optional.ofNullable(startTxConsumer.get()).ifPresent(c -> c.accept(responseTime));
-        if (GLOBAL_COLLECTION_ENABLED.get()) {
+        if (isGlobalCollectionEnabled()) {
             global().startTx(responseTime);
         }
+    }
+
+    private boolean isGlobalCollectionEnabled() {
+
+        return this != GLOBAL && forwardToGlobal.get() || GLOBAL_COLLECTION_ENABLED.get() ;
     }
 
     /**
@@ -232,7 +247,7 @@ public final class ResponseTimes {
         }
         defaultConsumer.accept(responseTime);
         Optional.ofNullable(stopTxConsumer.get()).ifPresent(c -> c.accept(responseTime));
-        if (GLOBAL_COLLECTION_ENABLED.get()) {
+        if (isGlobalCollectionEnabled()) {
             global().collect(responseTime);
         }
         return responseTime;

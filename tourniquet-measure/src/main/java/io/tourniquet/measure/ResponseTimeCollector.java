@@ -40,8 +40,7 @@ public class ResponseTimeCollector {
 
     private static final Logger LOG = getLogger(ResponseTimeCollector.class);
 
-    private static final ThreadLocal<Optional<ResponseTimeCollector>> CURRENT = ThreadLocal.withInitial
-            (Optional::empty);
+    private static final ThreadLocal<Optional<ResponseTimeCollector>> CURRENT = ThreadLocal.withInitial(Optional::empty);
 
     private final Map<String, ResponseTime> responseTimes = new ConcurrentHashMap<>();
 

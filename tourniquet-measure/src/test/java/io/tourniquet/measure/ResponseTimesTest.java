@@ -224,29 +224,36 @@ public class ResponseTimesTest {
     public void testGlobalCollection() throws Exception {
         //prepare
         ExecutorService pool = Executors.newFixedThreadPool(3);
-        ResponseTimes.enableGlobalCollection(true);
 
         //act
-        for(int i = 0; i < 6; i++){
+        for(int i = 0; i < 3; i++){
             pool.submit(() -> {
-                final ResponseTime rt = ResponseTimes.current().startTx("test");
-                try {
-                    Thread.sleep((System.currentTimeMillis() % 17) * 10);
-                } catch (InterruptedException e) {
-                } finally {
-                    ResponseTimes.current().stopTx(rt);
-                }
+                ResponseTimes local = ResponseTimes.current();
+                local.enableForwardToGlobal(true);
+                local.stopTx(local.startTx("forward"));
             });
         }
+        ResponseTimes.enableGlobalCollection(true);
+        for(int i = 0; i < 3; i++){
+            pool.submit(() -> {
+                ResponseTimes local = ResponseTimes.current();
+                local.stopTx(local.startTx("local"));
+            });
+        }
+        pool.submit(() -> {
+            ResponseTimes global = ResponseTimes.global();
+            global.stopTx(global.startTx("global"));
+        });
         pool.shutdown();
-        pool.awaitTermination(250, TimeUnit.MILLISECONDS);
+        pool.awaitTermination(250000, TimeUnit.MILLISECONDS);
 
         //assert
         Map<String, List<ResponseTime>> times =  ResponseTimes.global().getResponseTimes();
         assertNotNull(times);
-        assertEquals(1, times.size());
-        List<ResponseTime> series = times.get("test");
-        assertEquals(6, series.size());
+        assertEquals(3, times.size());
+        assertEquals(3, times.get("forward").size());
+        assertEquals(3, times.get("local").size());
+        assertEquals(1, times.get("global").size());
 
     }
 
