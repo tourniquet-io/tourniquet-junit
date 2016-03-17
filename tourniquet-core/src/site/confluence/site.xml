@@ -22,6 +22,7 @@
 
     <home name="API" uri="index.confluence">
           <child name="Usage" uri="../markdown/usage.md"/>
+          <child name="Utilities" uri="../markdown/utils.md"/>
     </home>
 
     <label>api</label>

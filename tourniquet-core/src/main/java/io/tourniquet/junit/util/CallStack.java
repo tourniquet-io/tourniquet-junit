@@ -56,7 +56,7 @@ public final class CallStack {
             METHODSTACK.get().push(method);
             try{
 
-                return methodProxy.invokeSuper(o, objects);
+                return method.invoke(target, objects);
             } finally {
                 METHODSTACK.get().pop();
             }
