@@ -88,13 +88,14 @@ public class CallStackTest {
     @Test
     public void testTrackAndGetCurrentMethod() throws Exception {
         //prepare
-        MethodTrackTarget target = CallStack.track(new MethodTrackTarget());
+        String value = ":test";
+        MethodTrackTarget target = CallStack.track(new MethodTrackTarget(value));
 
         //act
         String result = target.getString();
 
         //assert
-        assertEquals("getString", result);
+        assertEquals("getString:test", result);
 
     }
 
@@ -114,8 +115,18 @@ public class CallStackTest {
 
     public static class MethodTrackTarget {
 
+        private final String value;
+
+        MethodTrackTarget(){
+            this("empty");
+        }
+
+        public MethodTrackTarget(final String value) {
+            this.value = value;
+        }
+
         public String getString(){
-            return CallStack.currentMethod().get().getName();
+            return CallStack.currentMethod().get().getName() + value;
         }
 
     }
