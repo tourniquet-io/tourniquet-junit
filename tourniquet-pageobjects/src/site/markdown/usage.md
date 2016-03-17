@@ -10,14 +10,6 @@ All measured times can be collected and process, i.e. for performance analysis.
 
 ## Usage
 
-Add the following dependency to your project
-
-    <dependency>
-        <groupId>io.devcon5</groupId>
-        <artifactId>pageobjects</artifactId>
-        <version>0.3</version>
-    </dependency>
-
 This library requires a Java 8 JRE to run. If you write code for Java 7 production environments, but
  and your build and test execution environment supports Java 8 - Selenium tests can be executed in a 
  different JVM than the system under test - you may put your Selenium based tests in a separate
