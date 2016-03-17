@@ -183,7 +183,7 @@ public class ResponseTimesTest {
         //prepare
         Instant now = Instant.now();
         Duration dur = Duration.ofMillis(100);
-        TimeMeasure tm = new TimeMeasure(now, dur);
+        SimpleTimeMeasure tm = new SimpleTimeMeasure(now, dur);
 
         //act
         ResponseTime rt = ResponseTimes.collect("test", tm);
@@ -198,7 +198,7 @@ public class ResponseTimesTest {
     @Test(expected = AssertionError.class)
     public void testCollect_txNameAndMeasure_unfinished_exception() throws Exception {
         //prepare
-        TimeMeasure tm = new TimeMeasure(Instant.now());
+        SimpleTimeMeasure tm = new SimpleTimeMeasure(Instant.now());
 
         //act
         ResponseTimes.collect("test", tm);
@@ -207,9 +207,9 @@ public class ResponseTimesTest {
     @Test
     public void testGetResponseTimes() throws Exception {
         //prepare
-        ResponseTimes.collect("tx1", new TimeMeasure(Instant.now(), Duration.ZERO));
-        ResponseTimes.collect("tx1", new TimeMeasure(Instant.now(), Duration.ZERO));
-        ResponseTimes.collect("tx2", new TimeMeasure(Instant.now(), Duration.ZERO));
+        ResponseTimes.collect("tx1", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
+        ResponseTimes.collect("tx1", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
+        ResponseTimes.collect("tx2", new SimpleTimeMeasure(Instant.now(), Duration.ZERO));
 
         //act
         Map<String, List<ResponseTime>> rts = ResponseTimes.getResponseTimes();

@@ -17,12 +17,11 @@
 package io.tourniquet.measure;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
@@ -35,34 +34,18 @@ public class MeasuredExecutionResultTest {
     private Duration duration = Duration.ofMillis(1500);
 
     @Test
-    public void testGetReturnValue() throws Exception {
+    public void testForDuration() throws Exception {
         //prepare
         Object returnValue = new Object();
-        MeasuredExecutionResult<Object> result = new MeasuredExecutionResult<Object>(timestamp, duration, returnValue);
+        MeasuredExecutionResult<Object> result = new MeasuredExecutionResult<>(timestamp, duration, returnValue);
+        final AtomicReference<Object> holder = new AtomicReference<>();
 
         //act
-        Optional<Object> actual = result.getReturnValue();
-        Optional<Throwable> exception = result.getException();
+        MeasuredExecutionResult<Object> retVal = result.forDuration(holder::set);
 
         //assert
-        assertEquals(returnValue, actual.get());
-        assertFalse(exception.isPresent());
-        assertTrue(result.wasSuccessful());
-    }
-
-    @Test
-    public void testGetException() throws Exception {
-        Throwable t = new Throwable();
-        MeasuredExecutionResult<Object> result = new MeasuredExecutionResult<Object>(timestamp, duration, t);
-
-        //act
-        Optional<Object> actual = result.getReturnValue();
-        Optional<Throwable> exception = result.getException();
-
-        //assert
-        assertFalse(actual.isPresent());
-        assertEquals(t, exception.get());
-        assertFalse(result.wasSuccessful());
+        assertSame(result, retVal);
+        assertEquals(duration, holder.get());
     }
 
 }

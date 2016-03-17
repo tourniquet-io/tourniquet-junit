@@ -18,53 +18,60 @@ package io.tourniquet.measure;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
+import java.util.function.Consumer;
+
+import io.tourniquet.junit.util.ExecutionResult;
 
 /**
- * The result of a time measured execution. As this measurement holds a reference to the return value of
- * a measured execution (or the throwable that occured during the execution) you should not keep it in memory
- * for recording execution times as this will fill up memory.
+ * The result of a time measured execution. As this measurement holds a reference to the return value of a measured
+ * execution (or the throwable that occured during the execution) you should not keep it in memory for recording
+ * execution times as this will fill up memory.
  */
-public class MeasuredExecutionResult<RESULTTYPE> extends TimeMeasure {
+public class MeasuredExecutionResult<RESULTTYPE> extends ExecutionResult<RESULTTYPE> implements TimeMeasure {
 
-    private final Optional<RESULTTYPE> result;
-    private final Optional<Throwable> throwable;
+    private final SimpleTimeMeasure measure;
 
     public MeasuredExecutionResult(final Instant start, final Duration duration, RESULTTYPE result) {
 
-        super(start, duration);
-        this.result = Optional.ofNullable(result);
-        this.throwable = Optional.empty();
+        super(result, null);
+        this.measure = new SimpleTimeMeasure(start, duration);
     }
 
-    public MeasuredExecutionResult(final Instant start, final Duration duration, Throwable throwable) {
+    public MeasuredExecutionResult(final Instant start, final Duration duration, Exception throwable) {
 
-        super(start, duration);
-        this.result = Optional.empty();
-        this.throwable = Optional.of(throwable);
-    }
-
-    /**
-     * The result of the execution. In case the operation had no result - because it was of return type void -
-     * this method returns {@link Void}.
-     * @return
-     *  the result of the execution.
-     */
-    public Optional<RESULTTYPE> getReturnValue() {
-
-        return result;
-    }
-
-    public Optional<Throwable> getException(){
-        return throwable;
+        super(null, throwable);
+        this.measure = new SimpleTimeMeasure(start, duration);
     }
 
     /**
-     * Indicator whether the execution was successful.
-     * @return
-     *  true if the execution did not throw an exception.
+     * Method to fluently process the duration of the measured operation.
+     *
+     * @param consumer
+     *         the consumer to process the duration
+     *
+     * @return this measure
      */
-    public boolean wasSuccessful(){
-        return !throwable.isPresent();
+    public MeasuredExecutionResult<RESULTTYPE> forDuration(Consumer<Duration> consumer) {
+
+        consumer.accept(getDuration());
+        return this;
+    }
+
+    @Override
+    public Instant getStart() {
+
+        return this.measure.getStart();
+    }
+
+    @Override
+    public Duration getDuration() {
+
+        return this.measure.getDuration();
+    }
+
+    @Override
+    public boolean isFinished() {
+
+        return this.measure.isFinished();
     }
 }

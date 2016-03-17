@@ -18,10 +18,13 @@ package io.tourniquet.measure;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 
+import io.tourniquet.junit.util.ExecutionResult;
 import org.junit.Test;
 
 /**
@@ -30,8 +33,26 @@ import org.junit.Test;
 public class ExecutionStopWatchTest {
 
     @Test
-    public void testRunMeasured_runnable() throws Exception {
+    public void testRunMeasured_withException() throws Exception {
 
+        //prepare
+        AtomicReference<Throwable> holder = new AtomicReference<>();
+
+        //act
+        MeasuredExecutionResult watch = (MeasuredExecutionResult) ExecutionStopWatch.runMeasured(() -> {
+            sleep(100);
+            throw new Exception();
+        }).catchException(holder::set);
+
+        //assert
+        //5 millis tolerance
+        assertTrue(watch.getDuration().plusMillis(5).compareTo(Duration.ofMillis(100)) >= 0);
+        assertFalse(watch.wasSuccess());
+        assertNotNull(holder);
+    }
+
+    @Test
+    public void testRunMeasured_runnable() throws Exception {
 
         //act
         MeasuredExecutionResult watch = ExecutionStopWatch.runMeasured(() -> sleep(100));
@@ -39,13 +60,12 @@ public class ExecutionStopWatchTest {
         //assert
         //5 millis tolerance
         assertTrue(watch.getDuration().plusMillis(5).compareTo(Duration.ofMillis(100)) >= 0);
-        assertEquals(Void.TYPE, watch.getReturnValue().get());
+        assertEquals(ExecutionResult.VOID, watch.getReturnValue().get());
 
     }
 
     @Test
     public void testMeasure_callable_returningNull() throws Exception {
-
 
         //act
         MeasuredExecutionResult watch = ExecutionStopWatch.runMeasured(() -> {
@@ -61,7 +81,6 @@ public class ExecutionStopWatchTest {
     @Test
     public void testMeasure_callable_returningResult() throws Exception {
 
-
         //act
         MeasuredExecutionResult<String> watch = ExecutionStopWatch.runMeasured(() -> {
             sleep(100);
@@ -74,6 +93,7 @@ public class ExecutionStopWatchTest {
     }
 
     private void sleep(long millis) {
+
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {

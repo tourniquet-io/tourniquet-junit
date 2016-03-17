@@ -19,6 +19,8 @@ package io.tourniquet.junit.util;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +28,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+/**
+ * Created by Gerald Muecke on 26.11.2015.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class CallStackTest {
 
@@ -70,6 +75,30 @@ public class CallStackTest {
         assertEquals(MockClass.class, cls);
     }
 
+    @Test
+    public void testCurrentMethodWithoutTracking() throws Exception {
+        //prepare
+
+        //act
+        assertEquals(Optional.empty(), CallStack.currentMethod());
+        //assert
+
+    }
+
+    @Test
+    public void testTrackAndGetCurrentMethod() throws Exception {
+        //prepare
+        String value = ":test";
+        MethodTrackTarget target = CallStack.track(new MethodTrackTarget(value));
+
+        //act
+        String result = target.getString();
+
+        //assert
+        assertEquals("getString:test", result);
+
+    }
+
     /**
      * Placeholder for a class that wants to get the caller of the calling method.
      */
@@ -83,4 +112,24 @@ public class CallStackTest {
     public static class MockClass extends CallStackTest {
 
     }
+
+    public static class MethodTrackTarget {
+
+        private final String value;
+
+        MethodTrackTarget(){
+            this("empty");
+        }
+
+        public MethodTrackTarget(final String value) {
+            this.value = value;
+        }
+
+        public String getString(){
+            return CallStack.currentMethod().get().getName() + value;
+        }
+
+    }
+
+
 }

@@ -21,12 +21,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * ResponseTime of a Transaction. Is a specific {@link TimeMeasure} that associates
+ * ResponseTime of a Transaction. Is a specific {@link SimpleTimeMeasure} that associates
  * a unique id with the measurement and a specific transaction with the recored times. The ResponseTime is
  * immutable. Upon starting a measurement, the duration is set to ZERO. When finishing the transaction, a new
  * instance is created.
  */
-public class ResponseTime extends TimeMeasure {
+public class ResponseTime extends SimpleTimeMeasure {
 
     private final UUID uuid;
     private final String transaction;

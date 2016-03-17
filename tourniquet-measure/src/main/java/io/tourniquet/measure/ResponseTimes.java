@@ -150,7 +150,7 @@ public final class ResponseTimes {
      * @return
      *  the response time recorded
      */
-    public static ResponseTime collect(String transaction, TimeMeasure result) {
+    public static ResponseTime collect(String transaction, SimpleTimeMeasure result) {
         return collect(new ResponseTime(transaction, result.getStart(), result.getDuration()));
     }
 

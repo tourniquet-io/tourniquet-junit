@@ -20,12 +20,32 @@
     <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
-        <version>0.4.0</version>
+        <version>0.4.1</version>
     </parent>
     <artifactId>tourniquet-core</artifactId>
     <name>${project.artifactId}</name>
     <description>API for tourniquet entities, providing common classes and interfaces used throughout tourniquet
     </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

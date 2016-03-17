@@ -16,24 +16,68 @@
 
 package io.tourniquet.junit.util;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Optional;
 
-import org.slf4j.Logger;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
 
 /**
- * Helper class for operations on the call stack
+ * Helper class for operations on the call stack Created by Gerald Muecke on 26.11.2015.
  */
 public final class CallStack {
 
-    private static final Logger LOG = getLogger(CallStack.class);
     private static final String THIS_NAME = CallStack.class.getName();
 
     private CallStack() {
 
     }
 
+    private static ThreadLocal<Deque<Method>> METHODSTACK = ThreadLocal.withInitial(() -> new ArrayDeque<>());
+
     /**
-     * Returns the caller class of the calling method.<br> For example: <br> A.calling() -> B.called() B.called() ->
+     * Enhances the target object to track the invocation of methods of the target. The current method can
+     * be retrieved by invoking {@link #currentMethod()}
+     * @param target
+     *  the target object whose method invocations should be tracked
+     * @param <T>
+     *      the type of the tracked object
+     * @return
+     *  a tracked object whose method references will be put onto a stack so that the most recent method can
+     *  be retrieved using the {@link #currentMethod()} call
+     *
+     */
+    public static <T> T track(T target){
+
+        //noinspection unchecked
+        return (T) Enhancer.create(target.getClass(), (MethodInterceptor) (o, method, objects, methodProxy) -> {
+            METHODSTACK.get().push(method);
+            try{
+
+                return method.invoke(target, objects);
+            } finally {
+                METHODSTACK.get().pop();
+            }
+
+        });
+    }
+
+    /**
+     * Returns a reference to a method that was last invoked on a target object which has been enhanced for method
+     * recording. This method only works properly if the caller of this method is tracked.
+     * @return
+     *  the current method on the tracked call stack or an empty optional if no method was found, i.e. because no
+     *  object on the actual callstack is tracked.
+     */
+    public static Optional<Method> currentMethod() {
+        return Optional.ofNullable(METHODSTACK.get().peek());
+    }
+
+    /**
+     * Returns the caller class of the calling method.<br> For example: <br> A.calling() -&gt; B.called() B.called()
+     * -&gt;
      * getCallerClass(): A <br> If a thread context classloader is defined, it will be used for loading the class,
      * otherwise the default class loader is used.
      *
@@ -46,8 +90,7 @@ public final class CallStack {
             final StackTraceElement caller = findCaller(stElements);
             return loadClass(caller.getClassName());
         } catch (ClassNotFoundException e) {
-            LOG.debug("Could not determine caller class", e);
-            return null;
+            throw new RuntimeException("Could not determine caller class", e);
         }
     }
 

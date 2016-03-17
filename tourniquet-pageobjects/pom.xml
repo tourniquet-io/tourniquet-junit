@@ -20,71 +20,46 @@
     <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
-        <version>0.4.0</version>
+        <version>0.4.1</version>
     </parent>
 
     <artifactId>tourniquet-pageobjects</artifactId>
-	<version>0.4.0</version>
+	<version>0.4.1</version>
 
     <name>${project.artifactId}</name>
     <description>A small library to define a pageobject model for testing applications with selenium.</description>
 
-   <properties>
-            <tourniquet.tx.version>0.1</tourniquet.tx.version>
-            <devcon5.commons>1.3</devcon5.commons>
-            <apache.commons.cli.version>1.3.1</apache.commons.cli.version>
-            <apache.commons.lang.version>2.6</apache.commons.lang.version>
-            <test.junit.version>4.12</test.junit.version>
-            <test.mockito.version>1.10.19</test.mockito.version>
-            <test.hamcrest.version>1.3</test.hamcrest.version>
-            <test.scribble.version>0.3.2</test.scribble.version>
-            <org.slf4j.version>1.7.13</org.slf4j.version>
-            <log4j.version>2.0-rc1</log4j.version>
-            <cglib.version>3.2.1</cglib.version>
-            <selenium.version>2.52.0</selenium.version>
-    </properties>
-
     <dependencies>
-        <dependency>
-            <groupId>io.devcon5</groupId>
-            <artifactId>classutils</artifactId>
-            <version>${devcon5.commons}</version>
-        </dependency>
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-tx</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-core</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.1</version>
         </dependency>
         <!-- Selenium dependencies -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>${selenium.version}</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-firefox-driver</artifactId>
-            <version>${selenium.version}</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-ie-driver</artifactId>
-            <version>${selenium.version}</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-safari-driver</artifactId>
-            <version>${selenium.version}</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-chrome-driver</artifactId>
-            <version>${selenium.version}</version>
         </dependency>
     </dependencies>
 
