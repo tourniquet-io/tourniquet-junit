@@ -16,7 +16,6 @@
 
 package io.tourniquet.junit.net;
 
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -175,13 +174,7 @@ public class UDPReceiverTest {
         } ;
         //act
         final List<byte[]> packets = new CopyOnWriteArrayList<>();
-        subject.onDatagramReceived(new PacketHandler() {
-
-            @Override
-            public void process(final byte[] data) {
-                packets.add(data);
-            }
-        });
+        subject.onDatagramReceived(packets::add);
 
         //assert
         subject.apply(stmt, description).evaluate();
