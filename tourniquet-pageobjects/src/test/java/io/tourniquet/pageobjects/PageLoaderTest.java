@@ -40,15 +40,15 @@ public class PageLoaderTest {
 
     @Before
     public void setUp() throws Exception {
-        ResponseTimes.onMeasureEnd(responseTime -> rtEndRef.set(responseTime));
+        ResponseTimes.current().onMeasureEnd(responseTime -> rtEndRef.set(responseTime));
         rtc.startCollecting();
     }
 
     @After
     public void tearDown() throws Exception {
         rtc.stopCollecting();
-        ResponseTimes.resetResponseTimeHandlers();
-        ResponseTimes.clear();
+        ResponseTimes.current().onMeasureEnd(null);
+        ResponseTimes.current().clear();
     }
 
     @Test

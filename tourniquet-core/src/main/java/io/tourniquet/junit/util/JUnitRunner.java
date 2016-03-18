@@ -17,6 +17,7 @@
 package io.tourniquet.junit.util;
 
 import java.lang.reflect.Method;
+import java.util.Properties;
 import java.util.function.Supplier;
 
 import org.junit.runner.Computer;
@@ -59,6 +60,7 @@ public class JUnitRunner {
      *  if the test could not be executed or result retrieved.
      */
     public static Result runClass(String className, Supplier<ClassLoader> classLoader) throws Exception {
+        final Properties currentProperties = (Properties) System.getProperties().clone();
         final ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
         final ClassLoader cl = classLoader.get();
         try {
@@ -69,6 +71,7 @@ public class JUnitRunner {
             return new ResultHelper().deserialize((byte[])run.invoke(runner, testClass));
         } finally {
             Thread.currentThread().setContextClassLoader(oldCl);
+            System.setProperties(currentProperties);
         }
     }
 
