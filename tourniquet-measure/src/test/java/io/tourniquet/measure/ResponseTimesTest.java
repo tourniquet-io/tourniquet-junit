@@ -35,9 +35,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 
-/**
- *
- */
 public class ResponseTimesTest {
 
     /**
@@ -52,6 +49,7 @@ public class ResponseTimesTest {
         subject.onMeasureStart(null);
         subject.onMeasureEnd(null);
         subject.setCleanupStrategy(null, null);
+        subject.enableForwardToGlobal(false);
         ResponseTimes.global().clear();
         ResponseTimes.enableGlobalCollection(false);
     }
@@ -260,20 +258,22 @@ public class ResponseTimesTest {
     @Test
     public void testCleanupStrategy() throws Exception {
         //prepare
+        long period = 100;
 
         //act
-        subject.setCleanupStrategy(Map::clear, Duration.ofMillis(10));
-
+        subject.setCleanupStrategy(Map::clear, Duration.ofMillis(period));
         subject.stopTx(subject.startTx("test1"));
         subject.stopTx(subject.startTx("test2"));
+        Thread.sleep(period/5);
         int before = subject.getResponseTimes().size();
-        Thread.sleep(10);
+        Thread.sleep((4*period/5));
         subject.stopTx(subject.startTx("test1"));
         subject.stopTx(subject.startTx("test2"));
         subject.stopTx(subject.startTx("test3"));
         subject.stopTx(subject.startTx("test4"));
+        Thread.sleep(period/5);
         int middle = subject.getResponseTimes().size();
-        Thread.sleep(10);
+        Thread.sleep((4*period/5));
         int after = subject.getResponseTimes().size();
 
         //assert
@@ -281,4 +281,5 @@ public class ResponseTimesTest {
         assertEquals(4, middle);
         assertEquals(0, after);
     }
+
 }
