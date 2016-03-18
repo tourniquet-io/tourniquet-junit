@@ -25,11 +25,6 @@ import io.tourniquet.junit.matchers.TimeoutSupport;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 
-/**
- * Created by <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a> on 3/12/2015
- *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
- */
 public class EndpointMatcher extends BaseMatcher<NetworkPort> implements TimeoutSupport{
 
     private long timeout;

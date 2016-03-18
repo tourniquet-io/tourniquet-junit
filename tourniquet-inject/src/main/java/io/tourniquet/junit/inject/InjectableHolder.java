@@ -26,8 +26,8 @@ package io.tourniquet.junit.inject;
  * @param <T>
  *         the type of the injected value
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
+@FunctionalInterface
 public interface InjectableHolder<T> {
 
     /**
@@ -35,5 +35,5 @@ public interface InjectableHolder<T> {
      *
      * @return the target object to be injected
      */
-    public T getInjectionValue();
+    T getInjectionValue();
 }

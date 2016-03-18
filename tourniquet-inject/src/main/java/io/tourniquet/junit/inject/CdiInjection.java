@@ -30,7 +30,6 @@ import java.util.Set;
  * Injection support for injecting {@link javax.inject.Inject} annotated fields. The field can be of any
  * type.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald Muecke</a> (18.05.2015)
  *
  */
 public class CdiInjection extends Injection{

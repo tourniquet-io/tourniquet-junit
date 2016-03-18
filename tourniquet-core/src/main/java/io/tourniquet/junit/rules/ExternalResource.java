@@ -24,7 +24,6 @@ import org.junit.runners.model.Statement;
  * Alternative for {@link org.junit.rules.ExternalResource} that supports class-level before and after statements and
  * {@link TestRule} chaining.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public abstract class ExternalResource<T extends TestRule> extends BaseRule<T> {
 
@@ -56,7 +55,7 @@ public abstract class ExternalResource<T extends TestRule> extends BaseRule<T> {
      *  the statement for invoking before and after
      */
     private Statement statement(final Statement base) {
-        return new Statement() {
+        return new Statement() { //NOSONAR
             @Override
             public void evaluate() throws Throwable {
                 before();

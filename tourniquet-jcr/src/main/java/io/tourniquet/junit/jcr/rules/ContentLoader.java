@@ -33,7 +33,6 @@ import io.tourniquet.junit.jcr.rules.util.XMLContentLoader;
  * The ContentLoader is a testRule to prefill a {@link ContentRepository} with a node structure before the test.
  * <p>Experimental!</p>
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class ContentLoader extends ExternalResource<ContentRepository> {
 

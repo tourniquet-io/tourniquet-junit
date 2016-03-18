@@ -23,7 +23,6 @@ import io.tourniquet.junit.rules.ldap.DirectoryServer;
 /**
  * Builder for creating a {@link DirectoryServer} rule. The rule allows to start and stop an embedded ldap server
  * for test.
- * Created by Gerald on 29.05.2015.
  */
 public class DirectoryServerBuilder implements Builder<DirectoryServer> {
 

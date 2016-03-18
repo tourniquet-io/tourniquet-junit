@@ -21,8 +21,7 @@ import java.security.Principal;
 /**
  * A Principal to be used in test that carries a username information.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
- * 
+ *
  */
 public class SimpleUserPrincipal implements Principal {
 

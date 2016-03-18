@@ -29,9 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * available TCP ports on the local machine and to check if a port is available. Both could help when writing
  * tests that require a tcp port and at the time of writing the test, it is unknown whether the port is available
  * on the build system, i.e. a CI server.
- * Created by Gerald M&uuml;cke on 11.03.2015.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public final class NetworkUtils {
 

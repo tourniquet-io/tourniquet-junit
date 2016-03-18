@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
  * This source-only annotation marks a method to be used for setting up a rule and is not intended to be used as public
  * API. The annotation provides a guide for users of the Tourniquet rule API.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
@@ -41,7 +40,6 @@ public @interface RuleSetup {
     /**
      * Indicates the
      *
-     * @author Gerald Muecke, gerald@moskito.li
      */
     public static enum RequirementLevel {
         /**

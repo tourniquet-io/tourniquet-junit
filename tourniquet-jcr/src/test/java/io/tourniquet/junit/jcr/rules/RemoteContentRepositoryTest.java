@@ -33,9 +33,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald on 19.05.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class RemoteContentRepositoryTest {
 

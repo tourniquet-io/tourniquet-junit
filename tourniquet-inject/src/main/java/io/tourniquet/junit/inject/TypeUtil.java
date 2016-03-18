@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Helper class for dealing with primitive and object types. <br> Created by Gerald on 02.06.2015.
+ * Helper class for dealing with primitive and object types.
  */
 public final class TypeUtil {
 

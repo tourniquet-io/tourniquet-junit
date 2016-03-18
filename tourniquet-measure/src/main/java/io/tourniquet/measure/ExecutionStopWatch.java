@@ -37,7 +37,7 @@ public final class ExecutionStopWatch {
      * @return
      *  the measured execution result. The return value is always of type {@link Void}
      */
-    public static MeasuredExecutionResult runMeasured(Runnable r){
+    public static MeasuredExecutionResult runMeasured(Runnable r){ //NOSONAR
         return runMeasured(() -> {
             r.run(); //NOSONAR
             return ExecutionResult.VOID;

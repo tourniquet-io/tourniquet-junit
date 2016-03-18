@@ -16,11 +16,6 @@
 
 package io.tourniquet.junit.net;
 
-/**
- * Created by Gerald M&uuml;cke on 11.03.2015.
- *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
- */
 public final class NetworkMatchers {
 
     private NetworkMatchers() {

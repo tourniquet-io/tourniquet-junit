@@ -25,7 +25,6 @@ import org.junit.rules.TemporaryFolder;
  * fast to instantiate and tear down and the content will be lost on each restart. The builder allows to activate
  * security in the rule, so that user management and access control can be properly used.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class InMemoryContentRepositoryBuilder extends ContentRepositoryBuilder<InMemoryContentRepository> {
 

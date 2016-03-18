@@ -40,9 +40,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import io.tourniquet.junit.rules.ldap.Directory;
 
-/**
- * Created by Gerald on 29.05.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class DirectoryBuilderTest {
 

@@ -16,22 +16,21 @@
 
 package io.tourniquet.junit.jcr.rules.builder;
 
-import io.tourniquet.junit.jcr.rules.JNDIContentRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.jcr.Repository;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.Properties;
 
+import io.tourniquet.junit.jcr.rules.JNDIContentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * A {@link Builder} for creating a {@link io.tourniquet.junit.jcr.rules.JNDIContentRepository}. The builder allows to override the default lookup
+ * A {@link io.tourniquet.junit.Builder} for creating a {@link io.tourniquet.junit.jcr.rules.JNDIContentRepository}. The builder allows to override the default lookup
  * name as well setting a {@link Context} or configuring the context to create. If no context property is specified the
  * default {@link Context} will be used.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class JNDIContentRepositoryBuilder extends ContentRepositoryBuilder<JNDIContentRepository> {
 

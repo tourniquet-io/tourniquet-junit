@@ -29,9 +29,6 @@ import java.lang.reflect.Field;
 
 import org.junit.Test;
 
-/**
- * Created by Gerald on 18.05.2015.
- */
 public class CdiInjectionTest {
 
     @Test

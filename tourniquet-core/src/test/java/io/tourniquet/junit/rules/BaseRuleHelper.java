@@ -19,7 +19,6 @@ package io.tourniquet.junit.rules;
 /**
  * Helper class to deal with the BaseRule when writing tests for Rules that subclass it
  *
- * @author Gerald Muecke, gerald@moskito.li
  */
 public final class BaseRuleHelper {
 

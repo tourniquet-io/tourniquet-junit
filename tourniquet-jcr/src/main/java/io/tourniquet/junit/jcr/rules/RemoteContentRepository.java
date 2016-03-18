@@ -46,7 +46,6 @@ import org.xml.sax.SAXException;
  * initialize method has to be invoked in a {@link BeforeClass} annotated class if the Jackrabbit web is being deployed
  * as part of the arquillian deployment.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class RemoteContentRepository extends ContentRepository {
 

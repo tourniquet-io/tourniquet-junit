@@ -43,7 +43,6 @@ import org.apache.deltaspike.core.api.config.ConfigProperty;
  *     new Injection(anyValue).asResource().byName("resourceName").into(target);
  * </code></pre>
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class Injection {
 

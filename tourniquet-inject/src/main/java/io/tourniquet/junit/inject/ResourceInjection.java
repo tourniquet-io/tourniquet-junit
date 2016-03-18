@@ -29,7 +29,6 @@ import java.util.List;
  * A handle for performing an injection operation of a {@link Resource} annotated field. Matching criteria can be
  * defined using the according by-methods, where multiple criterias are processes using OR (first match).
  *
- * @author Gerald Muecke, gerald@moskito.li
  */
 public class ResourceInjection extends Injection {
 
@@ -128,7 +127,6 @@ public class ResourceInjection extends Injection {
     /**
      * Literal for representing a {@link Resource} annotation
      *
-     * @author Gerald Muecke, gerald@moskito.li
      */
     static class ResourceLiteral extends AnnotationLiteral<Resource> implements Resource {
 

@@ -30,7 +30,6 @@ import org.apache.deltaspike.core.api.config.ConfigProperty;
  * <code>null</code>. Note, that this implementation is not thread-safe. As the defaultValue is updated on the last
  * match processing of injections should be done in a sequential way.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald Muecke</a>
  */
 public class ConfigPropertyInjection extends CdiInjection {
 

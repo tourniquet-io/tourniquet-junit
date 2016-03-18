@@ -22,7 +22,6 @@ import io.tourniquet.junit.jcr.rules.MockContentRepository;
 /**
  * A builder for a {@link MockContentRepository}
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class MockContentRepositoryBuilder implements Builder<MockContentRepository> {
 

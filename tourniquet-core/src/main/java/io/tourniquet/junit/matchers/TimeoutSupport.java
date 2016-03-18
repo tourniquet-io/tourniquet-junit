@@ -24,10 +24,8 @@ import org.hamcrest.Matcher;
  * Interface to be implemented by Matchers that require a timeout. By implementing this method the matcher
  * becomes configurable to produce a result within a certain timeframe.
  *
- * Created by <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a> on 3/13/2015
- *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
+@FunctionalInterface
 public interface TimeoutSupport {
 
     /**

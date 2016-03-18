@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import io.tourniquet.junit.rules.ExternalResource;
 import org.slf4j.Logger;
@@ -70,12 +71,7 @@ public class UDPReceiver extends ExternalResource {
      * The handler that processes the received packets. The default handler will put it in the packet queue. Note that
      * if the handler gets changed, the packet queue related methods won't work
      */
-    private PacketHandler packetHandler = new PacketHandler() {
-        @Override
-        public void process(final byte[] data) {
-            packets.addLast(data);
-        }
-    };
+    private Consumer<byte[]> packetHandler = packets::addLast;
     /**
      * Executor service for managing the receiver thread.
      */
@@ -192,7 +188,7 @@ public class UDPReceiver extends ExternalResource {
      * @param packetHandler
      *  the new packet handler that is invoked when an UDP datagram is received
      */
-    public void onDatagramReceived(final PacketHandler packetHandler) {
+    public void onDatagramReceived(final Consumer<byte[]> packetHandler) {
 
         this.packetHandler = packetHandler;
     }
@@ -200,7 +196,7 @@ public class UDPReceiver extends ExternalResource {
     /**
      * Processor for incoming
      */
-    private static class UDPProcessor implements Runnable {
+    private static class UDPProcessor implements Runnable { //NOSONAR
 
         private static final Logger LOG = getLogger(UDPProcessor.class);
 
@@ -217,7 +213,7 @@ public class UDPReceiver extends ExternalResource {
         /**
          * The handler that processes the incoming packets
          */
-        private final PacketHandler handler;
+        private final Consumer<byte[]> handler;
 
         /**
          * Creates a new UDPProcessor on the specified port.
@@ -229,7 +225,7 @@ public class UDPReceiver extends ExternalResource {
          * @param handler
          *  the handler that is invoked on received packets
          */
-        public UDPProcessor(final int port, final int bufferSize, final PacketHandler handler) {
+        public UDPProcessor(final int port, final int bufferSize, final Consumer<byte[]> handler) {
 
             this.port = port;
             this.bufferSize = bufferSize;
@@ -281,7 +277,7 @@ public class UDPReceiver extends ExternalResource {
                 final byte[] receivedData = new byte[buf.remaining()];
                 LOG.debug("Received {} byte packet", receivedData.length);
                 buf.get(receivedData);
-                handler.process(receivedData);
+                handler.accept(receivedData);
             }
         }
 

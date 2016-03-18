@@ -24,9 +24,6 @@ import java.net.URL;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-/**
- * Created by Gerald on 18.05.2015.
- */
 public class ContentRepositoryBuilderTest {
 
     private ContentRepositoryBuilder subject = new ContentRepositoryBuilder() {

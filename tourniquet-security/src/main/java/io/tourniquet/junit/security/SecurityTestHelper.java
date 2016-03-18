@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public final class SecurityTestHelper {
 
@@ -79,14 +78,7 @@ public final class SecurityTestHelper {
             final Object... params) throws Throwable { // NOSONAR
 
         try {
-            return Subject.doAs(jaasSubject, new PrivilegedExceptionAction<T>() {
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public T run() throws Exception {
-                    return (T) method.invoke(target, params);
-                }
-            });
+            return Subject.doAs(jaasSubject, (PrivilegedExceptionAction<T>) () -> (T) method.invoke(target, params));
         } catch (final PrivilegedActionException e) {
             LOG.debug("Exception in privileged action", e);
             throw e.getCause();

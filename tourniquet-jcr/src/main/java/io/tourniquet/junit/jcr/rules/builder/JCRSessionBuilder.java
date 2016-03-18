@@ -23,7 +23,6 @@ import io.tourniquet.junit.jcr.rules.ContentRepository;
 /**
  * A builder for a {@link io.tourniquet.junit.jcr.rules.ActiveSession}. The {@link io.tourniquet.junit.jcr.rules.ActiveSession} rule requires {@link io.tourniquet.junit.jcr.rules.ContentRepository} as outer rule.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class JCRSessionBuilder implements Builder<ActiveSession> {
 
