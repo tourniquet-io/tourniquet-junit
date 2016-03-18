@@ -33,7 +33,7 @@ public interface TransactionSupport {
      *  the name of the transaction to start. Use the same annotatio to stop the transaction.
      */
     default void txBegin(String txName) {
-        ResponseTimeCollector.current().ifPresent(rtc -> rtc.startTx(txName));
+        ResponseTimeCollector.current().ifPresent(rtc -> rtc.startTransaction(txName));
     }
 
     /**
@@ -44,6 +44,6 @@ public interface TransactionSupport {
      */
     default void txEnd(String txName) {
         Instant now = Instant.now();
-        ResponseTimeCollector.current().ifPresent(rtc -> rtc.stopTx(txName, now));
+        ResponseTimeCollector.current().ifPresent(rtc -> rtc.stopTransaction(txName, now));
     }
 }

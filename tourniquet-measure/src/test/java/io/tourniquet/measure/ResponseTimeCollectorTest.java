@@ -123,12 +123,61 @@ public class ResponseTimeCollectorTest {
     }
 
     @Test
+    public void testStartTransaction() throws Exception {
+        //prepare
+        subject.startCollecting();
+
+        //act
+        subject.startTransaction("test");
+
+        //assert
+        ResponseTime rt = rtStartRef.get();
+        assertNotNull(rt);
+        assertEquals("test", rt.getTransaction());
+        assertFalse(rt.isFinished());
+    }
+
+    @Test
+    public void testStopTransaction() throws Exception {
+        //prepare
+        subject.startCollecting();
+        subject.startTransaction("test");
+
+        //act
+        subject.stopTransaction("test");
+
+        //assert
+        subject.stopCollecting();
+        ResponseTime rt = rtEndRef.get();
+        assertNotNull(rt);
+        assertEquals("test", rt.getTransaction());
+    }
+
+    @Test
+    public void testStopTransaction_Instant() throws Exception {
+        //prepare
+        subject.startCollecting();
+        subject.startTransaction("test");
+        Instant end = Instant.now().plus(100, ChronoUnit.MILLIS);
+
+        //act
+        subject.stopTransaction("test", end);
+
+        //assert
+        subject.stopCollecting();
+        ResponseTime rt = rtEndRef.get();
+        assertNotNull(rt);
+        assertEquals("test", rt.getTransaction());
+        assertTrue(rt.getDuration().compareTo(Duration.ofMillis(95)) > 0);
+    }
+
+    @Test
     public void testStartTx() throws Exception {
         //prepare
         subject.startCollecting();
 
         //act
-        subject.startTx("test");
+        ResponseTimeCollector.startTx("test");
 
         //assert
         ResponseTime rt = rtStartRef.get();
@@ -141,10 +190,10 @@ public class ResponseTimeCollectorTest {
     public void testStopTx() throws Exception {
         //prepare
         subject.startCollecting();
-        subject.startTx("test");
+        subject.startTransaction("test");
 
         //act
-        subject.stopTx("test");
+        ResponseTimeCollector.stopTx("test");
 
         //assert
         subject.stopCollecting();
@@ -157,11 +206,11 @@ public class ResponseTimeCollectorTest {
     public void testStopTx_Instant() throws Exception {
         //prepare
         subject.startCollecting();
-        subject.startTx("test");
+        subject.startTransaction("test");
         Instant end = Instant.now().plus(100, ChronoUnit.MILLIS);
 
         //act
-        subject.stopTx("test", end);
+        ResponseTimeCollector.stopTx("test", end);
 
         //assert
         subject.stopCollecting();
