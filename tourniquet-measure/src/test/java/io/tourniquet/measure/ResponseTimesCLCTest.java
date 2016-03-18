@@ -39,7 +39,7 @@ public class ResponseTimesCLCTest {
     @Test
     public void testGetCurrentResponseTimeRetrieval() throws Exception {
         //prepare
-        try(TestClassLoader cl = new TestClassLoader(singletonList(resolver.resolve("/test.jar")))) {
+        try(TestClassLoader cl = new TestClassLoader(singletonList(resolver.resolve("/test.zip")))) {
             Result result = JUnitRunner.runClass("io.tourniquet.measure.MockTest", () -> cl);
             assertEquals(2, result.getRunCount());
             //act
@@ -54,7 +54,7 @@ public class ResponseTimesCLCTest {
     @Test
     public void testGlobalResponseTimesRetrieval() throws Exception {
         //prepare
-        try(TestClassLoader cl = new TestClassLoader(singletonList(resolver.resolve("/test.jar")))) {
+        try(TestClassLoader cl = new TestClassLoader(singletonList(resolver.resolve("/test.zip")))) {
             Result result = JUnitRunner.runClass("io.tourniquet.measure.MockTest", () -> cl);
             assertEquals(2, result.getRunCount());
             //act
