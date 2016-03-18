@@ -22,14 +22,14 @@ can also be used outside of a unit test, if needed, using the `ResponseTimeColle
 This will bind the collector instance to the current thread, making it accessible using a static getter:
 
 ```java
-    ResponseTimeCollector.current().ifPresent(rtc -> rtc.startTx("customTx");
+    ResponseTimeCollector.startTx("customTx");
     //do transaction
-    ResponseTimeCollector.current().ifPresent(rtc -> rtc.stopTx("customTx");
+    ResponseTimeCollector.stopTx("customTx");
 ```
 
 ## Accessing Response Times
 All started and completed collection are collected in the `ResponseTimes` collection. All collected 
-response times are accessible by transaction via the `getResponesTimes()` method.
+response times are accessible by transaction via the `getResponseTimes()` method.
 
 ## Custom Measure Handlers
 In case you want to add some additional processing on the measure events, you may register a custom handler using the
@@ -74,3 +74,10 @@ Example for setting a cleanup strategy:
 ```java
 ResponseTimes.global().setCleanupStrategy(Map::clear, Duration.ofMinutes(10));
 ```
+
+## Classloader isolation
+In cases where tests are executed in an isolated classloader, it might be required to get the collected response times
+collected by the test. The `ResponseTimes` provides two static getter methods to retrieve the thread-local or global 
+response times from the other classloader. The method ensures, the response times are cleanly transferred across
+classloader boundaries.
+
