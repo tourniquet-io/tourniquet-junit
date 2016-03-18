@@ -266,14 +266,14 @@ public class ResponseTimesTest {
         subject.stopTx(subject.startTx("test2"));
         Thread.sleep(period/5);
         int before = subject.getResponseTimes().size();
-        Thread.sleep((4*period/5));
+        Thread.sleep((4*period/5 + 10));
         subject.stopTx(subject.startTx("test1"));
         subject.stopTx(subject.startTx("test2"));
         subject.stopTx(subject.startTx("test3"));
         subject.stopTx(subject.startTx("test4"));
         Thread.sleep(period/5);
         int middle = subject.getResponseTimes().size();
-        Thread.sleep((4*period/5));
+        Thread.sleep(period);
         int after = subject.getResponseTimes().size();
 
         //assert
