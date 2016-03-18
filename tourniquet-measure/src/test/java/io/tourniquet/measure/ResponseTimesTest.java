@@ -33,14 +33,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 
 public class ResponseTimesTest {
 
     /**
      * The class under test
      */
-    @InjectMocks
     private ResponseTimes subject = ResponseTimes.current();
 
     @After
@@ -281,5 +279,4 @@ public class ResponseTimesTest {
         assertEquals(4, middle);
         assertEquals(0, after);
     }
-
 }

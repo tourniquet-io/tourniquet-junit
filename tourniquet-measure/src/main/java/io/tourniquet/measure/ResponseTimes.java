@@ -16,9 +16,17 @@
 
 package io.tourniquet.measure;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+
 /**
  * Collector for recording response times. The collector has two collections. One per thread and one single global
  * collection. The thread local collection should meet most cases. But in some cases it might be required to collect
@@ -45,6 +55,8 @@ import java.util.function.Consumer;
  * sequence, otherwise the response remain in memory permanently.
  */
 public final class ResponseTimes {
+
+    private static final Logger LOG = getLogger(ResponseTimes.class);
 
     /**
      * Global collector
@@ -81,8 +93,8 @@ public final class ResponseTimes {
     }
 
     /**
-     * The response time collector for the current thread. Every thread has it's own collector, but forwarding to
-     * the global collection can be enabled for all or single threads.
+     * The response time collector for the current thread. Every thread has it's own collector, but forwarding to the
+     * global collection can be enabled for all or single threads.
      *
      * @return the current response times collector
      */
@@ -129,6 +141,7 @@ public final class ResponseTimes {
      *         <code>true</code> if the response times should be forwared, <code>false</code> if not.
      */
     public void enableForwardToGlobal(boolean enabled) {
+
         forwardToGlobal.set(enabled);
     }
 
@@ -217,7 +230,7 @@ public final class ResponseTimes {
 
     private boolean isGlobalCollectionEnabled() {
 
-        return this != GLOBAL && forwardToGlobal.get() || GLOBAL_COLLECTION_ENABLED.get() ;
+        return this != GLOBAL && (forwardToGlobal.get() || GLOBAL_COLLECTION_ENABLED.get());
     }
 
     /**
@@ -284,5 +297,61 @@ public final class ResponseTimes {
             result.get(trt.getTransaction()).add(trt);
         });
         return result;
+    }
+
+    /**
+     * Collects response times collected by the current thread in another classloader hierarchy.
+     * @param cl
+     *  the classloader from which the response times should be collected
+     * @return
+     *  the collected results
+     */
+    public static Map<String, List<ResponseTime>> getCurrentResponseTimes(ClassLoader cl) {
+
+        return getResponseTimeObject(cl, "current");
+    }
+
+    /**
+     * Collects response times collected by the global collector in another classloader hierarchy.
+     * @param cl
+     *  the classloader from which the response times should be collected
+     * @return
+     *  the collected results
+     */
+    public static Map<String, List<ResponseTime>> getGlobalResponseTimes(ClassLoader cl) {
+
+        return getResponseTimeObject(cl, "global");
+    }
+
+    private static Map<String, List<ResponseTime>> getResponseTimeObject(final ClassLoader cl,
+                                                                         final String methodName) {
+
+        try {
+            final Class<?> responseTimesClass = cl.loadClass(ResponseTimes.class.getName());
+            final Object oCurrent = responseTimesClass.getMethod(methodName).invoke(null);
+            final Object oResponseTimes = responseTimesClass.getMethod("getResponseTimes").invoke(oCurrent);
+            return transfer(oResponseTimes);
+        } catch (Exception e) {
+            LOG.error("Unable to retrieve response times", e);
+        }
+        return Collections.emptyMap();
+    }
+
+    /**
+     * Tansfers a given object by serializing and deserializing from one classloader hierarchy to another, given both
+     * classloader hierarchies contain the same classes.
+     *
+     * @param object
+     *         the Object to transfer
+     *
+     * @return the transferred object
+     */
+    private static <TARGET_TYPE> TARGET_TYPE transfer(Object object) throws IOException, ClassNotFoundException {
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(object);
+        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+        return (TARGET_TYPE) ois.readObject();
     }
 }
