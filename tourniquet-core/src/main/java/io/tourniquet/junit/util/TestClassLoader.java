@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * A test classloader for dynamically loading external jar files, allowing to declare for which packages this
  * classloader takes precedence over the parent classloader.
+ * The classloader uses the classpath from the current classloader and uses the current classloader's parent
+ * as parent. This ensures, that no classes from the current classloader leak into this classloader's hierarchy.
  */
 public class TestClassLoader extends URLClassLoader {
 
@@ -47,12 +49,20 @@ public class TestClassLoader extends URLClassLoader {
      */
     public TestClassLoader(Collection<URL> testJars, Collection<String> packages, String... excludePackages) {
 
-        super(getURLs(testJars), ClassLoader.getSystemClassLoader().getParent());
+        super(getURLs(testJars), getParentClassLoader());
         this.packages = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.packages.addAll(packages);
         this.packages.addAll(new JarScanner().addJar(testJars).ignore(excludePackages).scanPackages());
         this.blacklist = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.blacklist.addAll(Arrays.asList(excludePackages));
+    }
+
+    private static ClassLoader getParentClassLoader() {
+        return TestClassLoader.class.getClassLoader().getParent();
+    }
+
+    private static Collection<URL> getParentJars() {
+        return Arrays.asList(((URLClassLoader)TestClassLoader.class.getClassLoader()).getURLs());
     }
 
     /**
@@ -115,7 +125,7 @@ public class TestClassLoader extends URLClassLoader {
 
         final List<URL> result = new ArrayList<>();
         result.addAll(testJars);
-        result.addAll(Arrays.asList(((URLClassLoader) getSystemClassLoader()).getURLs()));
+        result.addAll(getParentJars());
         return result.toArray(new URL[result.size()]);
     }
 }
