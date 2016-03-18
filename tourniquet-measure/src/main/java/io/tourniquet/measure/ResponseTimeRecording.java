@@ -20,9 +20,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
 
 import io.tourniquet.junit.rules.ExternalResource;
-import org.slf4j.Logger;
 
 /**
  * JUnit Rule to record response times. Use this rule if your page object model uses the transaction support
@@ -34,20 +34,20 @@ public class ResponseTimeRecording extends ExternalResource {
 
     private final ResponseTimeCollector collector = new ResponseTimeCollector();
 
-    private boolean clearGlobalTable = true;
+    private boolean clearResponseTimes = true;
     private boolean printTransactions = true;
 
     /**
-     * Sets whether to reset the global response time table after the test. Default is true. See {@link ResponseTimes#clear()}
-     * for more information
-     * @param clearGlobalTable
+     * Sets whether to reset the response time table of the current thread after the test.
+     * Default is true. See {@link ResponseTimes#clear()} for more information.
+     * @param clearResponseTimes
      *  true if table should be cleared (default) or false if not
      * @return
      *  this rule
      */
-    public ResponseTimeRecording clearGlobalTable(final boolean clearGlobalTable) {
+    public ResponseTimeRecording clearResponseTimes(final boolean clearResponseTimes) {
 
-        this.clearGlobalTable = clearGlobalTable;
+        this.clearResponseTimes = clearResponseTimes;
         return this;
     }
 
@@ -92,7 +92,7 @@ public class ResponseTimeRecording extends ExternalResource {
                 }
             }
         }
-        if(clearGlobalTable) {
+        if(clearResponseTimes) {
             ResponseTimes.current().clear();
         }
     }

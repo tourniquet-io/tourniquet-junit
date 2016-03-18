@@ -66,7 +66,7 @@ public class ResponseTimeRecordingTest {
         responseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
 
         //act
-        subject.clearGlobalTable(false);
+        subject.clearResponseTimes(false);
         subject.after();
 
         //assert
