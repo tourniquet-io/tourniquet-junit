@@ -18,6 +18,7 @@ package io.tourniquet.junit.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
@@ -49,6 +50,7 @@ public class JUnitRunnerTest {
         final List<Failure> failures = result.getFailures();
         assertNotNull(failures);
         assertEquals(1, failures.size());
+        assertNull(System.getProperty("MockTest"));
 
     }
 }
