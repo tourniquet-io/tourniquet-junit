@@ -20,7 +20,7 @@
     <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
-        <version>0.5.0-SNAPSHOT</version>
+        <version>0.4.2-SNAPSHOT</version>
     </parent>
     <artifactId>tourniquet-inject</artifactId>
     <name>${project.artifactId}</name>
