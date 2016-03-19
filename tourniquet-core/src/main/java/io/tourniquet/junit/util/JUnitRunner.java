@@ -60,8 +60,7 @@ public class JUnitRunner {
      *  if the test could not be executed or result retrieved.
      */
     public static Result runClass(String className, Supplier<ClassLoader> classLoader) throws Exception {
-        final Properties origProps = new Properties();
-        origProps.putAll(System.getProperties());
+        final Properties origProps = (Properties)System.getProperties().clone();
         final ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
         final ClassLoader cl = classLoader.get();
         try {
@@ -72,9 +71,7 @@ public class JUnitRunner {
             return new ResultHelper().deserialize((byte[])run.invoke(runner, testClass));
         } finally {
             Thread.currentThread().setContextClassLoader(oldCl);
-            final Properties currentProps = System.getProperties();
-            currentProps.clear();
-            currentProps.putAll(origProps);
+            System.setProperties(origProps);
         }
     }
 
