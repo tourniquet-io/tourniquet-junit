@@ -42,7 +42,6 @@ import io.tourniquet.junit.security.SecurityTestHelper;
  * Rule for testing with java content repositories (JCR). The rule implementations rely on the reference implementation
  * Jackrabbit. The Rule provides access to the {@link Repository} instance and logging in.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public abstract class ContentRepository extends ExternalResource<TemporaryFolder> implements
         InjectableHolder<Repository> {

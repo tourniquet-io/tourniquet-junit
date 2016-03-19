@@ -25,7 +25,6 @@ import io.tourniquet.junit.jcr.rules.ContentRepository;
 /**
  * Abstract Builder for {@link io.tourniquet.junit.jcr.rules.ContentRepository} rules.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  * @param <T>
  *            the Type of the {@link io.tourniquet.junit.jcr.rules.ContentRepository}
  */

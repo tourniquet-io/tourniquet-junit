@@ -25,10 +25,6 @@ import javax.security.auth.Subject;
 import java.security.Principal;
 import org.junit.Test;
 
-/**
- * Created by Gerald on 04.06.2015.
- */
-
 public class SecurityTestHelperTest {
 
     @Test

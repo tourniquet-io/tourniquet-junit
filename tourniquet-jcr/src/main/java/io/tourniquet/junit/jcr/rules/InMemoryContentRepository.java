@@ -27,7 +27,6 @@ import org.junit.rules.TemporaryFolder;
  * {@link TransientRepository} of Jackrabitt that is an in-memory repository. Nevertheless it requires a filesystem
  * location to put the configuration file (repository.xml) to.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class InMemoryContentRepository extends JackrabbitContentRepository{
 

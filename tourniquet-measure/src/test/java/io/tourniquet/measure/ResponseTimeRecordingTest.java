@@ -41,34 +41,36 @@ public class ResponseTimeRecordingTest {
     @InjectMocks
     private ResponseTimeRecording subject;
 
+    private ResponseTimes responseTimes = ResponseTimes.current();
+
     @After
     public void tearDown() throws Exception {
-        ResponseTimes.clear();
+        responseTimes.current().clear();
     }
 
     @Test
     public void testClearGlobalTable_default() throws Exception {
         //prepare
-        ResponseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
+        responseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
 
         //act
         subject.after();
 
         //assert
-        assertTrue(ResponseTimes.getResponseTimes().isEmpty());
+        assertTrue(responseTimes.getResponseTimes().isEmpty());
     }
 
     @Test
     public void testClearGlobalTable_false() throws Exception {
         //prepare
-        ResponseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
+        responseTimes.collect(new ResponseTime("test", Instant.now(), Duration.ofMillis(100)));
 
         //act
-        subject.clearGlobalTable(false);
+        subject.clearResponseTimes(false);
         subject.after();
 
         //assert
-        assertFalse(ResponseTimes.getResponseTimes().isEmpty());
+        assertFalse(responseTimes.getResponseTimes().isEmpty());
     }
 
     @Test

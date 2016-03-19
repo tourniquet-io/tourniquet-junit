@@ -50,7 +50,6 @@ import io.tourniquet.junit.rules.RuleSetup;
  * cluster settings. Beyond that, the class allows to specify a resource containing node type definitions in the
  * compact node type definition (CND) format that are loaded into the repository on startup.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public abstract class ConfigurableContentRepository extends ContentRepository {
 

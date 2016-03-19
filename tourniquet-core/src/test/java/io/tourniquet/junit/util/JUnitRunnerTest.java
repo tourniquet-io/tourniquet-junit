@@ -18,6 +18,8 @@ package io.tourniquet.junit.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeTrue;
 
 import java.util.List;
 
@@ -32,13 +34,13 @@ public class JUnitRunnerTest {
 
     @Test
     public void testRunClass() throws Exception {
-
+        assumeTrue("MockTest property is set, could not run test",System.getProperty("MockTest") == null);
         //prepare
         final ResourceClassLoader cl = new ResourceClassLoader();
         final Class<?> testClass = cl.loadClassFromResource("io.tourniquet.junit.util.MockTest","MockTest.clazz");
 
         //act
-        Result result = JUnitRunner.runClass("io.tourniquet.junit.util.MockTest", () -> cl);
+        Result result = JUnitRunner.runClass(testClass.getName(), () -> cl);
 
         //assert
         assertNotNull(result);
@@ -49,6 +51,7 @@ public class JUnitRunnerTest {
         final List<Failure> failures = result.getFailures();
         assertNotNull(failures);
         assertEquals(1, failures.size());
+        assertNull(System.getProperty("MockTest"));
 
     }
 }

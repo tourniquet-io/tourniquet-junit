@@ -25,7 +25,6 @@ import io.tourniquet.junit.jcr.rules.StandaloneContentRepository;
  * A Builder for an {@link StandaloneContentRepository}. The {@link StandaloneContentRepository} requires a
  * {@link TemporaryFolder} as outer rule.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class StandaloneContentRepositoryBuilder extends ContentRepositoryBuilder<StandaloneContentRepository> {
 

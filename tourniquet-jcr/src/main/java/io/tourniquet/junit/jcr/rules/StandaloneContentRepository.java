@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder;
  * repository is a pure in memory persistence. If actual persistence is required, an according configuration has to be
  * configured.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class StandaloneContentRepository extends JackrabbitContentRepository {
 

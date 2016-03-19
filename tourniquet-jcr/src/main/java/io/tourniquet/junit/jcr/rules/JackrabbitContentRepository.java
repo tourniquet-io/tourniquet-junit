@@ -44,7 +44,6 @@ import org.slf4j.Logger;
  *     <b>Note:</b> if you're using this rule as a class rule, be sure to remove users that are added within a single
  *     test execution properly after the test.
  * </p>
- * Created by gerald on 03.06.15.
  */
 public abstract class JackrabbitContentRepository extends ConfigurableContentRepository {
 

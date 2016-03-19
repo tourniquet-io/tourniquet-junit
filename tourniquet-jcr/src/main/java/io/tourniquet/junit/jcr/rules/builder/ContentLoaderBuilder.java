@@ -26,7 +26,6 @@ import io.tourniquet.junit.jcr.rules.ContentRepository;
  * Builder for creating {@link io.tourniquet.junit.jcr.rules.ContentLoader} TestRules. A content loader can be used to
  * prefill a JCR Content Repository.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class ContentLoaderBuilder implements Builder<ContentLoader> {
 

@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A {@link TestRule} for creating an active JCR session for a test.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class ActiveSession extends ExternalResource<ContentRepository> {
 

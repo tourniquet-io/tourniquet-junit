@@ -46,9 +46,6 @@ import org.slf4j.Logger;
 import io.tourniquet.junit.rules.BaseRuleHelper;
 import junit.framework.TestCase;
 
-/**
- * Created by gerald on 03.06.15.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class JackrabbitContentRepositoryTest extends TestCase {
 

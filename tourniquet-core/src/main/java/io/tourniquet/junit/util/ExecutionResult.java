@@ -136,9 +136,9 @@ public class ExecutionResult<RESULTTYPE> {
      * @return
      *  this result
      */
-    public ExecutionResult<RESULTTYPE> doFinally(Runnable finalTask) {
+    public ExecutionResult<RESULTTYPE> doFinally(Runnable finalTask) { //NOSONAR
 
-        finalTask.run();
+        finalTask.run(); //NOSONAR
         return this;
     }
 

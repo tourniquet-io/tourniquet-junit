@@ -21,9 +21,6 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-/**
- * Created by Gerald on 02.06.2015.
- */
 public class TypeUtilTest {
 
     @Test

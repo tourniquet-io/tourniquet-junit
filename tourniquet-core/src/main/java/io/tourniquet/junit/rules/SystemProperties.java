@@ -32,7 +32,7 @@ public class SystemProperties implements TestRule {
     @Override
     public Statement apply(final Statement statement, final Description description) {
 
-        return new Statement() {
+        return new Statement() { //NOSONAR
 
             @Override
             public void evaluate() throws Throwable {

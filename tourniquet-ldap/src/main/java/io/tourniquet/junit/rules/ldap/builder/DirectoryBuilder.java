@@ -26,8 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 /**
  * Builder for creating a {@link Directory} rule. The builder allows to add partitions, initial content and basic
- * settings so that the entire rule can be set up with chained method calls. <p/> <p> Created by Gerald on 29.05.2015.
- * </p>
+ * settings so that the entire rule can be set up with chained method calls.
  */
 public class DirectoryBuilder implements Builder<Directory> {
 

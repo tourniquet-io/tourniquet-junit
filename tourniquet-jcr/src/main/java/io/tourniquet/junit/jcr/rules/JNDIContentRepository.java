@@ -32,7 +32,6 @@ import io.tourniquet.junit.rules.BaseRule;
  * A {@link ContentRepository} implementation for providing a repository using a JNDI lookup. The repsitory is searched
  * used the configured Context.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class JNDIContentRepository extends ContentRepository {
 

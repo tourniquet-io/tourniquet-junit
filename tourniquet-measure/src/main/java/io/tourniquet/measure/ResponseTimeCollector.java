@@ -40,8 +40,7 @@ public class ResponseTimeCollector {
 
     private static final Logger LOG = getLogger(ResponseTimeCollector.class);
 
-    private static final ThreadLocal<Optional<ResponseTimeCollector>> CURRENT = ThreadLocal.withInitial
-            (Optional::empty);
+    private static final ThreadLocal<Optional<ResponseTimeCollector>> CURRENT = ThreadLocal.withInitial(Optional::empty);
 
     private final Map<String, ResponseTime> responseTimes = new ConcurrentHashMap<>();
 
@@ -95,7 +94,7 @@ public class ResponseTimeCollector {
      */
     public void captureTx(String txName, Instant start, Duration duration) {
         LOG.trace("TX {} started {} took {}", txName, start, duration);
-        ResponseTimes.collect(new ResponseTime(txName, start, duration));
+        ResponseTimes.current().collect(new ResponseTime(txName, start, duration));
     }
 
     /**
@@ -103,38 +102,73 @@ public class ResponseTimeCollector {
      * @param tx
      *  the name of the transaction
      */
-    public void startTx(String tx) {
+    public void startTransaction(String tx) {
 
         final Instant now = Instant.now();
         LOG.trace("TX Start {} at {}", tx, now);
-        responseTimes.put(tx, ResponseTimes.startTx(tx, now));
+        responseTimes.put(tx, ResponseTimes.current().startTx(tx, now));
     }
 
     /**
-     * Stops the recording of a transaction time, storing the transaction in the global response time store
+     * Stops the recording of a transaction time, pushing the result to the response time store {@link ResponseTimes}
      * @param tx
      *  the transaction that has been completd
      */
-    public void stopTx(String tx) {
+    public void stopTransaction(String tx) {
 
         final Instant now = Instant.now();
-        stopTx(tx, now);
+        stopTransaction(tx, now);
     }
 
     /**
      * Stops the transaction at the specific time point
      * @param tx
      *  the transaction to stop
-     * @param now
+     * @param endTime
      *  the manually measured time point when the transaction ended
      */
-    public void stopTx(String tx, Instant now) {
+    public void stopTransaction(String tx, Instant endTime) {
 
         if (!responseTimes.containsKey(tx)) {
             throw new IllegalStateException("Transaction " + tx + " not started");
         }
-        LOG.trace("TX End {} at {}", tx, now);
-        ResponseTimes.stopTx(responseTimes.remove(tx).finish(now));
+        LOG.trace("TX End {} at {}", tx, endTime);
+        ResponseTimes.current().stopTx(responseTimes.remove(tx).finish(endTime));
+    }
+
+    /**
+     * Starts a new transaction time recording if response time collection is running.
+     * <br>
+     * this is convience method for {@code current().ifPresent(rtc -> rtc.startTransaction(txName));}
+     * @param txName
+     *  the name of the transaction
+     */
+    public static void startTx(String txName) {
+        current().ifPresent(rtc -> rtc.startTransaction(txName));
+    }
+
+
+    /**
+     * Stops the recording of a transaction time, pushing the result to the response time store {@link ResponseTimes}
+     * <br>
+     * this is convenience method for {code current().ifPresent(rtc -> rtc.stopTransaction(txName));}
+     * @param txName
+     *  the transaction that has been completed
+     */
+    public static void stopTx(String txName) {
+        current().ifPresent(rtc -> rtc.stopTransaction(txName));
+    }
+
+    /**
+     * Stops the transaction at the specific time point
+     * this is convenience method for {@code current().ifPresent(rtc -> rtc.stopTransaction(txName, endTime));}
+     * @param txName
+     *  the transaction to stop
+     * @param endTime
+     *  the manually measured time point when the transaction ended
+     */
+    public static void stopTx(String txName, Instant endTime) {
+        current().ifPresent(rtc -> rtc.stopTransaction(txName, endTime));
     }
 
 }

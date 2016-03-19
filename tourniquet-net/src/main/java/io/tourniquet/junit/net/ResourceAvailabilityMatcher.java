@@ -32,7 +32,6 @@ import org.slf4j.Logger;
  * Matcher for verifying a a resource is available. Supported resources are <ul> <li>local TCP ports</li> <li>URLs</li>
  * </ul>
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class ResourceAvailabilityMatcher<RESOURCE> extends BaseMatcher<RESOURCE> {
 

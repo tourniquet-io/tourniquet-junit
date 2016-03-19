@@ -46,7 +46,7 @@ public final class ExecutionHelper {
      * @return
      *  the result of the task execution
      */
-    public static void runUnchecked(Runnable runnable) {
+    public static void runUnchecked(Runnable runnable) { //NOSONAR
         runProtected(runnable).mapException(Exception.class, RuntimeException::new).get();
     }
 
@@ -74,9 +74,9 @@ public final class ExecutionHelper {
      * @return
      *  the execution result monad
      */
-    public static ExecutionResult<Void> runProtected(Runnable runnable) {
+    public static ExecutionResult<Void> runProtected(Runnable runnable) { //NOSONAR
         try {
-            runnable.run();
+            runnable.run(); //NOSONAR
             return ExecutionResult.ofVoid();
         } catch (Exception e) {
             return ExecutionResult.ofException(e);

@@ -37,9 +37,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-/**
- * Created by Gerald on 08.06.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ContentLoaderTest {
 

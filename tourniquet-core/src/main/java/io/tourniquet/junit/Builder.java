@@ -24,8 +24,8 @@ import org.junit.rules.TestRule;
  * @param <T>
  *         the type of the {@link org.junit.rules.TestRule} the build can be used to build
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
+@FunctionalInterface
 public interface Builder<T extends TestRule> {
 
     /**

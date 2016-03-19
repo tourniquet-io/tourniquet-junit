@@ -16,6 +16,7 @@
 
 package io.tourniquet.measure;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -23,7 +24,7 @@ import java.time.Instant;
  * Represents a single time measure. The time measure can either denote a specific point in time - being an unfinished
  * measure - or a specific time (the start of the measurement) and a duration the measured operation took.
  */
-public class SimpleTimeMeasure implements TimeMeasure {
+public class SimpleTimeMeasure implements TimeMeasure, Serializable {
 
     private final Instant start;
     private final Duration duration;

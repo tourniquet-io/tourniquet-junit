@@ -45,9 +45,6 @@ import org.junit.runners.model.Statement;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created by Gerald on 18.05.2015.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class TourniquetTest {
 

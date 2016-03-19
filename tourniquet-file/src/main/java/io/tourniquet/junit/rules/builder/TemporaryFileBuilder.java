@@ -27,7 +27,6 @@ import org.junit.rules.TemporaryFolder;
 /**
  * Builder for creating a temporary file in a temporary folder.
  *
- * @author <a href="mailto:gerald.muecke@gmail.com">Gerald M&uuml;cke</a>
  */
 public class TemporaryFileBuilder implements Builder<TemporaryFile> {
 
