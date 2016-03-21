@@ -19,10 +19,11 @@ package io.tourniquet.junit.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeTrue;
 
 import java.util.List;
+import java.util.Properties;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
@@ -32,9 +33,19 @@ import org.junit.runner.notification.Failure;
  */
 public class JUnitRunnerTest {
 
+    @Before
+    public void setUp() throws Exception {
+        Properties sysprops = System.getProperties();
+        if(sysprops.containsKey("MockTest")){
+            System.err.println("System properties not properly cleaned from previous tests");
+            sysprops.remove("MockTest");
+        }
+    }
+
+
     @Test
     public void testRunClass() throws Exception {
-        assumeTrue("MockTest property is set, could not run test",System.getProperty("MockTest") == null);
+
         //prepare
         final ResourceClassLoader cl = new ResourceClassLoader();
         final Class<?> testClass = cl.loadClassFromResource("io.tourniquet.junit.util.MockTest","MockTest.clazz");
@@ -52,6 +63,39 @@ public class JUnitRunnerTest {
         assertNotNull(failures);
         assertEquals(1, failures.size());
         assertNull(System.getProperty("MockTest"));
+
+    }
+
+
+    @Test
+    public void testRunClass_withTestContext() throws Exception {
+
+        //prepare
+        final Properties props = new Properties();
+        final ResourceClassLoader cl = new ResourceClassLoader();
+        final Class<?> testClass = cl.loadClassFromResource("io.tourniquet.junit.util.MockTest","MockTest.clazz");
+
+        //act
+        Result result;
+        try {
+            TestExecutionContext.init(props);
+            result = JUnitRunner.runClass(testClass.getName(), () -> cl);
+        } finally {
+            TestExecutionContext.destroy();
+        }
+
+        //assert
+        assertNotNull(result);
+        assertEquals(1, result.getIgnoreCount());
+        assertEquals(1, result.getFailureCount());
+        assertEquals(2, result.getRunCount());
+
+        final List<Failure> failures = result.getFailures();
+        assertNotNull(failures);
+        assertEquals(1, failures.size());
+        assertNull(System.getProperty("MockTest"));
+
+        assertEquals("testValue", props.getProperty("testProperty"));
 
     }
 }
