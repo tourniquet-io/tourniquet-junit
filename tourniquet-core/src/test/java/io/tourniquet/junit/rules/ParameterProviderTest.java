@@ -21,14 +21,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Optional;
+import java.util.Properties;
 
+import io.tourniquet.junit.util.TestExecutionContext;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.Description;
+import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  *
  */
-public class ParametersTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ParameterProviderTest {
 
     @Rule
     public SystemProperties sysprops = new SystemProperties();
@@ -37,6 +45,9 @@ public class ParametersTest {
      * The class under test
      */
     private ParameterProvider subject = new ParameterProvider();
+
+    @Mock
+    private Description description;
 
     @Test
     public void testUseProvider() throws Exception {
@@ -123,5 +134,36 @@ public class ParametersTest {
         //assert
         assertNotNull(value);
         assertFalse(value.isPresent());
+    }
+
+    @Test
+    public void testDataProvisionWithTestExecutionContext() throws Throwable {
+        //prepare
+        final Properties props = new Properties();
+        props.put("testParam", "testValue");
+        ParameterProvider provider = new ParameterProvider();
+
+        //act
+        try {
+            TestExecutionContext.init(props);
+            provider.apply(new Statement() {
+
+                @Override
+                public void evaluate() throws Throwable {
+
+                    assertEquals("testValue", provider.getValue("testParam").get());
+                    TestExecutionContext.current()
+                                        .map(TestExecutionContext::getProperties)
+                                        .ifPresent(p -> p.put("testResult", "result"));
+                }
+            }, description).evaluate();
+
+        } finally {
+            TestExecutionContext.destroy();
+        }
+
+        //assert
+        assertEquals("result", props.getProperty("testResult"));
+
     }
 }

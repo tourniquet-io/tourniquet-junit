@@ -30,6 +30,9 @@ public class MockTest {
     @Test
     public void testFail() throws Exception {
 
+        TestExecutionContext.current()
+                            .map(TestExecutionContext::getProperties)
+                            .ifPresent(props -> props.put("testProperty", "testValue"));
         fail();
     }
 
@@ -42,6 +45,7 @@ public class MockTest {
 
     @Test
     public void testSuccess() throws Exception {
+
         System.setProperty("MockTest", "newProperty");
     }
 }

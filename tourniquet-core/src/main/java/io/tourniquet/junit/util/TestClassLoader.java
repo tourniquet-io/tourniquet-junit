@@ -57,12 +57,22 @@ public class TestClassLoader extends URLClassLoader {
         this.blacklist.addAll(Arrays.asList(excludePackages));
     }
 
-    private static ClassLoader getParentClassLoader() {
-        return TestClassLoader.class.getClassLoader().getParent();
+    private static Collection<URL> getParentJars() {
+        return Arrays.asList(((URLClassLoader)getClassLoader()).getURLs());
     }
 
-    private static Collection<URL> getParentJars() {
-        return Arrays.asList(((URLClassLoader)TestClassLoader.class.getClassLoader()).getURLs());
+    private static ClassLoader getParentClassLoader() {
+
+        return getClassLoader().getParent();
+    }
+
+    private static ClassLoader getClassLoader() {
+
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if(cl == null) {
+            cl = TestClassLoader.class.getClassLoader();
+        }
+        return cl;
     }
 
     /**
