@@ -73,6 +73,7 @@ The Rule can easily be created by instantiating it and doesn't require further i
     
 SystemConsole
 ----------------------------------------
+
 The `SystemConsole` Rule captures the output written to `System.out` and `System.err` so that it is accessible from 
 within the test case, i.e. for verifying a certain output has been written. The original streams are preserved and
 restored on teardown.
@@ -95,6 +96,59 @@ written is accesible by getter methods.
         System.err.print("test");
         assertEquals("test", console.getErr());
     }
+```
+
+    
+ParameterProvider
+----------------------------------------
+
+This rule allows to parametrize a test. Different to the JUnit `Parametrized` runner, this rule provides a means to
+ feed test data externalize in order to configure it for changing test environments or test dataset. It is not the
+ intention to run the test with various datasets multiple times in the same test execution but to parametrize a single
+ test execution only. The rule allows to specify a mapper function that provides the value for a specific parameter key.
+ 
+```java
+    @Rule
+    public ParameterProvider parameters = new ParameterProvider();
+    
+    @Test
+    public void test() {
+        int value = parameters.getValue("key", int.class, 123);
+    }
+
+```
+ 
+The default source is the `TestExecutionContext` and if that is not initialized, the parameters are read from the
+ System properties.
+
+The `TestExecutionContext` is designed for embedded test execution using the `JUnitRunner`. It encapsulates the access
+to a defined set of properties which are bound to the current thread. It's also possible to initialize the context 
+from the test execution and access the values using the `ParameterProvider`, although this is not recommended in 
+combination with the `JUnitRunner` as the context is a means of getting properties from outside (the code that embeds 
+the test execution) into the test.
+
+```java
+    @Rule
+    public ParameterProvider parameters = new ParameterProvider();
+    
+    @Before
+    public void setUp(){
+        Properties props = new Properties();
+        props.setProperty("key", "456");
+        //init props
+        TestExecutionContext.init(props);
+    }
+    
+    @Before
+    public void tearDown(){
+        TestExecutionContext.destroy();
+    }
+    
+    @Test
+    public void test() {
+        int value = parameters.getValue("key", int.class, 123);
+    }
+
 ```
 
 DateFormatMatcher
