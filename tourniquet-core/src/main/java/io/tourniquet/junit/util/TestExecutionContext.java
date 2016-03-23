@@ -49,6 +49,12 @@ public class TestExecutionContext {
         this.output = new Properties();
     }
 
+    /**
+     * The context for the current thread.
+     *
+     * @return
+     *  the optional is empty if the context is not initialized.
+     */
     public static Optional<TestExecutionContext> current() {
 
         return Optional.ofNullable(CURRENT.get());
