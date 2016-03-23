@@ -20,7 +20,7 @@
     <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
-        <version>0.4.4-SNAPSHOT</version>
+        <version>0.4.3</version>
     </parent>
 
     <artifactId>tourniquet-file</artifactId>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-core</artifactId>
-            <version>0.4.4-SNAPSHOT</version>
+            <version>0.4.3</version>
         </dependency>
         <!-- Apache Commons -->
         <dependency>
