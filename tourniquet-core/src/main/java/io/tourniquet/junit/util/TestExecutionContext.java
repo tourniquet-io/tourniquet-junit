@@ -20,48 +20,95 @@ import java.util.Optional;
 import java.util.Properties;
 
 /**
- * The test context allows to define a set of properties that are valid only for the current thread.
+ * Provides a context for a test execution that allows to
+ * <ul>
+ *     <li>Set the system properties for the test execution</li>
+ *     <li>Specify input parameters for a test</li>
+ *     <li>Collect and retrieve output parameters produced by the test</li>
+ * </ul>
+ * To get convient access to this context, you may use the rules
+ * <ul>
+ *     <li>ParameterProvider - which obtains the provided parameters from this context (as default)</li>
+ *     <li>OutputCollector - which stores collected outputs in this context (as default)</li>
+ * </ul>
+ * <br>
+ * To make use of this execution context, test may be executed using the {@link JUnitRunner}.
  */
 public class TestExecutionContext {
 
     private static final ThreadLocal<TestExecutionContext> CURRENT = new ThreadLocal<>();
 
-    private final Properties properties;
+    private final Properties input;
+    private final Properties output;
+    private final Properties env;
 
-    TestExecutionContext(final Properties properties) {
-        this.properties = properties;
+    TestExecutionContext(final Properties input, final Properties env) {
+
+        this.env = env;
+        this.input = input;
+        this.output = new Properties();
     }
 
-    public static Optional<TestExecutionContext> current(){
+    public static Optional<TestExecutionContext> current() {
+
         return Optional.ofNullable(CURRENT.get());
     }
 
     /**
      * Initializes the test context with the provided set of properties
      *
-     * @param props
-     *         the properties to initialize the context
+     * @param input
+     *         the input parameters for the test
+     * @param env
+     *         the environment parameters for the test execution.
      */
-    public static void init(Properties props) {
+    public static void init(Properties input, Properties env) {
 
-        CURRENT.set(new TestExecutionContext(props));
+        CURRENT.set(new TestExecutionContext(input, env));
     }
 
     /**
      * Destroys the test context for the current thread.
      */
-    public static void destroy(){
+    public static Properties destroy() {
+
+        final Properties output = current().map(TestExecutionContext::getOutput)
+                                     .orElseThrow(() -> new IllegalStateException("Context not initialized"));
         CURRENT.remove();
+        return output;
     }
 
     /**
-     * Retrieves the properties of the current test context or throws an {@link java.lang.IllegalStateException} if no
-     * context has been defined.
+     * Retrieves the environment of the current test context. Note, the returned properties are a clone of the original,
+     * therefore changing values won't have any effects.
      *
-     * @return the properties of the current test context
+     * @return the env properties of the current test context
      */
-    public Properties getProperties() {
-        return properties;
+    public Properties getEnv() {
+
+        return (Properties) env.clone();
+    }
+
+    /**
+     * Returns access to the input properties. Note, the returned properties are a clone of the original, therefore
+     * changing values won't have any effects.
+     *
+     * @return a copy of the input parameters
+     */
+    public Properties getInput() {
+
+        return (Properties) input.clone();
+    }
+
+    /**
+     * Provides access to the output properties field. Added or modified values on the properties are stored in the test
+     * context. On destroying the context, these properties are returned.
+     *
+     * @return the properties to be returned from the test context
+     */
+    public Properties getOutput() {
+
+        return output;
     }
 
 }

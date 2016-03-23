@@ -139,31 +139,32 @@ public class ParameterProviderTest {
     @Test
     public void testDataProvisionWithTestExecutionContext() throws Throwable {
         //prepare
-        final Properties props = new Properties();
-        props.put("testParam", "testValue");
+        final Properties env = new Properties();
+        final Properties input = new Properties();
         ParameterProvider provider = new ParameterProvider();
+        input.put("testParam", "testValue");
 
         //act
+        Properties output;
         try {
-            TestExecutionContext.init(props);
+            TestExecutionContext.init(input, env);
             provider.apply(new Statement() {
 
                 @Override
                 public void evaluate() throws Throwable {
-
                     assertEquals("testValue", provider.getValue("testParam").get());
                     TestExecutionContext.current()
-                                        .map(TestExecutionContext::getProperties)
+                                        .map(TestExecutionContext::getOutput)
                                         .ifPresent(p -> p.put("testResult", "result"));
                 }
             }, description).evaluate();
 
         } finally {
-            TestExecutionContext.destroy();
+            output = TestExecutionContext.destroy();
         }
 
         //assert
-        assertEquals("result", props.getProperty("testResult"));
+        assertEquals("result", output.getProperty("testResult"));
 
     }
 }

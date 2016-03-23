@@ -35,7 +35,7 @@ public class ParameterProvider extends BaseRule {
     public ParameterProvider() {
 
         this.provider = key -> Optional.ofNullable(TestExecutionContext.current()
-                                                                       .map(TestExecutionContext::getProperties)
+                                                                       .map(TestExecutionContext::getInput)
                                                                        .orElse(System.getProperties())
                                                                        .getProperty(key));
     }

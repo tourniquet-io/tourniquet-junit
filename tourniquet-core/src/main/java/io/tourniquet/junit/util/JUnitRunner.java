@@ -21,6 +21,7 @@ import static io.tourniquet.junit.util.ExecutionHelper.runUnchecked;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Supplier;
 
@@ -82,11 +83,18 @@ public class JUnitRunner {
         }
     }
 
+    /*
+     * If a test execution context is present for the current thread, it will also be initialized for the
+     * executed test. Further all env properties are copied to the system properties of the test execution.
+     */
     private static Result invokeRun(final String className, final ClassLoader cl)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
             IOException, InvocationTargetException {
 
-        TestExecutionContext.current().ifPresent(ctx -> initCtx(ctx, cl));
+        TestExecutionContext.current().ifPresent(ctx -> {
+            System.getProperties().putAll(ctx.getEnv());
+            initCtx(ctx, cl);
+        });
         try {
             final Class<?> testClass = cl.loadClass(className);
             final Object runner = cl.loadClass(JUnitRunner.class.getName()).newInstance();
@@ -98,16 +106,27 @@ public class JUnitRunner {
     }
 
     private static void destroyCtx(final TestExecutionContext ctx, final ClassLoader cl) {
+        //avoid destroying the context in the same classloader
 
-        runUnchecked(() -> cl.loadClass(ctx.getClass().getName()).getMethod("destroy").invoke(null));
+        try {
+            Class<?> contextClass = cl.loadClass(ctx.getClass().getName());
+            if (!Objects.equals(ctx.getClass(), contextClass)) {
+                final Properties props = (Properties) cl.loadClass(ctx.getClass().getName())
+                                                        .getMethod("destroy")
+                                                        .invoke(null);
+                ctx.getOutput().putAll(props);
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Unable to destroy context", e);
+        }
     }
 
     private static void initCtx(final TestExecutionContext ctx, final ClassLoader cl) {
-
-        runUnchecked(() -> cl.loadClass(ctx.getClass().getName())
-                             .getMethod("init", Properties.class)
-                             .invoke(null, ctx.getProperties()));
-
+        //avoid overwriting the context in the same classloader
+        if (!Objects.equals(ctx.getClass().getClassLoader(), cl)) {
+            runUnchecked(() -> cl.loadClass(ctx.getClass().getName())
+                                 .getMethod("init", Properties.class, Properties.class)
+                                 .invoke(null, ctx.getInput(), ctx.getEnv()));
+        }
     }
-
 }

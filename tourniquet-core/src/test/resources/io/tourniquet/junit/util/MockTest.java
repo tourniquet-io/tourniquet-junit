@@ -31,7 +31,7 @@ public class MockTest {
     public void testFail() throws Exception {
 
         TestExecutionContext.current()
-                            .map(TestExecutionContext::getProperties)
+                            .map(TestExecutionContext::getOutput)
                             .ifPresent(props -> props.put("testProperty", "testValue"));
         fail();
     }
