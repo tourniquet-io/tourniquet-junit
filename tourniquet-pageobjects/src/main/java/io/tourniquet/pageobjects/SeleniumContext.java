@@ -39,6 +39,15 @@ public class SeleniumContext {
         this.provider = provider;
     }
 
+    /**
+     * Initializes the context of another classloader
+     * @param context
+     * @param cl
+     */
+    public static void init(SeleniumContext context, ClassLoader cl){
+
+    }
+
     public void init(){
         driver = Optional.of(provider.get());
         CONTEXT.set(Optional.of(this));
@@ -67,7 +76,7 @@ public class SeleniumContext {
      */
     public static Optional<WebDriver> currentDriver() {
 
-        return currentContext().flatMap(ctx -> ctx.getDriver());
+        return currentContext().flatMap(SeleniumContext::getDriver);
     }
 
     /**

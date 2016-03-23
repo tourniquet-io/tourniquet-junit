@@ -16,6 +16,10 @@
 
 package io.tourniquet.junit.util;
 
+import static io.tourniquet.junit.util.ExecutionHelper.runUnchecked;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -115,6 +119,48 @@ public class TestExecutionContext {
     public Properties getOutput() {
 
         return output;
+    }
+
+    /**
+     * Destroys the context of the context in the provided classloader, given the classloader is a different one than
+     * of the specified context. The output properties from the other classloader are taken over to the given
+     * context
+     * @param ctx
+     *  the context to which the output properties of teh other classloader should be transferred
+     * @param cl
+     *  the classloader whose context should be destroyed
+     */
+    public static void destroy(final TestExecutionContext ctx, final ClassLoader cl) {
+        //avoid destroying the context in the same classloader
+
+        try {
+            Class<?> contextClass = cl.loadClass(ctx.getClass().getName());
+            if (!Objects.equals(ctx.getClass(), contextClass)) {
+                final Properties props = (Properties) cl.loadClass(ctx.getClass().getName())
+                                                        .getMethod("destroy")
+                                                        .invoke(null);
+                ctx.getOutput().putAll(props);
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Unable to destroy context", e);
+        }
+    }
+
+    /**
+     * Initializes the specified context in the provided classloader, given the classloader is a different one than
+     * of the specified context
+     * @param ctx
+     *  the context that should be transferred to the other classloader
+     * @param cl
+     *  the classloader whose context should be initialized
+     */
+    public static void init(final TestExecutionContext ctx, final ClassLoader cl) {
+        //avoid overwriting the context in the same classloader
+        if (!Objects.equals(ctx.getClass().getClassLoader(), cl)) {
+            runUnchecked(() -> cl.loadClass(ctx.getClass().getName())
+                                 .getMethod("init", Properties.class, Properties.class)
+                                 .invoke(null, ctx.getInput(), ctx.getEnv()));
+        }
     }
 
 }

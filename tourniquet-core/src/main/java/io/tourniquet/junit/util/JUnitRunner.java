@@ -16,12 +16,12 @@
 
 package io.tourniquet.junit.util;
 
-import static io.tourniquet.junit.util.ExecutionHelper.runUnchecked;
+import static io.tourniquet.junit.util.TestExecutionContext.destroy;
+import static io.tourniquet.junit.util.TestExecutionContext.init;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Supplier;
 
@@ -93,7 +93,7 @@ public class JUnitRunner {
 
         TestExecutionContext.current().ifPresent(ctx -> {
             System.getProperties().putAll(ctx.getEnv());
-            initCtx(ctx, cl);
+            init(ctx, cl);
         });
         try {
             final Class<?> testClass = cl.loadClass(className);
@@ -101,32 +101,9 @@ public class JUnitRunner {
             final Method run = runner.getClass().getDeclaredMethod("run", Class.class);
             return new ResultHelper().deserialize((byte[]) run.invoke(runner, testClass));
         } finally {
-            TestExecutionContext.current().ifPresent(ctx -> destroyCtx(ctx, cl));
+            TestExecutionContext.current().ifPresent(ctx -> destroy(ctx, cl));
         }
     }
 
-    private static void destroyCtx(final TestExecutionContext ctx, final ClassLoader cl) {
-        //avoid destroying the context in the same classloader
 
-        try {
-            Class<?> contextClass = cl.loadClass(ctx.getClass().getName());
-            if (!Objects.equals(ctx.getClass(), contextClass)) {
-                final Properties props = (Properties) cl.loadClass(ctx.getClass().getName())
-                                                        .getMethod("destroy")
-                                                        .invoke(null);
-                ctx.getOutput().putAll(props);
-            }
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Unable to destroy context", e);
-        }
-    }
-
-    private static void initCtx(final TestExecutionContext ctx, final ClassLoader cl) {
-        //avoid overwriting the context in the same classloader
-        if (!Objects.equals(ctx.getClass().getClassLoader(), cl)) {
-            runUnchecked(() -> cl.loadClass(ctx.getClass().getName())
-                                 .getMethod("init", Properties.class, Properties.class)
-                                 .invoke(null, ctx.getInput(), ctx.getEnv()));
-        }
-    }
 }
