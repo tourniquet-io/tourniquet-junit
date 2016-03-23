@@ -16,7 +16,8 @@
 
 package io.tourniquet.junit.util;
 
-import static io.tourniquet.junit.util.ExecutionHelper.runUnchecked;
+import static io.tourniquet.junit.util.TestExecutionContext.destroy;
+import static io.tourniquet.junit.util.TestExecutionContext.init;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -82,32 +83,27 @@ public class JUnitRunner {
         }
     }
 
+    /*
+     * If a test execution context is present for the current thread, it will also be initialized for the
+     * executed test. Further all env properties are copied to the system properties of the test execution.
+     */
     private static Result invokeRun(final String className, final ClassLoader cl)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
             IOException, InvocationTargetException {
 
-        TestExecutionContext.current().ifPresent(ctx -> initCtx(ctx, cl));
+        TestExecutionContext.current().ifPresent(ctx -> {
+            System.getProperties().putAll(ctx.getEnv());
+            init(ctx, cl);
+        });
         try {
             final Class<?> testClass = cl.loadClass(className);
             final Object runner = cl.loadClass(JUnitRunner.class.getName()).newInstance();
             final Method run = runner.getClass().getDeclaredMethod("run", Class.class);
             return new ResultHelper().deserialize((byte[]) run.invoke(runner, testClass));
         } finally {
-            TestExecutionContext.current().ifPresent(ctx -> destroyCtx(ctx, cl));
+            TestExecutionContext.current().ifPresent(ctx -> destroy(ctx, cl));
         }
     }
 
-    private static void destroyCtx(final TestExecutionContext ctx, final ClassLoader cl) {
-
-        runUnchecked(() -> cl.loadClass(ctx.getClass().getName()).getMethod("destroy").invoke(null));
-    }
-
-    private static void initCtx(final TestExecutionContext ctx, final ClassLoader cl) {
-
-        runUnchecked(() -> cl.loadClass(ctx.getClass().getName())
-                             .getMethod("init", Properties.class)
-                             .invoke(null, ctx.getProperties()));
-
-    }
 
 }
