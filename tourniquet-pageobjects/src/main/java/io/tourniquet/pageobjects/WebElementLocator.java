@@ -16,12 +16,12 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.pageobjects.WaitPredicates.elemenDisplayed;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Predicate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
@@ -94,7 +94,7 @@ public final class WebElementLocator {
 
         new FluentWait<>(context).ignoring(NoSuchElementException.class)
                                  .withTimeout(waitSec, TimeUnit.SECONDS)
-                                 .until((Predicate<SearchContext>) d -> context.findElement(by).isDisplayed());
+                                 .until(elemenDisplayed(context, by));
         return context.findElement(by);
 
     }
