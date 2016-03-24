@@ -244,4 +244,30 @@ public class SeleniumControlTest {
         assertTrue(dur.getNano() >= 50);
     }
 
+    @Test
+    public void testSharedSeleniumContext() throws Throwable {
+        //prepare
+        try {
+            SeleniumContext ctx = new SeleniumContext(() -> webDriver);
+            ctx.init();
+
+            //act
+            subject.apply(new Statement() {
+
+                @Override
+                public void evaluate() throws Throwable {
+
+                    SeleniumContext context = SeleniumContext.currentContext().get();
+                    assertSame(ctx, context);
+                }
+            }, description).evaluate();
+
+
+        //assert
+        } finally {
+            SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        }
+
+    }
+
 }

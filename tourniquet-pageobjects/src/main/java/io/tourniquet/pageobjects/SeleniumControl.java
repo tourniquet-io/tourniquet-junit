@@ -114,10 +114,10 @@ public class SeleniumControl extends ExternalResource {
      * @return an optional containing a managed context or the empty optional if a context is already active
      */
     private Optional<SeleniumContext> getSeleniumContext() {
-
-        return Optional.ofNullable((SeleniumContext) SeleniumContext.currentContext()
-                                                                    .map(c -> null)
-                                                                    .orElse(new SeleniumContext(driverProvider)));
+        if(!SeleniumContext.currentContext().isPresent()){
+            return Optional.of(new SeleniumContext(driverProvider));
+        }
+        return Optional.empty();
     }
 
     /**
