@@ -34,7 +34,10 @@ public class TestExecutionContextTest {
 
     @After
     public void tearDown() throws Exception {
-        TestExecutionContext.destroy();
+
+        TestExecutionContext.current().ifPresent( ctx ->
+            TestExecutionContext.destroy()
+        );
     }
 
     @Test
@@ -49,10 +52,20 @@ public class TestExecutionContextTest {
         assertFalse(current.isPresent());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testDestroy_not_initialized_exception() throws Exception {
+
+        Properties props = TestExecutionContext.destroy();
+        //assert
+        assertNotNull(props);
+        assertTrue(props.isEmpty());
+
+    }
+
     @Test
     public void testCurrent_initialized() throws Exception {
         //prepare
-        TestExecutionContext.init(new Properties());
+        TestExecutionContext.init(new Properties(), new Properties());
 
         //act
         Optional<TestExecutionContext> current = TestExecutionContext.current();
@@ -66,23 +79,71 @@ public class TestExecutionContextTest {
     public void testInit_Destroy() throws Exception {
 
         //prepare
-        Properties props = new Properties();
-        props.setProperty("test", "value");
+        final Properties env = new Properties();
+        final Properties input = new Properties();
+
+        //act
+        Properties output;
+        try {
+            TestExecutionContext.init(input, env);
+            Properties outputProps = TestExecutionContext.current().get().getOutput();
+            outputProps.setProperty("output", "outValue");
+        } finally {
+            output = TestExecutionContext.destroy();
+        }
+
+        //assert
+        assertFalse(TestExecutionContext.current().isPresent());
+        assertEquals("outValue", output.getProperty("output"));
+
+    }
+
+    @Test
+    public void testImmutableInput() throws Exception {
+
+        //prepare
+        final Properties env = new Properties();
+        final Properties input = new Properties();
+        input.setProperty("input", "anInput");
+
+        //act
+        Properties output;
+        try {
+            TestExecutionContext.init(input, env);
+            Properties testInput = TestExecutionContext.current().get().getInput();
+            assertEquals("anInput", testInput.getProperty("input"));
+            testInput.setProperty("modified", "value");
+        } finally {
+            output = TestExecutionContext.destroy();
+        }
+
+        //assert
+        assertFalse(TestExecutionContext.current().isPresent());
+        assertFalse(input.containsKey("modified"));
+    }
+
+    @Test
+    public void testImmutableEnv() throws Exception {
+
+        //prepare
+        final Properties env = new Properties();
+        env.setProperty("param", "value");
+        final Properties input = new Properties();
 
         //act
         try {
-            TestExecutionContext.init(props);
-            Properties testProps = TestExecutionContext.current().get().getProperties();
-            assertEquals("value", testProps.getProperty("test"));
-            testProps.setProperty("test2", "value2");
+            TestExecutionContext.init(input, env);
+            Properties testEnv= TestExecutionContext.current().get().getEnv();
+            assertEquals("value", testEnv.getProperty("param"));
+            testEnv.setProperty("modified", "value");
         } finally {
             TestExecutionContext.destroy();
         }
 
         //assert
         assertFalse(TestExecutionContext.current().isPresent());
-        assertEquals("value2", props.getProperty("test2"));
-
+        assertFalse(env.containsKey("modified"));
     }
+
 
 }

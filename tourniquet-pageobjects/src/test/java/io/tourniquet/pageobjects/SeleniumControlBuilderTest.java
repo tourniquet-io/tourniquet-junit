@@ -39,7 +39,7 @@ public class SeleniumControlBuilderTest {
         //prepare
 
         //act
-        SeleniumControl.SeleniumContextBuilder builder = SeleniumControl.builder();
+        SeleniumControl.SeleniumControlBuilder builder = SeleniumControl.builder();
 
         //assert
         assertNotNull(builder);

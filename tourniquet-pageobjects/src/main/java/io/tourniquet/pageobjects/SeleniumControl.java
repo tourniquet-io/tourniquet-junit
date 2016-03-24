@@ -67,7 +67,11 @@ public class SeleniumControl extends ExternalResource {
 
     private Duration testDuration;
     private Supplier<WebDriver> driverProvider;
+    /**
+     * Reference to the context managed by this rule. If a context has already been initialized, this optional is empty
+     */
     private Optional<SeleniumContext> managedContext;
+    private boolean skipSharedDriverActions;
 
     @Override
     protected void before() throws Throwable {
@@ -104,10 +108,10 @@ public class SeleniumControl extends ExternalResource {
     }
 
     /**
-     * Checks, if a context is already present. If that is the case, an empty optional is returned.
-     * If no context is initialized, a new context is created using the driver provider of the test rule
-     * @return
-     *  an optional containing a managed context or the empty optional if a context is already active
+     * Checks, if a context is already present. If that is the case, an empty optional is returned. If no context is
+     * initialized, a new context is created using the driver provider of the test rule
+     *
+     * @return an optional containing a managed context or the empty optional if a context is already active
      */
     private Optional<SeleniumContext> getSeleniumContext() {
 
@@ -123,7 +127,7 @@ public class SeleniumControl extends ExternalResource {
      *         the user to login
      */
     public final void login(User user) {
-        currentDriver().ifPresent(d -> {
+        currentDriver().filter(d -> sessionActionsEnabled()).ifPresent(d -> {
             loginAction.accept(user, d);
             loggedIn.set(true);
         });
@@ -133,16 +137,22 @@ public class SeleniumControl extends ExternalResource {
      * Performs the logout action
      */
     public final void logout() {
-        currentDriver().ifPresent(d -> {
+        currentDriver().filter(d -> sessionActionsEnabled()).ifPresent(d -> {
             this.logoutAction.accept(d);
             loggedIn.set(false);
         });
+    }
+
+    private boolean sessionActionsEnabled() {
+
+        return managedContext.isPresent() || !skipSharedDriverActions;
     }
 
     /**
      * Indicates if a user is logged in to the application
      *
      * @return
+     *  <code>true</code> if login has been performed
      */
     public boolean isLoggedIn() {
 
@@ -196,7 +206,7 @@ public class SeleniumControl extends ExternalResource {
      *
      * @return the optional of a driver
      */
-    public  Optional<WebDriver> currentDriver() {
+    public Optional<WebDriver> currentDriver() {
 
         return currentContext().flatMap(ctx -> ctx.getDriver());
     }
@@ -206,15 +216,15 @@ public class SeleniumControl extends ExternalResource {
      *
      * @return a new builder
      */
-    public static SeleniumContextBuilder builder() {
+    public static SeleniumControlBuilder builder() {
 
-        return new SeleniumContextBuilder();
+        return new SeleniumControlBuilder();
     }
 
     /**
      * Builder for creating a Selenium test context
      */
-    public static class SeleniumContextBuilder {
+    public static class SeleniumControlBuilder {
 
         private Supplier<WebDriver> driver;
 
@@ -226,47 +236,108 @@ public class SeleniumControl extends ExternalResource {
 
         private Consumer<WebDriver.Options> optionsInitializer;
 
-        SeleniumContextBuilder() {
+        private boolean skipSharedDriverActions = true;
+
+        SeleniumControlBuilder() {
 
         }
 
-        public SeleniumContextBuilder driver(Supplier<WebDriver> driver) {
+        /**
+         * Define a supplier that creates the driver. Not that the rule supports a contextual (shared) driver. In case a
+         * contextual driver is present, the driver provided by this supplier is ignored.
+         *
+         * @param driver
+         *         the driver to be used by the test
+         *
+         * @return this builder
+         */
+        public SeleniumControlBuilder driver(Supplier<WebDriver> driver) {
 
             this.driver = driver;
             return this;
         }
 
-        public SeleniumContextBuilder baseUrl(String baseUrl) {
+        /**
+         * Specify the base URL of the application. It is the first page to be loaded for application and used to
+         * resolve relative URLs
+         *
+         * @param baseUrl
+         *         the base url of the application
+         *
+         * @return this builder
+         */
+        public SeleniumControlBuilder baseUrl(String baseUrl) {
 
             this.baseUrl = baseUrl;
             return this;
         }
 
-        public SeleniumContextBuilder loginAction(BiConsumer<User, WebDriver> loginAction) {
+        /**
+         * Specify an action that should be executed to perform a login to the target application.
+         *
+         * @param loginAction
+         *         the login action to perform
+         *
+         * @return this builder
+         */
+        public SeleniumControlBuilder loginAction(BiConsumer<User, WebDriver> loginAction) {
 
             this.loginAction = loginAction;
             return this;
         }
 
-        public SeleniumContextBuilder logoutAction(Consumer<WebDriver> logoutAction) {
+        /**
+         * Specify an action that should be executed to perform a logout to the target application.
+         *
+         * @param logoutAction
+         *         the logout action to perform
+         *
+         * @return this builder
+         */
+        public SeleniumControlBuilder logoutAction(Consumer<WebDriver> logoutAction) {
 
             this.logoutAction = logoutAction;
             return this;
         }
 
-        public SeleniumContextBuilder driverOptions(Consumer<WebDriver.Options> optionsInitializer) {
+        /**
+         * Specify options that should be applied on the driver after initialization.
+         *
+         * @param optionsInitializer
+         *         the options to be applied to the driver
+         *
+         * @return this builder
+         */
+        public SeleniumControlBuilder driverOptions(Consumer<WebDriver.Options> optionsInitializer) {
 
             this.optionsInitializer = optionsInitializer;
             return this;
         }
 
+        /**
+         * Configure if Login and Logout Actions should be executed, if a shared (context) driver is present. Default
+         * setting is true.
+         *
+         * @param flag
+         *         the <code>true</code> if actions should be skipped for shared drivers, <code>false</code> if not
+         *
+         * @return this builder
+         */
+        public SeleniumControlBuilder skipSharedDriverActions(boolean flag) {
+
+            this.skipSharedDriverActions = flag;
+            return this;
+        }
+
         public SeleniumControl build() {
+
             final SeleniumControl ctx = new SeleniumControl();
             ctx.baseUrl = this.baseUrl;
             ctx.driverProvider = this.driver;
             ctx.driverInit = Optional.ofNullable(this.optionsInitializer);
             ctx.loginAction = this.loginAction;
             ctx.logoutAction = this.logoutAction;
+            ctx.skipSharedDriverActions = skipSharedDriverActions;
             return ctx;
 
         }

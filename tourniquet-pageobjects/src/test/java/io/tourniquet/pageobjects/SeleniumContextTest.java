@@ -20,8 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Proxy;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.tourniquet.junit.util.TestClassLoader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
@@ -67,6 +70,26 @@ public class SeleniumContextTest {
             assertFalse(SeleniumContext.currentContext().isPresent());
             assertFalse(SeleniumContext.currentDriver().isPresent());
         }
+    }
+
+    @Test
+    public void testInitClassloader() throws Exception {
+        subject.init();
+        subject.setBaseUrl("testURL");
+        try (TestClassLoader cl = new TestClassLoader()){
+            SeleniumContext.init(subject, cl);
+
+            final Class contextClass = cl.loadClass(SeleniumContext.class.getName());
+            final Optional currentContext = (Optional) contextClass.getMethod("currentContext").invoke(null);
+            assertTrue(currentContext.isPresent());
+            final Optional currentDriver = (Optional) contextClass.getMethod("currentDriver").invoke(null);
+            assertTrue(currentDriver.isPresent());
+            final Object driver = currentDriver.get();
+            assertTrue(Proxy.isProxyClass(driver.getClass()));
+        } finally {
+            subject.destroy();
+        }
+
     }
 
 

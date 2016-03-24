@@ -71,17 +71,19 @@ public class JUnitRunnerTest {
     public void testRunClass_withTestContext() throws Exception {
 
         //prepare
-        final Properties props = new Properties();
+        final Properties input = new Properties();
+        final Properties env = new Properties();
         final ResourceClassLoader cl = new ResourceClassLoader();
         final Class<?> testClass = cl.loadClassFromResource("io.tourniquet.junit.util.MockTest","MockTest.clazz");
 
         //act
         Result result;
+        Properties output;
         try {
-            TestExecutionContext.init(props);
+            TestExecutionContext.init(input, env);
             result = JUnitRunner.runClass(testClass.getName(), () -> cl);
         } finally {
-            TestExecutionContext.destroy();
+            output = TestExecutionContext.destroy();
         }
 
         //assert
@@ -95,7 +97,7 @@ public class JUnitRunnerTest {
         assertEquals(1, failures.size());
         assertNull(System.getProperty("MockTest"));
 
-        assertEquals("testValue", props.getProperty("testProperty"));
+        assertEquals("testValue", output.getProperty("testProperty"));
 
     }
 }
