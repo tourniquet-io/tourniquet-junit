@@ -50,13 +50,13 @@ public class SeleniumContext {
     }
 
     /**
-     * Creates a link from the other classloader to the specified context. That way it is possible to share access
-     * to the same selenium context from different classloader hierarchies.
+     * Creates a link from the other classloader to the specified context. That way it is possible to share access to
+     * the same selenium context from different classloader hierarchies.
      *
      * @param context
-     *  the context of the current classloader hierarchy
+     *         the context of the current classloader hierarchy
      * @param cl
-     *  the other classloader in which the access to the given context should possible
+     *         the other classloader in which the access to the given context should possible
      */
     public static void init(SeleniumContext context, ClassLoader cl) {
 
@@ -67,7 +67,10 @@ public class SeleniumContext {
                 final Supplier provider = () -> createProxy(context.getDriver().get(), cl);
                 final Object ctx = constr.newInstance(provider);
                 contextClass.getMethod("init").invoke(ctx);
-                contextClass.getMethod("setBaseUrl", String.class).invoke(ctx, context.getBaseUrl());
+                final String baseUrl = context.getBaseUrl();
+                if (baseUrl != null) {
+                    contextClass.getMethod("setBaseUrl", String.class).invoke(ctx, baseUrl);
+                }
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
                     | InvocationTargetException e) {
                 throw new RuntimeException("Could not initialize context", e);
@@ -105,9 +108,21 @@ public class SeleniumContext {
         CONTEXT.set(Optional.of(this));
     }
 
+    /**
+     * Destroys the context and closes the current driver.
+     */
     public void destroy() {
+        destroy(true);
+    }
 
-        driver.ifPresent(WebDriver::quit);
+    /**
+     * Destroys the context.
+     * @param quitDriver
+     *  set to <code>true</code> to quit the driver, too. In case you want to reuse the driver, set to <code>false</code>
+     */
+    public void destroy(boolean quitDriver) {
+
+        driver.filter(d -> quitDriver).ifPresent(WebDriver::quit);
         driver = Optional.empty();
         CONTEXT.set(Optional.empty());
     }
