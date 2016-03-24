@@ -24,16 +24,16 @@ import java.util.Objects;
 
 /**
  * Fluent builder for composite waits. The builder can be used to compose a chain of waits and specify a total
- * timeout for all waits. Note that the chain is flushed on every invocation of {@link #within(java.time.Duration)}
+ * timeout for all waits. Note that the chain is flushed on every invocation of {@link #orTimeoutAfter(java.time.Duration)}
  * that way a multi-phased wait can be declared.
  * <br>
  * For example:
  * <pre><code>
  *     WaitChain.wait(activeWait1)
  *         .andThen(activeWait2)
- *         .within(timeoutForWait1And2)
+ *         .orTimeoutAfter(timeoutForWait1And2)
  *         .andThen(activeWait3)
- *         .within(timeoutForWait3);
+ *         .orTimeoutAfter(timeoutForWait3);
  * </code>
  * </pre>
  */
@@ -78,9 +78,9 @@ public class WaitChain {
      * @return
      *  this wait. In case no timeout occurred, additional wait activities can be added.
      */
-    public WaitChain within(Duration timeout) {
+    public WaitChain orTimeoutAfter(Duration timeout) {
         Objects.requireNonNull(timeout);
-        within(timeout, 0);
+        orTimeoutAfter(timeout, 0);
         waits.clear();
         return this;
     }
@@ -92,7 +92,7 @@ public class WaitChain {
      * @param skipWaits
      *  number of elements in the chain to skip
      */
-    private void within(Duration timeout, int skipWaits) {
+    private void orTimeoutAfter(Duration timeout, int skipWaits) {
         if (timeout.isNegative()) {
             return;
         }
@@ -100,7 +100,7 @@ public class WaitChain {
              .skip(skipWaits)
              .findFirst()
              .map(wait -> timeLeftAfter(wait, timeout))
-             .ifPresent(timeleft -> within(timeleft, skipWaits + 1));
+             .ifPresent(timeleft -> orTimeoutAfter(timeleft, skipWaits + 1));
     }
 
     /**

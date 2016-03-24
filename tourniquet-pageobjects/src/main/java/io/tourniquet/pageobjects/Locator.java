@@ -55,7 +55,7 @@ public @interface Locator {
      *
      * @return
      */
-    int timeout() default 60;
+    int timeout() default TimeoutProvider.DEFAULT_TIMEOUT_INT;
 
     enum ByLocator {
         /**

@@ -24,7 +24,28 @@ import java.util.function.Function;
  * wait cycles to either a changing test environment or to chaning non-functional requirements.
  */
 @FunctionalInterface
-public interface TimoutProvider extends Function<String, Duration> {
+public interface TimeoutProvider extends Function<String, Duration> {
+
+    /**
+     * Default timeout for every locator is 60s.
+     */
+    int DEFAULT_TIMEOUT_INT = 60;
+
+    /**
+     * Default timeout is 60 seconds.
+     */
+    Duration DEFAULT_TIMEOUT = Duration.ofSeconds(DEFAULT_TIMEOUT_INT);
+
+    /**
+     * Default name of timeout used by the PageLocator. If you want to alter the render timeout after page load,
+     * provide a different value using this key.
+     */
+    String RENDER_TIMEOUT = "RENDER_TIMEOUT";
+
+    /**
+     * The default provider always returns the DEFAULT_TIMEOUT
+     */
+    TimeoutProvider DEFAULT_PROVIDER = s -> DEFAULT_TIMEOUT;
 
     /**
      * Provides the duration for a timeout for the specified wait point.

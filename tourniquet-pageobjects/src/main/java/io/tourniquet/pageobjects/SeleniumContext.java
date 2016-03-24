@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,12 +38,34 @@ import org.openqa.selenium.WebDriver;
  */
 public class SeleniumContext {
 
-    private static ThreadLocal<Optional<SeleniumContext>> CONTEXT = ThreadLocal.withInitial(() -> Optional.empty());
+    private static ThreadLocal<Optional<SeleniumContext>> CONTEXT = ThreadLocal.withInitial(Optional::empty);
 
+    /**
+     * The selenium web driver for the current context
+     */
     private Optional<WebDriver> driver = Optional.empty();
+
+    /**
+     * Provides the webdriver. Suppliers can either create a new driver or reuse an existing
+     */
     private final Supplier<WebDriver> provider;
+
+    /**
+     * The base URL for the current context. The base URL is required for resolving relative URLs
+     */
     private final AtomicReference<String> baseUrl = new AtomicReference<>();
 
+    /**
+     * Timeout provider for configuring wait behavior or various points
+     */
+    private TimeoutProvider timeoutProvider = TimeoutProvider.DEFAULT_PROVIDER;
+
+    /**
+     * Creates a new context. For binding the context to the current thread, invoke the init method.
+     * @param provider
+     *  a provider for a web driver that should be bound to the current context. The driver is obtained during
+     *  intialization of the session.
+     */
     public SeleniumContext(Supplier<WebDriver> provider) {
 
         Objects.requireNonNull(provider, "WebDriver must not be null");
@@ -95,13 +118,15 @@ public class SeleniumContext {
                                                    .flatMap(c -> stream(c.getInterfaces()))
                                                    .map(c -> runUnchecked(() -> cl.loadClass(c.getName())))
                                                    .collect(toList());
-
         return Proxy.newProxyInstance(cl,
                                       interfaces.toArray(new Class[interfaces.size()]),
                                       (proxy, method, args) -> method.invoke(webDriver, args));
 
     }
 
+    /**
+     * Registers this instance as current context for the thread also binding the driver to this instance.
+     */
     public void init() {
 
         driver = Optional.of(provider.get());
@@ -158,6 +183,39 @@ public class SeleniumContext {
     }
 
     /**
+     * Sets the timeout provider for this context.
+     * @param provider
+     *  the provider to be used for timeout settings in this context.
+     */
+    public void setTimeoutProvider(TimeoutProvider provider) {
+        Objects.requireNonNull(provider);
+        this.timeoutProvider = provider;
+    }
+
+    /**
+     * The timeout provider is a specialized configuration for timeouts used in your page objects model.
+     * @return
+     *  the timeout for the current context.
+     */
+    public TimeoutProvider getTimeoutProvider(){
+        return this.timeoutProvider;
+    }
+
+    /**
+     * Returns the timeout for the current context or the default timeout if no context is defined
+     * @param timeoutKey
+     *  the name of the timeout
+     * @return
+     *  the duration to wait at the specified point
+     */
+    public static Duration getTimeoutFor(String timeoutKey){
+        return SeleniumContext.currentContext()
+                       .map(SeleniumContext::getTimeoutProvider)
+                       .map(p -> p.getTimeoutFor(timeoutKey))
+                       .orElse(TimeoutProvider.DEFAULT_TIMEOUT);
+    }
+
+    /**
      * The base URL for the current context used to resolve relative URLs.
      *
      * @return the current BaseUrl
@@ -183,7 +241,7 @@ public class SeleniumContext {
      * Resolves the URL path relative to the base URL.
      *
      * @param relativePath
-     *         the relative path within the application
+     *         the relative path orTimeoutAfter the application
      *
      * @return the absolute path of the application's base URL and the relative path
      */

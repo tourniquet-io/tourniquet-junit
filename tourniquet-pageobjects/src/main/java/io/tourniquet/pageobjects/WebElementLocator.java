@@ -89,7 +89,7 @@ public final class WebElementLocator {
      * @return the located element
      */
     public static WebElement waitForElement(final SearchContext context, final By by, final int waitSec) {
-        WaitChain.wait(untilElementDisplayed(context, by)).within(Duration.ofSeconds(waitSec));
+        WaitChain.wait(untilElementDisplayed(context, by)).orTimeoutAfter(Duration.ofSeconds(waitSec));
         return context.findElement(by);
 
     }
