@@ -108,9 +108,21 @@ public class SeleniumContext {
         CONTEXT.set(Optional.of(this));
     }
 
+    /**
+     * Destroys the context and closes the current driver.
+     */
     public void destroy() {
+        destroy(true);
+    }
 
-        driver.ifPresent(WebDriver::quit);
+    /**
+     * Destroys the context.
+     * @param quitDriver
+     *  set to <code>true</code> to quit the driver, too. In case you want to reuse the driver, set to <code>false</code>
+     */
+    public void destroy(boolean quitDriver) {
+
+        driver.filter(d -> quitDriver).ifPresent(WebDriver::quit);
         driver = Optional.empty();
         CONTEXT.set(Optional.empty());
     }

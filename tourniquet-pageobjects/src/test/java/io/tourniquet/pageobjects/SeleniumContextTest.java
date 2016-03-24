@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Proxy;
 import java.util.Optional;
@@ -70,6 +72,24 @@ public class SeleniumContextTest {
             assertFalse(subject.getDriver().isPresent());
             assertFalse(SeleniumContext.currentContext().isPresent());
             assertFalse(SeleniumContext.currentDriver().isPresent());
+            verify(webDriver).quit();
+        }
+    }
+
+    @Test
+    public void testInit_destroy_noCloseDriver() throws Exception {
+
+        subject.init();
+        try {
+            assertTrue(subject.getDriver().isPresent());
+            assertTrue(SeleniumContext.currentContext().isPresent());
+            assertTrue(SeleniumContext.currentDriver().isPresent());
+        } finally {
+            subject.destroy(false);
+            assertFalse(subject.getDriver().isPresent());
+            assertFalse(SeleniumContext.currentContext().isPresent());
+            assertFalse(SeleniumContext.currentDriver().isPresent());
+            verify(webDriver, times(0)).quit();
         }
     }
 
