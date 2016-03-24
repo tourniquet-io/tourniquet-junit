@@ -18,6 +18,7 @@ package io.tourniquet.pageobjects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Proxy;
@@ -73,7 +74,7 @@ public class SeleniumContextTest {
     }
 
     @Test
-    public void testInitClassloader() throws Exception {
+    public void testInitClassloader_withBaseUrl() throws Exception {
         subject.init();
         subject.setBaseUrl("testURL");
         try (TestClassLoader cl = new TestClassLoader()){
@@ -86,6 +87,26 @@ public class SeleniumContextTest {
             assertTrue(currentDriver.isPresent());
             final Object driver = currentDriver.get();
             assertTrue(Proxy.isProxyClass(driver.getClass()));
+            assertEquals("testURL",contextClass.getMethod("getBaseUrl").invoke(currentContext.get()));
+        } finally {
+            subject.destroy();
+        }
+    }
+
+    @Test
+    public void testInitClassloader_withoutBaseUrl() throws Exception {
+        subject.init();
+        try (TestClassLoader cl = new TestClassLoader()){
+            SeleniumContext.init(subject, cl);
+
+            final Class contextClass = cl.loadClass(SeleniumContext.class.getName());
+            final Optional currentContext = (Optional) contextClass.getMethod("currentContext").invoke(null);
+            assertTrue(currentContext.isPresent());
+            final Optional currentDriver = (Optional) contextClass.getMethod("currentDriver").invoke(null);
+            assertTrue(currentDriver.isPresent());
+            final Object driver = currentDriver.get();
+            assertTrue(Proxy.isProxyClass(driver.getClass()));
+            assertNull(contextClass.getMethod("getBaseUrl").invoke(currentContext.get()));
         } finally {
             subject.destroy();
         }
