@@ -16,17 +16,15 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.tourniquet.pageobjects.WaitPredicates.elemenDisplayed;
+import static io.tourniquet.pageobjects.ActiveWaits.untilElementDisplayed;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.slf4j.Logger;
 
 /**
@@ -77,8 +75,8 @@ public final class WebElementLocator {
     }
 
     /**
-     * Waits for the presence of a specific web element until a timeout is reached. The method will succeed in any case.
-     * If the element is not present, the method waits until the timeout, otherwise it returns as soon as the element is
+     * Waits for the presence of a specific web element wait a timeout is reached. The method will succeed in any case.
+     * If the element is not present, the method waits wait the timeout, otherwise it returns as soon as the element is
      * present
      *
      * @param context
@@ -91,16 +89,13 @@ public final class WebElementLocator {
      * @return the located element
      */
     public static WebElement waitForElement(final SearchContext context, final By by, final int waitSec) {
-
-        new FluentWait<>(context).ignoring(NoSuchElementException.class)
-                                 .withTimeout(waitSec, TimeUnit.SECONDS)
-                                 .until(elemenDisplayed(context, by));
+        WaitChain.wait(untilElementDisplayed(context, by)).within(Duration.ofSeconds(waitSec));
         return context.findElement(by);
 
     }
 
     /**
-     * Waits for the presence of an element until a timeout is reached.
+     * Waits for the presence of an element wait a timeout is reached.
      *
      * @param by
      *         the locator for the element
@@ -110,7 +105,6 @@ public final class WebElementLocator {
      * @return the element found
      */
     public static Optional<WebElement> waitForElement(final By by, final int waitSec) {
-
         return SeleniumContext.currentDriver().map(d -> waitForElement(d, by, waitSec));
     }
 

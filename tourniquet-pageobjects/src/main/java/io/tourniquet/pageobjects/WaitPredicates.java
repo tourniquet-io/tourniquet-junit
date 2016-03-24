@@ -31,27 +31,27 @@ public final class WaitPredicates {
 
 
     /**
-     * Wait until the element is displayed.
+     * WaitChain wait the element is displayed.
      * @param context
      *  the context in which the element should be searched for
      * @param locator
      *  the locator to identify the element in the search context
      */
-    public static Predicate<SearchContext> elemenDisplayed(SearchContext context, By locator){
+    public static Predicate<SearchContext> elementDisplayed(SearchContext context, By locator){
         return c -> context.findElement(locator).isDisplayed();
     }
 
     /**
-     * Wait until the element is displayed. The search context is the entire page.
+     * WaitChain wait the element is displayed. The search context is the entire page.
      * @param locator
      *  the locator to identify the element in the search context
      */
-    public static Predicate<SearchContext> elemenDisplayed(By locator){
-        return c -> elemenDisplayed(c, locator).apply(c);
+    public static Predicate<SearchContext> elementDisplayed(By locator){
+        return c -> elementDisplayed(c, locator).apply(c);
     }
 
     /**
-     * Wait until the element is not displayed anymore
+     * WaitChain wait the element is not displayed anymore
      * @param context
      *  the context in which the element should be searched for
      * @param locator
@@ -62,7 +62,7 @@ public final class WaitPredicates {
     }
 
     /**
-     * Wait until the element is not displayed anymore. The search context is the entire page.
+     * WaitChain wait the element is not displayed anymore. The search context is the entire page.
      * @param locator
      *  the locator to identify the element in the search context
      */
@@ -71,7 +71,7 @@ public final class WaitPredicates {
     }
 
     /**
-     * Wait until the page is rendered
+     * WaitChain wait the page is rendered
      */
     public static  Predicate<WebDriver> documentReady() {
             return  d -> "complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState"));

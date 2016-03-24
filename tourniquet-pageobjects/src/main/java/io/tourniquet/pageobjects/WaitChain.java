@@ -29,19 +29,19 @@ import java.util.Objects;
  * <br>
  * For example:
  * <pre><code>
- *     Wait.until(activeWait1)
- *         .andThenUntil(activeWait2)
+ *     WaitChain.wait(activeWait1)
+ *         .andThen(activeWait2)
  *         .within(timeoutForWait1And2)
- *         .andThenUntil(activeWait3)
+ *         .andThen(activeWait3)
  *         .within(timeoutForWait3);
  * </code>
  * </pre>
  */
-public class Wait {
+public class WaitChain {
 
     private final List<ActiveWait> waits = new ArrayList<>();
 
-    private Wait(ActiveWait initialWait) {
+    private WaitChain(ActiveWait initialWait) {
 
         this.waits.add(initialWait);
     }
@@ -51,11 +51,11 @@ public class Wait {
      * @param initialWait
      *  the initial wait activity to start the wait chain
      * @return
-     *  a new Wait instance
+     *  a new WaitChain instance
      */
-    public static Wait until(ActiveWait initialWait) {
+    public static WaitChain wait(ActiveWait initialWait) {
         Objects.requireNonNull(initialWait);
-        return new Wait(initialWait);
+        return new WaitChain(initialWait);
     }
 
     /**
@@ -63,22 +63,22 @@ public class Wait {
      * @param wait
      *  the next wait activity
      * @return
-     *  this Wait instance
+     *  this WaitChain instance
      */
-    public Wait andThenUntil(ActiveWait wait) {
+    public WaitChain andThen(ActiveWait wait) {
         Objects.requireNonNull(wait);
         this.waits.add(wait);
         return this;
     }
 
     /**
-     * Triggers the wait activities of the chain until the specified timeout is reached.
+     * Triggers the wait activities of the chain wait the specified timeout is reached.
      * @param timeout
      *  the total timeout for all wait activities in the chain
      * @return
      *  this wait. In case no timeout occurred, additional wait activities can be added.
      */
-    public Wait within(Duration timeout) {
+    public WaitChain within(Duration timeout) {
         Objects.requireNonNull(timeout);
         within(timeout, 0);
         waits.clear();

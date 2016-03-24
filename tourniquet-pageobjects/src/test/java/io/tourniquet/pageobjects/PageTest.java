@@ -58,7 +58,7 @@ public class PageTest {
         when(((JavascriptExecutor)selenium.getMockDriver()).executeScript(anyString())).thenReturn("complete");
 
         //act
-        selenium.execute(() -> page.loadPage());
+        selenium.execute(page::loadPage);
 
         //assert
     }
@@ -70,7 +70,7 @@ public class PageTest {
         when(((JavascriptExecutor)selenium.getMockDriver()).executeScript(anyString())).thenReturn("complete");
 
         //act
-        selenium.execute(() -> page.loadPage());
+        selenium.execute(page::loadPage);
 
         //assert
         verify(selenium.getMockDriver().navigate()).to("http://localhost/contextRoot");
@@ -84,7 +84,7 @@ public class PageTest {
         when(selenium.getMockDriver().findElement(By.id("testId"))).thenReturn(webElement);
 
         //act
-        selenium.execute(() -> page.loadPage());
+        selenium.execute(page::loadPage);
 
         //assert
     }

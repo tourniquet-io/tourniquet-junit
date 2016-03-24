@@ -16,25 +16,37 @@
 
 package io.tourniquet.pageobjects;
 
+import static org.junit.Assert.assertEquals;
+
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.Test;
 
 /**
- * Specialized runnable to perform an active wait
+ *
  */
-@FunctionalInterface
-public interface ActiveWait extends Consumer<Duration> {
+public class ActiveWaitTest {
 
-    /**
-     * Performs the wait until the timeout is reached - throwing an TimeoutException - or the underlying
-     * condition is fulfilled.
-     * @param timeout
-     *  the timeout to wait for
-     */
-    void wait(Duration timeout);
+    @Test
+    public void testAccept() throws Exception {
 
-    @Override
-    default void accept(Duration timeout){
-        wait(timeout);
+        //prepare
+        AtomicReference<Duration> duration = new AtomicReference<>();
+        ActiveWait wait = new ActiveWait() {
+
+            @Override
+            public void wait(final Duration timeout) {
+                duration.set(timeout);
+            }
+        };
+
+
+        //act
+        wait.accept(Duration.ZERO);
+
+        //assert
+        assertEquals(Duration.ZERO, duration.get());
+
     }
 }

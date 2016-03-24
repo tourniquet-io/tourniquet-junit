@@ -18,7 +18,6 @@ package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.SeleniumContext.currentDriver;
 import static io.tourniquet.pageobjects.WaitPredicates.documentReady;
-import static io.tourniquet.pageobjects.WaitPredicates.elemenDisplayed;
 import static io.tourniquet.pageobjects.WaitPredicates.elementNotDisplayed;
 
 import java.util.concurrent.TimeUnit;
@@ -36,19 +35,42 @@ public final class ActiveWaits {
 
     private ActiveWaits(){}
 
+    /**
+     * Active wait for an element not to be displayed
+     * @param context
+     *  the search context to locate the element
+     * @param locator
+     *  the locator used to find the object
+     * @return
+     *  an active wait that either waits wait the element is gone or not displayed anymore
+     */
+    public static ActiveWait untilElementDisplayed(SearchContext context, By locator) {
+        return timeout -> new FluentWait<>(context).ignoring(NoSuchElementException.class)
+                                                   .withTimeout(timeout.getSeconds(), TimeUnit.SECONDS)
+                                                   .until(WaitPredicates.elementDisplayed(context, locator));
+    }
+
+    /**
+     * Active wait for an element to be displayed
+     * @param context
+     *  the search context to locate the element
+     * @param locator
+     *  the locator used to find the object
+     * @return
+     *  an active wait that locates waits for the element to exist and to be displayed
+     */
     public static ActiveWait untilElementNotDisplayed(SearchContext context, By locator) {
         return timeout -> new FluentWait<>(context).ignoring(NoSuchElementException.class)
                                                    .withTimeout(timeout.getSeconds(), TimeUnit.SECONDS)
                                                    .until(elementNotDisplayed(context, locator));
     }
 
-    public static ActiveWait untilElementDisplayed(SearchContext context, By locator) {
-        return timeout -> new FluentWait<>(context).ignoring(NoSuchElementException.class)
-                                                   .withTimeout(timeout.getSeconds(), TimeUnit.SECONDS)
-                                                   .until(elemenDisplayed(context, locator));
-    }
-
-    public ActiveWait untilDocumentReady() {
+    /**
+     * Active wait that waits wait the document is rendered which is indicated by the document's ready-state.
+     * @return
+     *  active wait for document rendering complete
+     */
+    public static ActiveWait untilDocumentReady() {
         return timeout -> currentDriver().ifPresent(driver -> new WebDriverWait(driver, timeout.getSeconds(), 50).until(
                 documentReady()));
     }

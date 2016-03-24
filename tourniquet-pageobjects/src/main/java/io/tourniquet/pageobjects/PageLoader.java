@@ -18,7 +18,11 @@ package io.tourniquet.pageobjects;
 
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
+import java.time.Duration;
+import java.util.Optional;
+
 import io.tourniquet.tx.TransactionSupport;
+import org.openqa.selenium.WebElement;
 
 /**
  * Loader of a page instance. The page loader adds transaction support to the instance to measure
@@ -49,7 +53,24 @@ public final class PageLoader {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Page " + pageType.getName() + " can not be loaded", e);
         }
+    }
 
+    /**
+     * Loads the page into the current webdriver. The method waits for the document to be completely loaded
+     * and rendered.<br>
+     * If no {@link SeleniumContext} is initialized, an {@link IllegalStateException} is thrown.
+     *
+     * @param page
+     *  the page handle to load
+     */
+    public static void loadPage(Page page){
+        SeleniumContext.currentDriver().map(driver -> {
+            Optional.ofNullable(page.getClass().getAnnotation(Locator.class))
+                    .flatMap(l -> l.by().locate(l.value()))
+                    .ifPresent(WebElement::click);
+            WaitChain.wait(ActiveWaits.untilDocumentReady()).within(Duration.ofSeconds(150));
+            return Void.TYPE;
+        }).orElseThrow(() -> new IllegalStateException("Context not initialized"));
     }
 
 }
