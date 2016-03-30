@@ -49,8 +49,8 @@ public final class WebElementLocator {
      */
     public static WebElement locate(Locator loc) {
 
-        LOG.debug("Locating element with {}={} (timeout={})", loc.by().name(), loc.value(), loc.timeout());
-        return waitForElement(loc.by().withSelector(loc.value()), loc.timeout()).get();
+        LOG.debug("Locating element with {}={} (timeout={})", loc.by().name(), loc.value(), getTimeout(loc));
+        return waitForElement(loc.by().withSelector(loc.value()), getTimeout(loc)).get();
     }
 
     /**
@@ -68,10 +68,14 @@ public final class WebElementLocator {
 
         LOG.debug("Locating element with {}={} (timeout={}) in {}",
                   loc.by().name(),
-                  loc.value(),
-                  loc.timeout(),
+                  loc.value(), getTimeout(loc),
                   context);
-        return waitForElement(context, loc.by().withSelector(loc.value()), loc.timeout());
+        return waitForElement(context, loc.by().withSelector(loc.value()), getTimeout(loc));
+    }
+
+    private static int getTimeout(final Locator loc) {
+
+        return loc.timeout();
     }
 
     /**

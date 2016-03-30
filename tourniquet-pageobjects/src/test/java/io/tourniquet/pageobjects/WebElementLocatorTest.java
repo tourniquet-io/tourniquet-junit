@@ -50,8 +50,12 @@ public class WebElementLocatorTest {
     @Mock
     private Locator locator;
 
+    @Mock
+    private TimeoutProvider timeoutProvider;
+
     @Rule
     public SeleniumTestContext selenium = new SeleniumTestContext();
+
 
     private SeleniumControl ctx;
 
@@ -111,6 +115,30 @@ public class WebElementLocatorTest {
         }
     }
 
+    @Test(expected = TimeoutException.class)
+    public void testLocate_context_customTimeout() throws Throwable {
+        //prepare
+        when(locator.by()).thenReturn(Locator.ByLocator.ID);
+        when(locator.value()).thenReturn("testId");
+        when(locator.timeout()).thenReturn(1);
+        when(locator.timoutKey()).thenReturn("customTimeOut");
+        when(webElement.isDisplayed()).thenReturn(false);
+        when(searchContext.findElement(By.id("testId"))).thenReturn(webElement);
+        final SeleniumContext ctx = new SeleniumContext(() -> selenium.getMockDriver());
+        ctx.setTimeoutProvider(timeoutProvider);
+        when(timeoutProvider.getTimeoutFor("customTimeout")).thenReturn(Duration.ofMillis(500));
+
+        //act
+        Instant start = Instant.now();
+        try {
+            WebElementLocator.locate(searchContext, locator);
+        } finally {
+            SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+            Duration dur = Duration.between(start, Instant.now());
+            assertTrue(dur.compareTo(Duration.ofMillis(450)) > 0);
+            assertTrue(dur.compareTo(Duration.ofMillis(750)) < 0);
+        }
+    }
 
     @Test
     public void testWaitForElement_context() throws Throwable {

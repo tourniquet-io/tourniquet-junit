@@ -40,6 +40,7 @@ public @interface Locator {
      * The locator string to specify which element should be located
      *
      * @return
+     *  the locator-specific id to locate the element
      */
     String value();
 
@@ -47,6 +48,7 @@ public @interface Locator {
      * Specifies the locator type
      *
      * @return
+     *  the locator strategy how the element should be located
      */
     ByLocator by() default ByLocator.URL;
 
@@ -54,8 +56,17 @@ public @interface Locator {
      * Timeout in seconds to wait for the element to be present
      *
      * @return
+     *  timeout in seconds
      */
     int timeout() default TimeoutProvider.DEFAULT_TIMEOUT_INT;
+
+    /**
+     * Key for making the timeout configurable. If a {@link TimeoutProvider}
+     * is used, the timeout for this locator can be configured.
+     * @return
+     *  the key for determining the configured timeout
+     */
+    String timoutKey() default "";
 
     enum ByLocator {
         /**
