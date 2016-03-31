@@ -66,7 +66,7 @@ public @interface Locator {
      * @return
      *  the key for determining the configured timeout
      */
-    String timoutKey() default "";
+    String timeoutKey() default "";
 
     enum ByLocator {
         /**

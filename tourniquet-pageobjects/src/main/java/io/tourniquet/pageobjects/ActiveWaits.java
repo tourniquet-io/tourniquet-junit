@@ -18,8 +18,10 @@ package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.SeleniumContext.currentDriver;
 import static io.tourniquet.pageobjects.WaitPredicates.documentReady;
+import static io.tourniquet.pageobjects.WaitPredicates.elementDisplayed;
 import static io.tourniquet.pageobjects.WaitPredicates.elementNotDisplayed;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -45,9 +47,7 @@ public final class ActiveWaits {
      *  an active wait that either waits wait the element is gone or not displayed anymore
      */
     public static ActiveWait untilElementDisplayed(SearchContext context, By locator) {
-        return timeout -> new FluentWait<>(context).ignoring(NoSuchElementException.class)
-                                                   .withTimeout(timeout.getSeconds(), TimeUnit.SECONDS)
-                                                   .until(WaitPredicates.elementDisplayed(context, locator));
+        return timeout -> fluentWaitForElement(context, timeout).until(elementDisplayed(context, locator));
     }
 
     /**
@@ -60,9 +60,25 @@ public final class ActiveWaits {
      *  an active wait that locates waits for the element to exist and to be displayed
      */
     public static ActiveWait untilElementNotDisplayed(SearchContext context, By locator) {
-        return timeout -> new FluentWait<>(context).ignoring(NoSuchElementException.class)
-                                                   .withTimeout(timeout.getSeconds(), TimeUnit.SECONDS)
-                                                   .until(elementNotDisplayed(context, locator));
+        return timeout -> fluentWaitForElement(context, timeout).until(elementNotDisplayed(context, locator));
+    }
+
+    /**
+     * Creates a fluent wait instance that waits for the presence of an element in the search context. The timeout for
+     * the wait uses a milli-second precision with a polling interval of 1/10 of the timeout.
+     * @param context
+     *  the search context to find the element to wait for
+     * @param timeout
+     *  the timeout to wait before timing out
+     * @return
+     *  a fluent wait instance
+     */
+    private static FluentWait<SearchContext> fluentWaitForElement(final SearchContext context,
+                                                                  final Duration timeout) {
+
+        return new FluentWait<>(context).ignoring(NoSuchElementException.class)
+                                        .pollingEvery(timeout.toMillis() / 10, TimeUnit.MILLISECONDS)
+                                        .withTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     /**

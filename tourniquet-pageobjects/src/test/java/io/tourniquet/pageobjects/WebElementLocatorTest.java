@@ -41,6 +41,8 @@ import org.openqa.selenium.WebElement;
 @RunWith(MockitoJUnitRunner.class)
 public class WebElementLocatorTest {
 
+    public static final Duration TIMEOUT_1S = Duration.ofSeconds(1);
+    public static final Duration TIMEOUT_10S = Duration.ofSeconds(10);
     @Mock
     private SearchContext searchContext;
 
@@ -102,6 +104,7 @@ public class WebElementLocatorTest {
         when(locator.by()).thenReturn(Locator.ByLocator.ID);
         when(locator.value()).thenReturn("testId");
         when(locator.timeout()).thenReturn(1);
+        when(locator.timeoutKey()).thenReturn("");
         when(webElement.isDisplayed()).thenReturn(false);
         when(searchContext.findElement(By.id("testId"))).thenReturn(webElement);
 
@@ -112,6 +115,7 @@ public class WebElementLocatorTest {
         } finally {
             Duration dur = Duration.between(start, Instant.now());
             assertTrue(dur.compareTo(Duration.ofMillis(950)) > 0);
+            assertTrue(dur.compareTo(Duration.ofMillis(1250)) < 0);
         }
     }
 
@@ -121,11 +125,12 @@ public class WebElementLocatorTest {
         when(locator.by()).thenReturn(Locator.ByLocator.ID);
         when(locator.value()).thenReturn("testId");
         when(locator.timeout()).thenReturn(1);
-        when(locator.timoutKey()).thenReturn("customTimeOut");
+        when(locator.timeoutKey()).thenReturn("customTimeout");
         when(webElement.isDisplayed()).thenReturn(false);
         when(searchContext.findElement(By.id("testId"))).thenReturn(webElement);
         final SeleniumContext ctx = new SeleniumContext(() -> selenium.getMockDriver());
         ctx.setTimeoutProvider(timeoutProvider);
+        ctx.init();
         when(timeoutProvider.getTimeoutFor("customTimeout")).thenReturn(Duration.ofMillis(500));
 
         //act
@@ -135,6 +140,7 @@ public class WebElementLocatorTest {
         } finally {
             SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
             Duration dur = Duration.between(start, Instant.now());
+            System.out.printf("timed out after %s ms\n", dur.toMillis());
             assertTrue(dur.compareTo(Duration.ofMillis(450)) > 0);
             assertTrue(dur.compareTo(Duration.ofMillis(750)) < 0);
         }
@@ -145,7 +151,7 @@ public class WebElementLocatorTest {
 
         when(searchContext.findElement(By.id("test"))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        assertNotNull(WebElementLocator.waitForElement(searchContext, By.id("test"), 10));
+        assertNotNull(WebElementLocator.waitForElement(searchContext, By.id("test"), TIMEOUT_10S));
     }
 
     @Test
@@ -153,7 +159,7 @@ public class WebElementLocatorTest {
 
         when(selenium.getMockDriver().findElement(By.id("test"))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        assertFalse(WebElementLocator.waitForElement(By.id("test"), 10).isPresent());
+        assertFalse(WebElementLocator.waitForElement(By.id("test"), TIMEOUT_10S).isPresent());
     }
 
     @Test
@@ -162,7 +168,7 @@ public class WebElementLocatorTest {
         when(selenium.getMockDriver().findElement(By.id("test"))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
         selenium.execute(() -> {
-            assertTrue(WebElementLocator.waitForElement(By.id("test"), 10).isPresent());
+            assertTrue(WebElementLocator.waitForElement(By.id("test"), TIMEOUT_10S).isPresent());
             return null;
         });
     }
@@ -173,7 +179,7 @@ public class WebElementLocatorTest {
         when(selenium.getMockDriver().findElement(By.id("test"))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(false);
         selenium.execute(() -> {
-            assertTrue(WebElementLocator.waitForElement(By.id("test"), 1).isPresent());
+            assertTrue(WebElementLocator.waitForElement(By.id("test"), TIMEOUT_1S).isPresent());
             return null;
         });
     }
