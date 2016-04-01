@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -199,20 +198,6 @@ public class SeleniumContext {
      */
     public TimeoutProvider getTimeoutProvider(){
         return this.timeoutProvider;
-    }
-
-    /**
-     * Returns the timeout for the current context or the default timeout if no context is defined
-     * @param timeoutKey
-     *  the name of the timeout
-     * @return
-     *  the duration to wait at the specified point
-     */
-    public static Duration getTimeoutFor(String timeoutKey){
-        return SeleniumContext.currentContext()
-                       .map(SeleniumContext::getTimeoutProvider)
-                       .map(p -> p.getTimeoutFor(timeoutKey))
-                       .orElse(TimeoutProvider.DEFAULT_TIMEOUT);
     }
 
     /**

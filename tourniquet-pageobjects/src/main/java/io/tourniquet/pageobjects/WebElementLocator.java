@@ -17,6 +17,7 @@
 package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.ActiveWaits.untilElementDisplayed;
+import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.time.Duration;
@@ -74,16 +75,7 @@ public final class WebElementLocator {
         return waitForElement(context, loc.by().withSelector(loc.value()), getTimeout(loc));
     }
 
-    private static Duration getTimeout(final Locator loc) {
 
-        if ("".equals(loc.timeoutKey())) {
-            return Duration.ofSeconds(loc.timeout());
-        }
-        return SeleniumContext.currentContext()
-                       .map(SeleniumContext::getTimeoutProvider)
-                       .map(tp -> tp.getTimeoutFor(loc.timeoutKey()))
-                        .orElse(TimeoutProvider.DEFAULT_TIMEOUT);
-    }
 
     /**
      * Waits for the presence of a specific web element wait a timeout is reached. The method will succeed in any case.

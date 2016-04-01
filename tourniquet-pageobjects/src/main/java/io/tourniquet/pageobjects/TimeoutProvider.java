@@ -17,6 +17,7 @@
 package io.tourniquet.pageobjects;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -24,7 +25,7 @@ import java.util.function.Function;
  * wait cycles to either a changing test environment or to chaning non-functional requirements.
  */
 @FunctionalInterface
-public interface TimeoutProvider extends Function<String, Duration> {
+public interface TimeoutProvider extends Function<String, Optional<Duration>> {
 
     /**
      * Default timeout for every locator is 60s.
@@ -45,19 +46,21 @@ public interface TimeoutProvider extends Function<String, Duration> {
     /**
      * The default provider always returns the DEFAULT_TIMEOUT
      */
-    TimeoutProvider DEFAULT_PROVIDER = s -> DEFAULT_TIMEOUT;
+    TimeoutProvider DEFAULT_PROVIDER = s -> Optional.of(DEFAULT_TIMEOUT);
 
     /**
      * Provides the duration for a timeout for the specified wait point.
      * @param timeoutKey
      *  the unique name for the timeout
      * @return
-     *  the duration how long should be waited in order to trigger a timeout.
+     *  the duration how long should be waited in order to trigger a timeout. In case no timeout is defined for
+     *  the given timeout, the result is empty.
      */
-    Duration getTimeoutFor(String timeoutKey);
+    Optional<Duration> getTimeoutFor(String timeoutKey);
 
     @Override
-    default Duration apply(String s) {
+    default Optional<Duration> apply(String s) {
         return getTimeoutFor(s);
     }
+
 }

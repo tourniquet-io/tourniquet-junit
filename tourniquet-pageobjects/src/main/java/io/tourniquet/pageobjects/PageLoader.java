@@ -17,8 +17,8 @@
 package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
-import static io.tourniquet.pageobjects.SeleniumContext.getTimeoutFor;
 import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
+import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
 import java.util.Optional;
@@ -70,11 +70,12 @@ public final class PageLoader {
     public static void loadPage(Page page) {
 
         SeleniumContext.currentDriver().map(driver -> {
-            Optional.ofNullable(page.getClass().getAnnotation(Locator.class))
-                    .flatMap(l -> l.by().locate(l.value()))
-                    .ifPresent(WebElement::click);
-            WaitChain.wait(untilDocumentReady()).orTimeoutAfter(getTimeoutFor(RENDER_TIMEOUT));
+            final Optional<Locator> locator = Optional.ofNullable(page.getClass().getAnnotation(Locator.class));
+            locator.flatMap(l -> l.by().locate(l.value())).ifPresent(WebElement::click);
+            WaitChain.wait(untilDocumentReady()).orTimeoutAfter(getTimeout(locator, RENDER_TIMEOUT));
             return Void.TYPE;
         }).orElseThrow(() -> new IllegalStateException("Context not initialized"));
     }
+
+
 }
