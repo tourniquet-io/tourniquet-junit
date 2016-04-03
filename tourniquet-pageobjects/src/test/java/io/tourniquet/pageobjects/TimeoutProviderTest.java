@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -32,13 +33,13 @@ public class TimeoutProviderTest {
     public void testApply() throws Exception {
 
         //prepare
-        TimeoutProvider provider = timeoutKey -> Duration.ofSeconds(1234);
+        TimeoutProvider provider = timeoutKey -> Optional.of(Duration.ofSeconds(1234));
 
         //act
-        Duration result = provider.apply("someKey");
+        Optional<Duration> result = provider.apply("someKey");
 
         //assert
-        assertEquals(Duration.ofSeconds(1234), result);
+        assertEquals(Duration.ofSeconds(1234), result.get());
     }
 
     @Test
@@ -46,11 +47,11 @@ public class TimeoutProviderTest {
         //prepare
 
         //act
-        Duration result = TimeoutProvider.DEFAULT_PROVIDER.getTimeoutFor("anyKey");
+        Optional<Duration> result = TimeoutProvider.DEFAULT_PROVIDER.getTimeoutFor("anyKey");
 
         //assert
         assertNotNull(result);
-        assertEquals(TimeoutProvider.DEFAULT_TIMEOUT, result);
+        assertEquals(TimeoutProvider.DEFAULT_TIMEOUT, result.get());
 
     }
 }

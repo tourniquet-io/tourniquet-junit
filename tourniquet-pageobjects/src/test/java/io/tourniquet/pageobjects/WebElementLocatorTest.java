@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -131,7 +132,7 @@ public class WebElementLocatorTest {
         final SeleniumContext ctx = new SeleniumContext(() -> selenium.getMockDriver());
         ctx.setTimeoutProvider(timeoutProvider);
         ctx.init();
-        when(timeoutProvider.getTimeoutFor("customTimeout")).thenReturn(Duration.ofMillis(500));
+        when(timeoutProvider.getTimeoutFor("customTimeout")).thenReturn(Optional.of(Duration.ofMillis(500)));
 
         //act
         Instant start = Instant.now();

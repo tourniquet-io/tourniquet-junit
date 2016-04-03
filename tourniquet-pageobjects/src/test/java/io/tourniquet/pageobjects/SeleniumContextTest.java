@@ -256,7 +256,7 @@ public class SeleniumContextTest {
 
         //prepare
         SeleniumContext ctx = new SeleniumContext(() -> webDriver);
-        TimeoutProvider custom = s -> Duration.ofMillis(1234);
+        TimeoutProvider custom = s -> Optional.of(Duration.ofMillis(1234));
 
         //act
         ctx.setTimeoutProvider(custom);
@@ -265,22 +265,5 @@ public class SeleniumContextTest {
         //assert
         assertNotNull(provider);
         assertEquals(custom, provider);
-    }
-
-    @Test
-    public void testGetTimeoutFor() throws Exception {
-        //prepare
-        try{
-            new SeleniumContext(() -> webDriver).init();
-
-        //act
-            Duration dur = SeleniumContext.getTimeoutFor("aKey");
-            assertNotNull(dur);
-
-        //assert
-        } finally {
-            SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
-        }
-
     }
 }
