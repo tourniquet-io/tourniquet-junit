@@ -72,10 +72,10 @@ public final class PageLoader {
         SeleniumContext.currentDriver().map(driver -> {
             final Optional<Locator> locator = Optional.ofNullable(page.getClass().getAnnotation(Locator.class));
             locator.flatMap(l -> l.by().locate(l.value())).ifPresent(WebElement::click);
-            WaitChain.wait(untilDocumentReady()).orTimeoutAfter(getTimeout(locator, RENDER_TIMEOUT));
+            WaitChain.wait(untilDocumentReady())
+                     .orTimeoutAfter(getTimeout(locator, RENDER_TIMEOUT));
             return Void.TYPE;
         }).orElseThrow(() -> new IllegalStateException("Context not initialized"));
     }
-
 
 }

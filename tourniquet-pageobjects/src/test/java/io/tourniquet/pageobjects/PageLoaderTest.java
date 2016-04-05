@@ -18,7 +18,12 @@ package io.tourniquet.pageobjects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.tourniquet.measure.ResponseTime;
@@ -29,26 +34,39 @@ import io.tourniquet.tx.TransactionSupport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 
-/**
- *
- */
+@RunWith(MockitoJUnitRunner.class)
 public class PageLoaderTest {
+
+    @Mock(extraInterfaces = JavascriptExecutor.class)
+    private WebDriver webDriver;
+
+    @Mock
+    private TimeoutProvider timeoutProvider;
 
     private ResponseTimeCollector rtc = new ResponseTimeCollector();
     private AtomicReference<ResponseTime> rtEndRef = new AtomicReference<>();
 
     @Before
     public void setUp() throws Exception {
+
         ResponseTimes.current().onMeasureEnd(responseTime -> rtEndRef.set(responseTime));
         rtc.startCollecting();
     }
 
     @After
     public void tearDown() throws Exception {
+
         rtc.stopCollecting();
         ResponseTimes.current().onMeasureEnd(null);
         ResponseTimes.current().clear();
+        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
     }
 
     @Test
@@ -71,25 +89,78 @@ public class PageLoaderTest {
         assertEquals("transactionalOp", rt.getTransaction());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testLoadPageInstance_noInstance_exception() throws Exception {
+        PageLoader.loadPage(PageLoader.loadPage(TestPage.class));
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void testLoadPageInstance_timeout() throws Exception {
+        //prepare
+        SeleniumContext ctx = new SeleniumContext(() -> webDriver);
+        ctx.setTimeoutProvider(timeoutProvider);
+        ctx.init();
+        when(((JavascriptExecutor)webDriver).executeScript(anyString())).thenReturn("");
+        when(timeoutProvider.getTimeoutFor(TimeoutProvider.RENDER_TIMEOUT)).thenReturn(Optional.of(Duration.ZERO));
+
+        //act
+
+        PageLoader.loadPage(PageLoader.loadPage(TestPage.class));
+        //assert
+    }
+
+
+    @Test
+    public void testLoadPageInstance_noTimeout() throws Exception {
+        //prepare
+        SeleniumContext ctx = new SeleniumContext(() -> webDriver);
+        ctx.init();
+        when(((JavascriptExecutor)webDriver).executeScript(anyString())).thenReturn("complete");
+
+        //act
+
+        PageLoader.loadPage(PageLoader.loadPage(TestPage.class));
+        //assert
+        verify((JavascriptExecutor)webDriver).executeScript(anyString());
+    }
+
     @Test(expected = AssertionError.class)
     public void testLoadPage_privateConstructor() throws Exception {
+
         PageLoader.loadPage(PrivateConstructorPage.class);
     }
 
     @Test(expected = AssertionError.class)
     public void testLoadPage_parameterConstructor() throws Exception {
+
         PageLoader.loadPage(ParameterConstructorPage.class);
     }
 
-    public static class TestPage implements Page {}
+    // -------------- Test Page Model ------------------------
+
+    public static class TestPage implements Page {
+
+    }
+
     public static class ParameterConstructorPage implements Page {
-        public ParameterConstructorPage(String someParam){}
+
+        public ParameterConstructorPage(String someParam) {
+
+        }
     }
+
     public static class PrivateConstructorPage implements Page {
-        private PrivateConstructorPage(){}
+
+        private PrivateConstructorPage() {
+
+        }
     }
+
     public static class TxPage implements Page, TransactionSupport {
+
         @Transaction
-        public void transactionalOp(){}
+        public void transactionalOp() {
+
+        }
     }
 }
