@@ -18,12 +18,14 @@ package io.tourniquet.pageobjects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -232,5 +234,36 @@ public class SeleniumContextTest {
 
         //assert
         assertEquals(expected, path.get());
+    }
+
+    @Test
+    public void testGetTimeoutProvider_defaultProvider() throws Exception {
+
+        //prepare
+        SeleniumContext ctx = new SeleniumContext(() -> webDriver);
+
+        //act
+        TimeoutProvider provider = ctx.getTimeoutProvider();
+
+        //assert
+        assertNotNull(provider);
+        assertEquals(TimeoutProvider.DEFAULT_PROVIDER, provider);
+    }
+
+
+    @Test
+    public void testGetTimeoutProvider_setProvider() throws Exception {
+
+        //prepare
+        SeleniumContext ctx = new SeleniumContext(() -> webDriver);
+        TimeoutProvider custom = s -> Optional.of(Duration.ofMillis(1234));
+
+        //act
+        ctx.setTimeoutProvider(custom);
+        TimeoutProvider provider = ctx.getTimeoutProvider();
+
+        //assert
+        assertNotNull(provider);
+        assertEquals(custom, provider);
     }
 }
