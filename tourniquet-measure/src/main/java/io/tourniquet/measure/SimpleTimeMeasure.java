@@ -26,6 +26,7 @@ import java.time.Instant;
  */
 public class SimpleTimeMeasure implements TimeMeasure, Serializable {
 
+    private static final long serialVersionUID = -686596868634888819L;
     private final Instant start;
     private final Duration duration;
 

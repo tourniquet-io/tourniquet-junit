@@ -28,6 +28,7 @@ import java.util.UUID;
  */
 public class ResponseTime extends SimpleTimeMeasure {
 
+    private static final long serialVersionUID = -1194650333670074082L;
     private final UUID uuid;
     private final String transaction;
 
