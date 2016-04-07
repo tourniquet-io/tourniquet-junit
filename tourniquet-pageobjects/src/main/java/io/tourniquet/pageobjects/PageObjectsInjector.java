@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import io.tourniquet.junit.UncheckedException;
 import io.tourniquet.junit.util.ClassStreams;
 import io.tourniquet.tx.TransactionHelper;
 import io.tourniquet.tx.TransactionSupport;
@@ -71,7 +72,7 @@ public final class PageObjectsInjector {
         try {
             m.invoke(target, (Supplier<WebElement>) () -> WebElementLocator.locate(target.getSearchContext(), loc));
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Could not init " + m, e);
+            throw new UncheckedException("Could not init " + m, e);
         }
     }
 
@@ -127,7 +128,7 @@ public final class PageObjectsInjector {
         try {
             field.set(target, (Supplier<WebElement>) () -> WebElementLocator.locate(target.getSearchContext(), locator));
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not init " + field, e);
+            throw new UncheckedException("Could not init " + field, e);
         }
     }
 
@@ -154,7 +155,7 @@ public final class PageObjectsInjector {
             }
             target.set(parent, nestedGroup);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not init element group", e);
+            throw new UncheckedException("Could not init element group", e);
         }
     }
 
@@ -201,7 +202,7 @@ public final class PageObjectsInjector {
                              c.setAccessible(true);
                              return (ElementGroup) c.newInstance(context);
                          } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                             throw new RuntimeException("Could not create element group " + elementGroupType, e);
+                             throw new UncheckedException("Could not create element group " + elementGroupType, e);
                          }
                      })
                      .findFirst();
@@ -219,7 +220,7 @@ public final class PageObjectsInjector {
         try {
             return (ElementGroup) elementGroupType.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Could not create element group using default constructor", e);
+            throw new UncheckedException("Could not create element group using default constructor", e);
         }
     }
 

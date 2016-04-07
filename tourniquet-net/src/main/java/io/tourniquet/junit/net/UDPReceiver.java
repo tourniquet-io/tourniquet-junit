@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import io.tourniquet.junit.UncheckedException;
 import io.tourniquet.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 
@@ -252,7 +253,7 @@ public class UDPReceiver extends ExternalResource {
                     receivePacket(channel, buf);
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Could not start UDP receiver", e);
+                throw new UncheckedException("Could not start UDP receiver", e);
             }
             LOG.info("Server stopped");
         }

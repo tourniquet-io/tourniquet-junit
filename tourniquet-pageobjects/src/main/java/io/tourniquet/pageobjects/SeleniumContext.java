@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import io.tourniquet.junit.UncheckedException;
 import io.tourniquet.junit.util.ClassStreams;
 import org.openqa.selenium.WebDriver;
 
@@ -95,7 +96,7 @@ public class SeleniumContext {
                 }
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
                     | InvocationTargetException e) {
-                throw new RuntimeException("Could not initialize context", e);
+                throw new UncheckedException("Could not initialize context", e);
             }
         }
     }
