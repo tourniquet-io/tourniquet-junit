@@ -131,14 +131,14 @@ public class ResourceInjection extends Injection {
     static class ResourceLiteral extends AnnotationLiteral<Resource> implements Resource {
 
         private static final long serialVersionUID = -1648754563401613075L;
-        private String name = "";
-        private String lookup = "";
+        private String resName = "";
+        private String resLookup = "";
         @SuppressWarnings("rawtypes")
-        private Class type = Object.class;
-        private String mappedName = "";
-        private AuthenticationType authenticationType = AuthenticationType.CONTAINER;
-        private boolean shareable = true;
-        private String description = "";
+        private Class resType = Object.class;
+        private String mappedResName = "";
+        private AuthenticationType authType = AuthenticationType.CONTAINER;
+        private boolean shareableResource = true;
+        private String resDescription = "";
 
         ResourceLiteral() {
             //empty
@@ -149,56 +149,56 @@ public class ResourceInjection extends Injection {
                 final boolean shareable, final String description) {
 
             super();
-            this.name = name;
-            this.lookup = lookup;
-            this.mappedName = mappedName;
-            this.type = type;
-            this.authenticationType = authenticationType;
-            this.shareable = shareable;
-            this.description = description;
+            this.resName = name;
+            this.resLookup = lookup;
+            this.mappedResName = mappedName;
+            this.resType = type;
+            this.authType = authenticationType;
+            this.shareableResource = shareable;
+            this.resDescription = description;
         }
 
         @Override
         public String name() {
 
-            return name;
+            return resName;
         }
 
         @Override
         public String lookup() {
 
-            return lookup;
+            return resLookup;
         }
 
         @Override
         public String mappedName() {
 
-            return mappedName;
+            return mappedResName;
         }
 
         @SuppressWarnings("rawtypes")
         @Override
         public Class type() {
 
-            return type;
+            return resType;
         }
 
         @Override
         public AuthenticationType authenticationType() {
 
-            return authenticationType;
+            return authType;
         }
 
         @Override
         public boolean shareable() {
 
-            return shareable;
+            return shareableResource;
         }
 
         @Override
         public String description() {
 
-            return description;
+            return resDescription;
         }
 
         /**
@@ -207,7 +207,7 @@ public class ResourceInjection extends Injection {
          */
         public void setName(final String name) {
 
-            this.name = name;
+            this.resName = name;
         }
 
         /**
@@ -216,7 +216,7 @@ public class ResourceInjection extends Injection {
          */
         public void setLookup(final String lookup) {
 
-            this.lookup = lookup;
+            this.resLookup = lookup;
         }
 
         /**
@@ -225,7 +225,7 @@ public class ResourceInjection extends Injection {
          */
         public void setType(@SuppressWarnings("rawtypes") final Class type) {
 
-            this.type = type;
+            this.resType = type;
         }
 
         /**
@@ -234,7 +234,7 @@ public class ResourceInjection extends Injection {
          */
         public void setMappedName(final String mappedName) {
 
-            this.mappedName = mappedName;
+            this.mappedResName = mappedName;
         }
 
         /**
@@ -243,7 +243,7 @@ public class ResourceInjection extends Injection {
          */
         public void setAuthenticationType(final AuthenticationType authenticationType) {
 
-            this.authenticationType = authenticationType;
+            this.authType = authenticationType;
         }
 
         /**
@@ -252,7 +252,7 @@ public class ResourceInjection extends Injection {
          */
         public void setShareable(final boolean shareable) {
 
-            this.shareable = shareable;
+            this.shareableResource = shareable;
         }
 
         /**
@@ -261,7 +261,7 @@ public class ResourceInjection extends Injection {
          */
         public void setDescription(final String description) {
 
-            this.description = description;
+            this.resDescription = description;
         }
 
 
