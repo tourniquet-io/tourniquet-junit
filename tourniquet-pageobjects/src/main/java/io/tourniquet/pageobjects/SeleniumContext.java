@@ -82,7 +82,7 @@ public class SeleniumContext {
      */
     public static void init(SeleniumContext context, ClassLoader cl) {
 
-        if (!Objects.equals(context.getClass().getClassLoader(), cl) && context.getDriver().isPresent()) {
+        if (!Objects.equals(context.getClass().getClassLoader(), cl) && context.getDriver().isPresent()) { //NOSONAR
             try {
                 final Class<?> contextClass = cl.loadClass(context.getClass().getName());
                 final Constructor constr = contextClass.getConstructor(Supplier.class);

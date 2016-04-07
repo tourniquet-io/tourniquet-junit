@@ -156,7 +156,7 @@ public class TestExecutionContext {
      */
     public static void init(final TestExecutionContext ctx, final ClassLoader cl) {
         //avoid overwriting the context in the same classloader
-        if (!Objects.equals(ctx.getClass().getClassLoader(), cl)) {
+        if (!Objects.equals(ctx.getClass().getClassLoader(), cl)) { //NOSONAR
             runUnchecked(() -> cl.loadClass(ctx.getClass().getName())
                                  .getMethod("init", Properties.class, Properties.class)
                                  .invoke(null, ctx.getInput(), ctx.getEnv()));

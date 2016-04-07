@@ -70,7 +70,7 @@ public class TestClassLoader extends URLClassLoader {
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if(cl == null) {
-            cl = TestClassLoader.class.getClassLoader();
+            cl = TestClassLoader.class.getClassLoader(); //NOSONAR
         }
         return cl;
     }
