@@ -37,7 +37,7 @@ import java.util.Objects;
  * </code>
  * </pre>
  */
-public class WaitChain {
+public final class WaitChain {
 
     private final List<ActiveWait> waits = new ArrayList<>();
 

@@ -111,7 +111,7 @@ public class ExecutionResult<RESULTTYPE> {
      * @throws Exception
      *  if the execution produced an exception, it is thrown
      */
-    public RESULTTYPE flatten() throws Exception {
+    public RESULTTYPE flatten() throws Exception { //NOSONAR
 
         if (!wasSuccess()) {
             throw this.exception.get();
@@ -209,7 +209,7 @@ public class ExecutionResult<RESULTTYPE> {
             Function<ORIGINAL, RETHROW> mapper) throws RETHROW{
 
         if(this.exception.isPresent() && exceptionType.isAssignableFrom(this.exception.get().getClass())){
-            throw mapper.apply((ORIGINAL) this.exception.get());
+            throw mapper.apply((ORIGINAL) this.exception.get()); //NOSONAR
         }
         return this;
     }
