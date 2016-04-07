@@ -49,6 +49,7 @@ The `Locator` can contain a simple URL as String value which can be used to anno
 
 As example, take a login page:
 
+```java
     @Locator("login.jsp")
     public class LoginPage implements Page {
 
@@ -71,12 +72,14 @@ As example, take a login page:
             loginButton.get().click();
         }
     }
+```
 
 ## Running Tests with Page Objects
 The parts that load the page and locate the elements on the page require a Selenium driver. The default
 case is to run a test with a single driver in one test execution thread. In order to initialize a driver
 for the current test, the library provides a test rule that has to be added to the test:
 
+```java
     public class PageObjectTest {
     
         @Rule
@@ -88,6 +91,7 @@ for the current test, the library provides a test rule that has to be added to t
          //...
     
     }
+```
 
 The basePath in the example has to be the absolute URL required to resolve all relative URLs of 
 locators defined of your model. For driver a `java.util.function.Supplier` is passed. The library
@@ -97,6 +101,7 @@ provides a set of default suppliers in the `Drivers` enum.
 When using the page object in your tests, you have to navigate to the page first and then may invoke
 the methods on the objects.
 
+```java
     @Test
     public void testLogin() {
         LoginPage login = Page.navigateTo(LoginPage.class);
@@ -104,6 +109,7 @@ the methods on the objects.
              .enterPassword("password")
              .pressLogin();
     }
+```
 
 If the mechanism to load a page - either by navigating to the URL or by clicking on an element on the page - 
 should be different, the `loadPage()` method can be implemented.
@@ -127,9 +133,10 @@ flow navigates to the page and thereby creating the page instance.
 
 Example:
 
+```java
     public class LoginForm implements ElementGroup {
         @Locator(by = ID, value = "username")
-        Supplier<WebElement> username;
+        Supplier<WebElement> username;)
         
         @Locator(by = ID, value = "password")
         Supplier<WebElement> password;
@@ -152,4 +159,52 @@ Example:
     public class LoginPage implements Page {
         LoginForm form;
     }
-    
+```
+   
+# Timeouts
+When modelling an application page model, certain elements or pageloads have to meet a respones time goal or the 
+test should be guarded from taking too long. Selenium provides add timeouts to your code. The declarative approach of
+Tourniquet allows you to specify timeout in the annotations and to make timeouts configurable.
+
+## Fixed timeouts
+The `@Locator` annotation allows to specify a timeout element on each element or for the page. This timeout is the 
+number of milliseconds that it may take for the element to appear or the page to load. The timeout for pageload includes
+the time required for rending the page - that is, waiting until the `readyState` of the document is `complete`.
+
+To specify a fixed timeout for an element or page, simply specify the value in the annotation. The following snippet 
+waits at max 30 seconds for the element to appear
+ 
+```java
+    @Locator(by = ID, value = "username", timeout=30)
+    Supplier<WebElement> username;)
+```
+
+## Configurable Timeout
+Sometime it may be required to parameterize the timeouts in your object model, for example to separate response time 
+goals from your test code or to adapt the timeouts to the performance profile of the test environment. In that case
+timeouts can be configured. The actual timeout values are provided by a `TimeoutProvider` that is bound to the 
+current `SeleniumContext`. The timeouts are referred to using keys. To declare a timeout to be configurable, you have 
+to specify the timeout key:
+
+```java
+    @Locator(by = ID, value = "username", timeoutKey="usernameTimeout")
+    Supplier<WebElement> username;)
+```
+
+To set a timeout provider, you have to configure it in the SeleniumContext:
+
+```java
+    TimeoutProvider provider  = ...;
+    SeleniumContext ctx = ...;
+    ctx.setTimeoutProvider(provider);
+```
+
+The order of lookup for a timeout is (returning on the first match)
+
+* locator timeout (by key)
+* locator timeout (fixed value)
+* fallback values (by key)
+* fallback values (fixed value)
+
+The fallback may depend on the timeout required, for example loading a page uses a different timeout than waiting
+for an element. In any case, if no specific timeout is defined, a fixed-value default timeout is used for all.

@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * A converter for converting string values into primitive types.
  */
-public class TypeConverter {
+public final class TypeConverter {
 
     private static final Map<Class, Class> PRIMITIVE_TO_OBJECT_TYPE_MAP;
 

@@ -34,8 +34,8 @@ public class ResponseTimeRecording extends ExternalResource {
 
     private final ResponseTimeCollector collector = new ResponseTimeCollector();
 
-    private boolean clearResponseTimes = true;
-    private boolean printTransactions = true;
+    private boolean clearResponseTimesFlag = true;
+    private boolean printTransactionsFlag = true;
 
     /**
      * Sets whether to reset the response time table of the current thread after the test.
@@ -47,7 +47,7 @@ public class ResponseTimeRecording extends ExternalResource {
      */
     public ResponseTimeRecording clearResponseTimes(final boolean clearResponseTimes) {
 
-        this.clearResponseTimes = clearResponseTimes;
+        this.clearResponseTimesFlag = clearResponseTimes;
         return this;
     }
 
@@ -60,7 +60,7 @@ public class ResponseTimeRecording extends ExternalResource {
      */
     public ResponseTimeRecording printTransactions(final boolean printTransactions) {
 
-        this.printTransactions = printTransactions;
+        this.printTransactionsFlag = printTransactions;
         return this;
     }
 
@@ -82,7 +82,7 @@ public class ResponseTimeRecording extends ExternalResource {
     @Override
     protected void after() {
         collector.stopCollecting();
-        if(printTransactions){
+        if(printTransactionsFlag){
             LOG.info("Listing transactions");
             Map<String, List<ResponseTime>> responseTimes = ResponseTimes.current().getResponseTimes();
             for(Map.Entry<String, List<ResponseTime>> e : responseTimes.entrySet()){
@@ -92,7 +92,7 @@ public class ResponseTimeRecording extends ExternalResource {
                 }
             }
         }
-        if(clearResponseTimes) {
+        if(clearResponseTimesFlag) {
             ResponseTimes.current().clear();
         }
     }

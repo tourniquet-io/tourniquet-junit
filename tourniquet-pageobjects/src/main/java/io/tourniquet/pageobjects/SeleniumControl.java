@@ -114,10 +114,10 @@ public class SeleniumControl extends ExternalResource {
      * @return an optional containing a managed context or the empty optional if a context is already active
      */
     private Optional<SeleniumContext> getSeleniumContext() {
-
-        return Optional.ofNullable((SeleniumContext) SeleniumContext.currentContext()
-                                                                    .map(c -> null)
-                                                                    .orElse(new SeleniumContext(driverProvider)));
+        if(!SeleniumContext.currentContext().isPresent()){
+            return Optional.of(new SeleniumContext(driverProvider));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -226,20 +226,20 @@ public class SeleniumControl extends ExternalResource {
      */
     public static class SeleniumControlBuilder {
 
-        private Supplier<WebDriver> driver;
+        private Supplier<WebDriver> driverSupplier;
 
-        private String baseUrl;
+        private String appBaseUrl;
 
-        private BiConsumer<User, WebDriver> loginAction;
+        private BiConsumer<User, WebDriver> appLoginAction;
 
-        private Consumer<WebDriver> logoutAction;
+        private Consumer<WebDriver> appLogoutAction;
 
         private Consumer<WebDriver.Options> optionsInitializer;
 
-        private boolean skipSharedDriverActions = true;
+        private boolean skipSharedDriverActionsFlag = true;
 
         SeleniumControlBuilder() {
-
+            //package private constructor to prevent direct instantiation
         }
 
         /**
@@ -253,7 +253,7 @@ public class SeleniumControl extends ExternalResource {
          */
         public SeleniumControlBuilder driver(Supplier<WebDriver> driver) {
 
-            this.driver = driver;
+            this.driverSupplier = driver;
             return this;
         }
 
@@ -268,7 +268,7 @@ public class SeleniumControl extends ExternalResource {
          */
         public SeleniumControlBuilder baseUrl(String baseUrl) {
 
-            this.baseUrl = baseUrl;
+            this.appBaseUrl = baseUrl;
             return this;
         }
 
@@ -282,7 +282,7 @@ public class SeleniumControl extends ExternalResource {
          */
         public SeleniumControlBuilder loginAction(BiConsumer<User, WebDriver> loginAction) {
 
-            this.loginAction = loginAction;
+            this.appLoginAction = loginAction;
             return this;
         }
 
@@ -296,7 +296,7 @@ public class SeleniumControl extends ExternalResource {
          */
         public SeleniumControlBuilder logoutAction(Consumer<WebDriver> logoutAction) {
 
-            this.logoutAction = logoutAction;
+            this.appLogoutAction = logoutAction;
             return this;
         }
 
@@ -325,19 +325,19 @@ public class SeleniumControl extends ExternalResource {
          */
         public SeleniumControlBuilder skipSharedDriverActions(boolean flag) {
 
-            this.skipSharedDriverActions = flag;
+            this.skipSharedDriverActionsFlag = flag;
             return this;
         }
 
         public SeleniumControl build() {
 
             final SeleniumControl ctx = new SeleniumControl();
-            ctx.baseUrl = this.baseUrl;
-            ctx.driverProvider = this.driver;
+            ctx.baseUrl = this.appBaseUrl;
+            ctx.driverProvider = this.driverSupplier;
             ctx.driverInit = Optional.ofNullable(this.optionsInitializer);
-            ctx.loginAction = this.loginAction;
-            ctx.logoutAction = this.logoutAction;
-            ctx.skipSharedDriverActions = skipSharedDriverActions;
+            ctx.loginAction = this.appLoginAction;
+            ctx.logoutAction = this.appLogoutAction;
+            ctx.skipSharedDriverActions = skipSharedDriverActionsFlag;
             return ctx;
 
         }

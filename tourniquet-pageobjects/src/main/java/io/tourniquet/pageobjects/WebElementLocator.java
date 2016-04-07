@@ -16,17 +16,16 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.pageobjects.ActiveWaits.untilElementDisplayed;
+import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Predicate;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.slf4j.Logger;
 
 /**
@@ -51,8 +50,8 @@ public final class WebElementLocator {
      */
     public static WebElement locate(Locator loc) {
 
-        LOG.debug("Locating element with {}={} (timeout={})", loc.by().name(), loc.value(), loc.timeout());
-        return waitForElement(loc.by().withSelector(loc.value()), loc.timeout()).get();
+        LOG.debug("Locating element with {}={} (timeout={})", loc.by().name(), loc.value(), getTimeout(loc));
+        return waitForElement(loc.by().withSelector(loc.value()), getTimeout(loc)).get();
     }
 
     /**
@@ -71,47 +70,48 @@ public final class WebElementLocator {
         LOG.debug("Locating element with {}={} (timeout={}) in {}",
                   loc.by().name(),
                   loc.value(),
-                  loc.timeout(),
+                  getTimeout(loc),
                   context);
-        return waitForElement(context, loc.by().withSelector(loc.value()), loc.timeout());
+        return waitForElement(context, loc.by().withSelector(loc.value()), getTimeout(loc));
     }
 
+
+
     /**
-     * Waits for the presence of a specific web element until a timeout is reached. The method will succeed in any case.
-     * If the element is not present, the method waits until the timeout, otherwise it returns as soon as the element is
+     * Waits for the presence of a specific web element wait a timeout is reached. The method will succeed in any case.
+     * If the element is not present, the method waits wait the timeout, otherwise it returns as soon as the element is
      * present
      *
      * @param context
      *         the search context in which the element should be located
      * @param by
      *         the locate for the element
-     * @param waitSec
-     *         the timeout in seconds
+     * @param timeout
+     *         the timeout
      *
      * @return the located element
      */
-    public static WebElement waitForElement(final SearchContext context, final By by, final int waitSec) {
+    public static WebElement waitForElement(final SearchContext context, final By by, final Duration timeout) {
 
-        new FluentWait<>(context).ignoring(NoSuchElementException.class)
-                                 .withTimeout(waitSec, TimeUnit.SECONDS)
-                                 .until((Predicate<SearchContext>) d -> context.findElement(by).isDisplayed());
+        WaitChain.wait(untilElementDisplayed(context, by)).orTimeoutAfter(timeout);
         return context.findElement(by);
 
     }
 
     /**
-     * Waits for the presence of an element until a timeout is reached.
+     * Waits for the presence of an element wait a timeout is reached.
      *
      * @param by
      *         the locator for the element
-     * @param waitSec
-     *         the timeout. If the timeout is reached, a {@link org.openqa.selenium.NoSuchElementException} is thrown
+     * @param timeout
+     *         the timeout. If the timeout is reached, a
+     *         {@link org.openqa.selenium.NoSuchElementException} is thrown
      *
      * @return the element found
      */
-    public static Optional<WebElement> waitForElement(final By by, final int waitSec) {
+    public static Optional<WebElement> waitForElement(final By by, final Duration timeout) {
 
-        return SeleniumContext.currentDriver().map(d -> waitForElement(d, by, waitSec));
+        return SeleniumContext.currentDriver().map(d -> waitForElement(d, by, timeout));
     }
 
 }

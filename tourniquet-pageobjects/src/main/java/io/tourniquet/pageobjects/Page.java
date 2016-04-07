@@ -16,17 +16,11 @@
 
 package io.tourniquet.pageobjects;
 
-
 import static io.tourniquet.tx.TransactionHelper.getClassTxName;
 
 import java.util.Optional;
 
-import com.google.common.base.Predicate;
 import io.tourniquet.tx.TransactionSupport;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Interface to declare a page of an application
@@ -38,14 +32,8 @@ public interface Page extends ElementGroup {
      * mechanism of navigating to it, this method must be overriden.
      */
     default void loadPage() {
-        SeleniumContext.currentDriver().map(driver -> {
-            Optional.ofNullable(this.getClass().getAnnotation(Locator.class))
-                    .flatMap(l -> l.by().locate(l.value()))
-                    .ifPresent(WebElement::click);
-            new WebDriverWait(driver, 150, 50).until((Predicate<WebDriver>) d ->
-                    "complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState")));
-            return Void.TYPE;
-        }).orElseThrow(() -> new IllegalStateException("Context not initialized"));
+
+        PageLoader.loadPage(this);
     }
 
     /**
@@ -61,9 +49,9 @@ public interface Page extends ElementGroup {
     static <T extends Page> T navigateTo(Class<T> pageType) {
 
         final T page = PageLoader.loadPage(pageType);
-        final Optional<TransactionSupport> tx = Optional.ofNullable(TransactionSupport.class.isAssignableFrom(pageType)
-                                                               ? (TransactionSupport) page
-                                                               : null);
+        final Optional<TransactionSupport> tx = TransactionSupport.class.isAssignableFrom(pageType)
+                                                ? Optional.of((TransactionSupport) page)
+                                                : Optional.empty();
         tx.ifPresent(ts -> getClassTxName(pageType).ifPresent(ts::txBegin));
         try {
             page.loadPage();

@@ -16,40 +16,66 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
+import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
+import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
+import java.util.Optional;
+
 import io.tourniquet.tx.TransactionSupport;
+import org.openqa.selenium.WebElement;
 
 /**
- * Loader of a page instance. The page loader adds transaction support to the instance to measure
- * the execution of transactional methods.
+ * Loader of a page instance. The page loader adds transaction support to the instance to measure the execution of
+ * transactional methods.
  */
 public final class PageLoader {
 
-    private PageLoader(){}
+    private PageLoader() {
+
+    }
 
     /**
      * Loads a page with optional transaction support.
+     *
      * @param pageType
-     *  the page type to instantiate
+     *         the page type to instantiate
      * @param <T>
-     *  the type of the page
-     * @return
-     *  the page instance of the object model
+     *         the type of the page
+     *
+     * @return the page instance of the object model
      */
     public static <T extends Page> T loadPage(Class<T> pageType) {
 
         try {
             T page = pageType.newInstance();
             if (TransactionSupport.class.isAssignableFrom(pageType)) {
-                page = addTransactionSupport((TransactionSupport)page);
+                page = addTransactionSupport((TransactionSupport) page);
             }
             return page;
 
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Page " + pageType.getName() + " can not be loaded", e);
         }
+    }
 
+    /**
+     * Loads the page into the current webdriver. The method waits for the document to be completely loaded and
+     * rendered.<br> If no {@link SeleniumContext} is initialized, an {@link IllegalStateException} is thrown.
+     *
+     * @param page
+     *         the page handle to load
+     */
+    public static void loadPage(Page page) {
+
+        SeleniumContext.currentDriver().map(driver -> {
+            final Optional<Locator> locator = Optional.ofNullable(page.getClass().getAnnotation(Locator.class));
+            locator.flatMap(l -> l.by().locate(l.value())).ifPresent(WebElement::click);
+            WaitChain.wait(untilDocumentReady())
+                     .orTimeoutAfter(getTimeout(locator, RENDER_TIMEOUT));
+            return Void.TYPE;
+        }).orElseThrow(() -> new IllegalStateException("Context not initialized"));
     }
 
 }

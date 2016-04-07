@@ -37,12 +37,34 @@ import org.openqa.selenium.WebDriver;
  */
 public class SeleniumContext {
 
-    private static ThreadLocal<Optional<SeleniumContext>> CONTEXT = ThreadLocal.withInitial(() -> Optional.empty());
+    private static ThreadLocal<Optional<SeleniumContext>> CONTEXT = ThreadLocal.withInitial(Optional::empty);
 
+    /**
+     * The selenium web driver for the current context
+     */
     private Optional<WebDriver> driver = Optional.empty();
+
+    /**
+     * Provides the webdriver. Suppliers can either create a new driver or reuse an existing
+     */
     private final Supplier<WebDriver> provider;
+
+    /**
+     * The base URL for the current context. The base URL is required for resolving relative URLs
+     */
     private final AtomicReference<String> baseUrl = new AtomicReference<>();
 
+    /**
+     * Timeout provider for configuring wait behavior or various points
+     */
+    private TimeoutProvider timeoutProvider = TimeoutProvider.DEFAULT_PROVIDER;
+
+    /**
+     * Creates a new context. For binding the context to the current thread, invoke the init method.
+     * @param provider
+     *  a provider for a web driver that should be bound to the current context. The driver is obtained during
+     *  intialization of the session.
+     */
     public SeleniumContext(Supplier<WebDriver> provider) {
 
         Objects.requireNonNull(provider, "WebDriver must not be null");
@@ -50,24 +72,27 @@ public class SeleniumContext {
     }
 
     /**
-     * Creates a link from the other classloader to the specified context. That way it is possible to share access
-     * to the same selenium context from different classloader hierarchies.
+     * Creates a link from the other classloader to the specified context. That way it is possible to share access to
+     * the same selenium context from different classloader hierarchies.
      *
      * @param context
-     *  the context of the current classloader hierarchy
+     *         the context of the current classloader hierarchy
      * @param cl
-     *  the other classloader in which the access to the given context should possible
+     *         the other classloader in which the access to the given context should possible
      */
     public static void init(SeleniumContext context, ClassLoader cl) {
 
-        if (!Objects.equals(context.getClass().getClassLoader(), cl) && context.getDriver().isPresent()) {
+        if (!Objects.equals(context.getClass().getClassLoader(), cl) && context.getDriver().isPresent()) { //NOSONAR
             try {
                 final Class<?> contextClass = cl.loadClass(context.getClass().getName());
                 final Constructor constr = contextClass.getConstructor(Supplier.class);
                 final Supplier provider = () -> createProxy(context.getDriver().get(), cl);
                 final Object ctx = constr.newInstance(provider);
                 contextClass.getMethod("init").invoke(ctx);
-                contextClass.getMethod("setBaseUrl", String.class).invoke(ctx, context.getBaseUrl());
+                final String baseUrl = context.getBaseUrl();
+                if (baseUrl != null) {
+                    contextClass.getMethod("setBaseUrl", String.class).invoke(ctx, baseUrl);
+                }
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
                     | InvocationTargetException e) {
                 throw new RuntimeException("Could not initialize context", e);
@@ -92,22 +117,36 @@ public class SeleniumContext {
                                                    .flatMap(c -> stream(c.getInterfaces()))
                                                    .map(c -> runUnchecked(() -> cl.loadClass(c.getName())))
                                                    .collect(toList());
-
         return Proxy.newProxyInstance(cl,
                                       interfaces.toArray(new Class[interfaces.size()]),
                                       (proxy, method, args) -> method.invoke(webDriver, args));
 
     }
 
+    /**
+     * Registers this instance as current context for the thread also binding the driver to this instance.
+     */
     public void init() {
 
         driver = Optional.of(provider.get());
         CONTEXT.set(Optional.of(this));
     }
 
+    /**
+     * Destroys the context and closes the current driver.
+     */
     public void destroy() {
+        destroy(true);
+    }
 
-        driver.ifPresent(WebDriver::quit);
+    /**
+     * Destroys the context.
+     * @param quitDriver
+     *  set to <code>true</code> to quit the driver, too. In case you want to reuse the driver, set to <code>false</code>
+     */
+    public void destroy(boolean quitDriver) {
+
+        driver.filter(d -> quitDriver).ifPresent(WebDriver::quit);
         driver = Optional.empty();
         CONTEXT.set(Optional.empty());
     }
@@ -143,6 +182,25 @@ public class SeleniumContext {
     }
 
     /**
+     * Sets the timeout provider for this context.
+     * @param provider
+     *  the provider to be used for timeout settings in this context.
+     */
+    public void setTimeoutProvider(TimeoutProvider provider) {
+        Objects.requireNonNull(provider);
+        this.timeoutProvider = provider;
+    }
+
+    /**
+     * The timeout provider is a specialized configuration for timeouts used in your page objects model.
+     * @return
+     *  the timeout for the current context.
+     */
+    public TimeoutProvider getTimeoutProvider(){
+        return this.timeoutProvider;
+    }
+
+    /**
      * The base URL for the current context used to resolve relative URLs.
      *
      * @return the current BaseUrl
@@ -168,7 +226,7 @@ public class SeleniumContext {
      * Resolves the URL path relative to the base URL.
      *
      * @param relativePath
-     *         the relative path within the application
+     *         the relative path orTimeoutAfter the application
      *
      * @return the absolute path of the application's base URL and the relative path
      */

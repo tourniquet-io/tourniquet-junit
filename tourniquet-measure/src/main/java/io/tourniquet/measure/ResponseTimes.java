@@ -61,7 +61,7 @@ public final class ResponseTimes {
     /**
      * Global collector
      */
-    private static final ResponseTimes GLOBAL = new ResponseTimes();
+    private static final ResponseTimes GLOBAL_RESPONSE_TIMES = new ResponseTimes();
     /**
      * Flag to indicate, that response times should be collected globally, which is disabled by default
      */
@@ -110,7 +110,7 @@ public final class ResponseTimes {
      */
     public static ResponseTimes global() {
 
-        return GLOBAL;
+        return GLOBAL_RESPONSE_TIMES;
     }
 
     /**
@@ -230,7 +230,7 @@ public final class ResponseTimes {
 
     private boolean isGlobalCollectionEnabled() {
 
-        return this != GLOBAL && (forwardToGlobal.get() || GLOBAL_COLLECTION_ENABLED.get());
+        return this != GLOBAL_RESPONSE_TIMES && (forwardToGlobal.get() || GLOBAL_COLLECTION_ENABLED.get());
     }
 
     /**

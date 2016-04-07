@@ -36,6 +36,7 @@ public class SeleniumTestContext implements TestRule {
 
     private SeleniumControl ctx;
     private WebDriver mockDriver;
+    private TimeoutProvider timeoutProvider;
     private Description mockDescription;
 
     /**
