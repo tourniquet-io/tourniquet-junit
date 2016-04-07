@@ -16,7 +16,6 @@
 
 package io.tourniquet.pageobjects;
 
-
 import static io.tourniquet.tx.TransactionHelper.getClassTxName;
 
 import java.util.Optional;
@@ -33,6 +32,7 @@ public interface Page extends ElementGroup {
      * mechanism of navigating to it, this method must be overriden.
      */
     default void loadPage() {
+
         PageLoader.loadPage(this);
     }
 
@@ -49,9 +49,9 @@ public interface Page extends ElementGroup {
     static <T extends Page> T navigateTo(Class<T> pageType) {
 
         final T page = PageLoader.loadPage(pageType);
-        final Optional<TransactionSupport> tx = Optional.ofNullable(TransactionSupport.class.isAssignableFrom(pageType)
-                                                               ? (TransactionSupport) page
-                                                               : null);
+        final Optional<TransactionSupport> tx = TransactionSupport.class.isAssignableFrom(pageType)
+                                                ? Optional.of((TransactionSupport) page)
+                                                : Optional.empty();
         tx.ifPresent(ts -> getClassTxName(pageType).ifPresent(ts::txBegin));
         try {
             page.loadPage();
