@@ -40,7 +40,7 @@ import java.util.Properties;
  */
 public class TestExecutionContext {
 
-    private static final ThreadLocal<TestExecutionContext> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<TestExecutionContext> CURRENT_CONTEXT = new ThreadLocal<>();
 
     private final Properties input;
     private final Properties output;
@@ -61,7 +61,7 @@ public class TestExecutionContext {
      */
     public static Optional<TestExecutionContext> current() {
 
-        return Optional.ofNullable(CURRENT.get());
+        return Optional.ofNullable(CURRENT_CONTEXT.get());
     }
 
     /**
@@ -74,7 +74,7 @@ public class TestExecutionContext {
      */
     public static void init(Properties input, Properties env) {
 
-        CURRENT.set(new TestExecutionContext(input, env));
+        CURRENT_CONTEXT.set(new TestExecutionContext(input, env));
     }
 
     /**
@@ -84,7 +84,7 @@ public class TestExecutionContext {
 
         final Properties output = current().map(TestExecutionContext::getOutput)
                                      .orElseThrow(() -> new IllegalStateException("Context not initialized"));
-        CURRENT.remove();
+        CURRENT_CONTEXT.remove();
         return output;
     }
 
