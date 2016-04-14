@@ -16,9 +16,11 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.pageobjects.Locator.ByLocator.ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,9 +39,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PageLoaderTest {
@@ -136,6 +140,59 @@ public class PageLoaderTest {
         PageLoader.loadPage(ParameterConstructorPage.class);
     }
 
+    @Test
+    public void testAbstractPage_Click() throws Exception {
+        //prepare
+        new SeleniumContext(() -> webDriver).init();
+        WebElement element = mock(WebElement.class);
+        when(webDriver.findElement(By.id("someButton"))).thenReturn(element);
+        when(element.isDisplayed()).thenReturn(true);
+
+        //act
+        AbstractPage page = PageLoader.loadPage(AbstractPage.class);
+
+        //assert
+        assertNotNull(page);
+        page.pressButton();
+        verify(element).click();
+    }
+
+    @Test
+    public void testAbstractPage_SubmitForm() throws Exception {
+        //prepare
+        new SeleniumContext(() -> webDriver).init();
+        WebElement element = mock(WebElement.class);
+        when(webDriver.findElement(By.id("someForm"))).thenReturn(element);
+        when(element.isDisplayed()).thenReturn(true);
+        when(element.getTagName()).thenReturn("form");
+
+        //act
+        AbstractPage page = PageLoader.loadPage(AbstractPage.class);
+
+        //assert
+        assertNotNull(page);
+        page.submitForm();
+        verify(element).submit();
+    }
+
+    @Test
+    public void testAbstractPage_sendKeys() throws Exception {
+        //prepare
+        new SeleniumContext(() -> webDriver).init();
+        WebElement element = mock(WebElement.class);
+        when(webDriver.findElement(By.id("someInput"))).thenReturn(element);
+        when(element.isDisplayed()).thenReturn(true);
+
+        //act
+        AbstractPage page = PageLoader.loadPage(AbstractPage.class);
+
+        //assert
+        assertNotNull(page);
+        page.enterValue("text");
+        verify(element).clear();
+        verify(element).sendKeys("text");
+    }
+
     // -------------- Test Page Model ------------------------
 
     public static class TestPage implements Page {
@@ -163,4 +220,19 @@ public class PageLoaderTest {
 
         }
     }
+
+    public static abstract class AbstractPage implements Page {
+
+        @Locator(by = ID, value="someForm")
+        public abstract void submitForm();
+
+        @Locator(by = ID, value="someButton")
+        public abstract void pressButton();
+
+        @Locator(by = ID, value="someInput")
+        public abstract void enterValue(String someText);
+
+    }
+
+
 }

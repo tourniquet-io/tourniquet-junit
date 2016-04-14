@@ -21,9 +21,11 @@ import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 
 import io.tourniquet.tx.TransactionSupport;
+import net.sf.cglib.proxy.Enhancer;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -49,7 +51,7 @@ public final class PageLoader {
     public static <T extends Page> T loadPage(Class<T> pageType) {
 
         try {
-            T page = pageType.newInstance();
+            T page = newInstance(pageType);
             if (TransactionSupport.class.isAssignableFrom(pageType)) {
                 page = addTransactionSupport((TransactionSupport) page);
             }
@@ -58,6 +60,33 @@ public final class PageLoader {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Page " + pageType.getName() + " can not be loaded", e);
         }
+    }
+
+    private static <T extends Page> T newInstance(final Class<T> pageType)
+            throws InstantiationException, IllegalAccessException {
+        if(isAbstract(pageType)){
+            return newEnhancedPage(pageType);
+        }
+        return pageType.newInstance();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Page> T newEnhancedPage(final Class<T> pageType) {
+        return (T) Enhancer.create(pageType, new Class[0], new DynamicElementGroupInterceptor(pageType));
+    }
+
+    /**
+     * Checks if the specified page class denotes an abstract class.
+     * @param pageType
+     *  the type class of the page to check
+     * @param <T>
+     *  the type of the page
+     * @return
+     *  <code>true</code> if the specified type denotes an abstract page type
+     */
+    private static <T extends Page> boolean isAbstract(final Class<T> pageType) {
+
+        return Modifier.isAbstract(pageType.getModifiers());
     }
 
     /**
