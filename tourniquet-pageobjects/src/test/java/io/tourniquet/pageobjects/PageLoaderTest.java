@@ -153,8 +153,11 @@ public class PageLoaderTest {
 
         //assert
         assertNotNull(page);
-        page.pressButton();
+        WebElement e = page.pressButton();
         verify(element).click();
+        assertNotNull(e);
+        assertEquals(element, e);
+        assertEquals("testpage", page.toString());
     }
 
     @Test
@@ -173,6 +176,7 @@ public class PageLoaderTest {
         assertNotNull(page);
         page.submitForm();
         verify(element).submit();
+        assertEquals("testpage", page.toString());
     }
 
     @Test
@@ -188,9 +192,44 @@ public class PageLoaderTest {
 
         //assert
         assertNotNull(page);
-        page.enterValue("text");
+        AbstractPage fluentPage = page.enterValue("text");
         verify(element).clear();
         verify(element).sendKeys("text");
+        assertNotNull(fluentPage);
+        assertEquals(page, fluentPage);
+        assertEquals("testpage", fluentPage.toString());
+    }
+
+    @Test(expected = NoSuchMethodException.class)
+    public void testAbstractPage_nonInjectedMethod() throws Exception {
+        //prepare
+        new SeleniumContext(() -> webDriver).init();
+
+        //act
+        AbstractPage page = PageLoader.loadPage(AbstractPage.class);
+
+        //assert
+        assertNotNull(page);
+        //this method will not be implemented
+        page.unimplemented();
+
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAbstractPage_twoManyArgs() throws Exception {
+        //prepare
+        new SeleniumContext(() -> webDriver).init();
+        WebElement element = mock(WebElement.class);
+        when(webDriver.findElement(By.id("someInput"))).thenReturn(element);
+        when(element.isDisplayed()).thenReturn(true);
+
+        //act
+        AbstractPage page = PageLoader.loadPage(AbstractPage.class);
+
+        //assert
+        assertNotNull(page);
+        //this method is not supported
+        page.twoParamsMethod("text","2ndParam");
     }
 
     // -------------- Test Page Model ------------------------
@@ -227,11 +266,21 @@ public class PageLoaderTest {
         public abstract void submitForm();
 
         @Locator(by = ID, value="someButton")
-        public abstract void pressButton();
+        public abstract WebElement pressButton();
 
         @Locator(by = ID, value="someInput")
-        public abstract void enterValue(String someText);
+        public abstract AbstractPage enterValue(String someText);
 
+        @Locator(by = ID, value="someInput")
+        public abstract AbstractPage twoParamsMethod(String someText, String secondParam);
+
+        public abstract void unimplemented();
+
+        @Override
+        public String toString() {
+
+            return "testpage";
+        }
     }
 
 

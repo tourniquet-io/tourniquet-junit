@@ -19,27 +19,34 @@ package io.tourniquet.pageobjects;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 
 /**
- *
+ * CGLib method interceptor that injects default implementations for abstract methods that denote an action on an
+ * element. The methods must be annotated with {@link Locator} and may have either no or one (String) argument. The
+ * return type may be void, the page itself or a web element.
  */
 class DynamicElementGroupInterceptor implements MethodInterceptor {
 
     private final Map<Method, Supplier<WebElement>> elements;
 
-    public <T extends Page> DynamicElementGroupInterceptor(final Class<T> pageType) {
+    private Optional<ElementGroup> context = Optional.empty();
+
+    public <T extends ElementGroup> DynamicElementGroupInterceptor(final Class<T> pageType) {
         //scan for abstract methods with locator annotation
         this.elements = Stream.of(pageType.getMethods())
                               .filter(m -> m.getAnnotation(Locator.class) != null)
                               .collect(Collectors.toMap(method -> method,
                                                         method -> (Supplier<WebElement>) () -> WebElementLocator.locate(
+                                                                getSearchContext(),
                                                                 method.getAnnotation(Locator.class)))
 
                               );
@@ -50,23 +57,22 @@ class DynamicElementGroupInterceptor implements MethodInterceptor {
     public Object intercept(final Object o, final Method method, final Object[] objects, final MethodProxy methodProxy)
             throws Throwable {
 
-
         if (Modifier.isAbstract(method.getModifiers())) {
-            if(elements.containsKey(method)){
+            if (elements.containsKey(method)) {
                 WebElement element = elements.get(method).get();
-                if("form".equals(element.getTagName())){
+                if ("form".equals(element.getTagName())) {
                     element.submit();
-                } else if(objects.length == 1){
+                } else if (objects.length == 1) {
                     element.clear();
                     element.sendKeys(objects[0].toString());
-                } else if(objects.length == 0) {
+                } else if (objects.length == 0) {
                     element.click();
                 } else {
                     throw new IllegalArgumentException("Method does not match web element " + element);
                 }
-                if(o.getClass().isAssignableFrom(method.getReturnType())){
+                if (method.getReturnType().isAssignableFrom(o.getClass())) {
                     return o;
-                } else if(WebElement.class.isAssignableFrom(method.getReturnType())){
+                } else if (method.getReturnType().isAssignableFrom(WebElement.class)) {
                     return element;
                 }
                 return null;
@@ -77,5 +83,32 @@ class DynamicElementGroupInterceptor implements MethodInterceptor {
 
         }
         return methodProxy.invokeSuper(o, objects);
+    }
+
+    /**
+     * The seach context for locating elements. As search context, the search context of the current element group is
+     * used. The default search context is the current driver. So if no driver is initialized in the current
+     * SeleniumContext, this method will throw an {@link IllegalStateException}.
+     *
+     * @return the current search context.
+     */
+    SearchContext getSearchContext() {
+
+        return context.map(ctx -> getSearchContext())
+                      .orElse(SeleniumContext.currentDriver()
+                                             .orElseThrow(() -> new IllegalStateException(
+                                                     "No Selenium context initialized")));
+    }
+
+    /**
+     * Assigns the specified element group to this invocation handler. The search context of the element group is used
+     * to lookup for elements that are dynamically located.
+     *
+     * @param elementGroup
+     *         the element group this invocation handle should use to lookup for elements. May be null.
+     */
+    void assignElementGroup(ElementGroup elementGroup) {
+
+        this.context = Optional.ofNullable(elementGroup);
     }
 }

@@ -48,6 +48,7 @@ public final class PageLoader {
      *
      * @return the page instance of the object model
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Page> T loadPage(Class<T> pageType) {
 
         try {
@@ -62,18 +63,27 @@ public final class PageLoader {
         }
     }
 
+    /**
+     * Creates a new instance of the specified page. If the page type denotes an abstract class, a dynamic proxy
+     * (using CGLib) is created, providing injected implementations for the abstract methods.
+     * @param pageType
+     *  the type of the page to create
+     * @param <T>
+     *  the type of the page to create
+     * @return
+     *  an instance of the page
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    @SuppressWarnings("unchecked")
     private static <T extends Page> T newInstance(final Class<T> pageType)
             throws InstantiationException, IllegalAccessException {
         if(isAbstract(pageType)){
-            return newEnhancedPage(pageType);
+            return (T) Enhancer.create(pageType, new Class[0], new DynamicElementGroupInterceptor(pageType));
         }
         return pageType.newInstance();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends Page> T newEnhancedPage(final Class<T> pageType) {
-        return (T) Enhancer.create(pageType, new Class[0], new DynamicElementGroupInterceptor(pageType));
-    }
 
     /**
      * Checks if the specified page class denotes an abstract class.
