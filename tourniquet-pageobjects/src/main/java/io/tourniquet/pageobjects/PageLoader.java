@@ -19,9 +19,9 @@ package io.tourniquet.pageobjects;
 import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
 import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
+import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
-import java.lang.reflect.Modifier;
 import java.util.Optional;
 
 import io.tourniquet.tx.TransactionSupport;
@@ -82,21 +82,6 @@ public final class PageLoader {
             return (T) Enhancer.create(pageType, new Class[0], new DynamicElementGroupInterceptor(pageType));
         }
         return pageType.newInstance();
-    }
-
-
-    /**
-     * Checks if the specified page class denotes an abstract class.
-     * @param pageType
-     *  the type class of the page to check
-     * @param <T>
-     *  the type of the page
-     * @return
-     *  <code>true</code> if the specified type denotes an abstract page type
-     */
-    private static <T extends Page> boolean isAbstract(final Class<T> pageType) {
-
-        return Modifier.isAbstract(pageType.getModifiers());
     }
 
     /**
