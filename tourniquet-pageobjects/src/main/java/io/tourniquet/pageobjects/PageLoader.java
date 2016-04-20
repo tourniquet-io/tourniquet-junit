@@ -19,11 +19,13 @@ package io.tourniquet.pageobjects;
 import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
 import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
+import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
 import java.util.Optional;
 
 import io.tourniquet.tx.TransactionSupport;
+import net.sf.cglib.proxy.Enhancer;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -46,10 +48,11 @@ public final class PageLoader {
      *
      * @return the page instance of the object model
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Page> T loadPage(Class<T> pageType) {
 
         try {
-            T page = pageType.newInstance();
+            T page = newInstance(pageType);
             if (TransactionSupport.class.isAssignableFrom(pageType)) {
                 page = addTransactionSupport((TransactionSupport) page);
             }
@@ -58,6 +61,27 @@ public final class PageLoader {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Page " + pageType.getName() + " can not be loaded", e);
         }
+    }
+
+    /**
+     * Creates a new instance of the specified page. If the page type denotes an abstract class, a dynamic proxy
+     * (using CGLib) is created, providing injected implementations for the abstract methods.
+     * @param pageType
+     *  the type of the page to create
+     * @param <T>
+     *  the type of the page to create
+     * @return
+     *  an instance of the page
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    @SuppressWarnings("unchecked")
+    private static <T extends Page> T newInstance(final Class<T> pageType)
+            throws InstantiationException, IllegalAccessException {
+        if(isAbstract(pageType)){
+            return (T) Enhancer.create(pageType, new Class[0], new DynamicElementGroupInterceptor(pageType));
+        }
+        return pageType.newInstance();
     }
 
     /**
