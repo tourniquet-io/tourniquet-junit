@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
+import io.tourniquet.junit.UncheckedException;
+
 /**
  * Provides a context for a test execution that allows to
  * <ul>
@@ -142,7 +144,7 @@ public class TestExecutionContext {
                 ctx.getOutput().putAll(props);
             }
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Unable to destroy context", e);
+            throw new UncheckedException("Unable to destroy context", e);
         }
     }
 

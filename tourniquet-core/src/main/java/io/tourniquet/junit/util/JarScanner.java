@@ -37,6 +37,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.tourniquet.junit.UncheckedException;
+
 /**
  * A scanner for contents of jar files. The scanner supports scanning for packages and contents.
  */
@@ -201,7 +203,7 @@ public class JarScanner {
                         .distinct()
                         .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedException(e);
         }
     }
 
