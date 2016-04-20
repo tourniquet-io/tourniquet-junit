@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.tourniquet.junit.UncheckedException;
 import org.junit.Test;
 
 /**
@@ -45,7 +44,7 @@ public class ExecutionHelperTest {
         assertTrue(run.get());
     }
 
-    @Test(expected = UncheckedException.class)
+    @Test(expected = RuntimeException.class)
     public void testRunUnchecked_runnable_withException() throws Exception {
         //act
         ExecutionHelper.runUnchecked((Runnable) () -> {
@@ -66,7 +65,7 @@ public class ExecutionHelperTest {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = UncheckedException.class)
+    @Test(expected = RuntimeException.class)
     public void testRunUnchecked_callable_withException() throws Exception {
         //act
         ExecutionHelper.runUnchecked((Callable) () -> {

@@ -16,8 +16,6 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,11 +23,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import io.tourniquet.junit.UncheckedException;
 import io.tourniquet.junit.util.ClassStreams;
 import io.tourniquet.tx.TransactionHelper;
 import io.tourniquet.tx.TransactionSupport;
-import net.sf.cglib.proxy.Enhancer;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 
@@ -39,11 +35,11 @@ import org.openqa.selenium.WebElement;
 public final class PageObjectsInjector {
 
     private PageObjectsInjector() {
-
     }
 
     /**
-     * Injects WebElement suppliers in all setter methods according to the {@link Locator} annotation on that method
+     * Injects WebElement suppliers in all setter methods according to the {@link Locator} annotation on
+     * that method
      *
      * @param group
      *         the page into which setter methods should be invoked
@@ -55,40 +51,38 @@ public final class PageObjectsInjector {
                     .filter(m -> void.class.isAssignableFrom(m.getReturnType())
                             && m.getParameterCount() == 1
                             && Supplier.class.isAssignableFrom(m.getParameterTypes()[0]))
-                    .forEach(m -> Optional.ofNullable(m.getDeclaredAnnotation(Locator.class))
-                                          .ifPresent(loc -> invokeSetter(m, group, loc)));
+                    .forEach(m -> Optional.ofNullable(m.getDeclaredAnnotation(Locator.class)).ifPresent(
+                                    loc -> invokeSetter(m, group, loc)));
 
     }
 
     /**
      * Invokes the specified setter method to inject a WebElement supplier
-     *
      * @param m
-     *         the setter method to invoke
+     *  the setter method to invoke
      * @param target
-     *         the target element on which to invoke the method and which acts a search context for locating the
-     *         elements
+     *  the target element on which to invoke the method and which acts a search context for locating the
+     *  elements
      * @param loc
-     *         the locator to locate the web element
+     *  the locator to locate the web element
      */
     private static void invokeSetter(Method m, ElementGroup target, Locator loc) {
-
         m.setAccessible(true);
         try {
             m.invoke(target, (Supplier<WebElement>) () -> WebElementLocator.locate(target.getSearchContext(), loc));
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new UncheckedException("Could not init " + m, e);
+            throw new RuntimeException("Could not init " + m, e);
         }
     }
 
     /**
-     * Injects WebElement suppliers in all fields according to the {@link Locator} annotation on that field
+     * Injects WebElement suppliers in all fields according to the {@link Locator} annotation on that
+     * field
      *
      * @param group
      *         the page into which fields should be injected
      */
     public static void injectFields(ElementGroup group) {
-
         injectWebElements(group);
         injectElementGroups(group);
 
@@ -96,27 +90,23 @@ public final class PageObjectsInjector {
 
     /**
      * Inject WebElement Suppliers into fields of the element group
-     *
      * @param group
-     *         the element group to inject web elements into
+     *  the element group to inject web elements into
      */
     private static void injectWebElements(ElementGroup group) {
-
         ClassStreams.selfAndSupertypes(group.getClass())
                     .flatMap(c -> Stream.of(c.getDeclaredFields()))
                     .filter(f -> Supplier.class.isAssignableFrom(f.getType()))
-                    .forEach(f -> Optional.ofNullable(f.getDeclaredAnnotation(Locator.class))
-                                          .ifPresent(loc -> injectWebElement(group, f, loc)));
+                    .forEach(f -> Optional.ofNullable(f.getDeclaredAnnotation(Locator.class)).ifPresent(
+                                    loc -> injectWebElement(group, f, loc)));
     }
 
     /**
      * Creates and injects element groups into the specified group.
-     *
      * @param group
-     *         the elmeent group to inject element groups into
+     *  the elmeent group to inject element groups into
      */
     private static void injectElementGroups(ElementGroup group) {
-
         ClassStreams.selfAndSupertypes(group.getClass())
                     .flatMap(c -> Stream.of(c.getDeclaredFields()))
                     .filter(f -> ElementGroup.class.isAssignableFrom(f.getType()))
@@ -125,50 +115,46 @@ public final class PageObjectsInjector {
 
     /**
      * Injects a WebElement supplier into the specified field of the target.
-     *
      * @param target
-     *         the target object into which the webelement supplier should be injected
+     *  the target object into which the webelement supplier should be injected
      * @param field
-     *         the field declaration into which the instance should be injected
+     *  the field declaration into which the instance should be injected
      * @param locator
-     *         the locator declaring how the web element should be located
+     *  the locator declaring how the web element should be located
      */
     public static void injectWebElement(ElementGroup target, Field field, Locator locator) {
-
         field.setAccessible(true);
         try {
-            field.set(target,
-                      (Supplier<WebElement>) () -> WebElementLocator.locate(target.getSearchContext(), locator));
+            field.set(target, (Supplier<WebElement>) () -> WebElementLocator.locate(target.getSearchContext(), locator));
         } catch (IllegalAccessException e) {
-            throw new UncheckedException("Could not init " + field, e);
+            throw new RuntimeException("Could not init " + field, e);
         }
     }
 
     /**
      * Injects a new instance of an element group into the target field.
-     *
      * @param target
-     *         the target field to inject the new element group into
+     *  the target field to inject the new element group into
      * @param parent
-     *         the parent element group. It is not just the instance containing the target field but acts also as parent
-     *         search context for all elements inside the the group.
+     *  the parent element group. It is not just the instance containing the target field but acts also as parent
+     *  search context for all elements inside the the group.
      */
     @SuppressWarnings("unchecked")
     private static void injectElementGroup(Field target, ElementGroup parent) {
-
         try {
             final Class<? extends ElementGroup> elementGroupType = (Class<? extends ElementGroup>) target.getType();
-            ElementGroup nestedGroup = Optional.ofNullable(target.getAnnotation(Locator.class))
-                                               .map(loc -> createContextualInstance(elementGroupType, loc, parent))
-                                               .orElseGet(() -> createDefaultInstance(elementGroupType));
+            ElementGroup nestedGroup =
+                    Optional.ofNullable(target.getAnnotation(Locator.class))
+                            .map(loc -> createContextualInstance(elementGroupType, loc, parent))
+                            .orElseGet(() -> createDefaultInstance(elementGroupType));
             target.setAccessible(true);
             injectFields(nestedGroup);
-            if (TransactionSupport.class.isAssignableFrom(target.getDeclaringClass())) {
-                nestedGroup = TransactionHelper.addTransactionSupport((TransactionSupport) nestedGroup);
+            if(TransactionSupport.class.isAssignableFrom(target.getDeclaringClass())){
+                nestedGroup = TransactionHelper.addTransactionSupport((TransactionSupport)nestedGroup);
             }
             target.set(parent, nestedGroup);
         } catch (IllegalAccessException e) {
-            throw new UncheckedException("Could not init element group", e);
+            throw new RuntimeException("Could not init element group", e);
         }
     }
 
@@ -187,12 +173,8 @@ public final class PageObjectsInjector {
      *
      * @return a new element group instance
      */
-    private static ElementGroup createContextualInstance(Class<? extends ElementGroup> elementGroupType,
-                                                         Locator loc,
-                                                         ElementGroup parent) {
-
-        return loc.by()
-                  .locate(parent.getSearchContext(), loc.value())
+    private static ElementGroup createContextualInstance(Class<? extends ElementGroup> elementGroupType, Locator loc, ElementGroup parent) {
+        return loc.by().locate(parent.getSearchContext(), loc.value())
                   .map(context -> createContextualInstance(elementGroupType, context))
                   .orElseGet(() -> Optional.of(createDefaultInstance(elementGroupType)))
                   .get();
@@ -210,9 +192,7 @@ public final class PageObjectsInjector {
      *
      * @return an optional instance of the element group. If no matching constructor exists, the optional is empty.
      */
-    private static Optional<ElementGroup> createContextualInstance(Class<? extends ElementGroup> elementGroupType,
-                                                                   SearchContext context) {
-
+    private static Optional<ElementGroup> createContextualInstance(Class<? extends ElementGroup> elementGroupType, SearchContext context) {
         return Stream.of(elementGroupType.getConstructors())
                      .filter(c -> c.getParameterCount() == 1
                              && SearchContext.class.isAssignableFrom(c.getParameterTypes()[0]))
@@ -221,7 +201,7 @@ public final class PageObjectsInjector {
                              c.setAccessible(true);
                              return (ElementGroup) c.newInstance(context);
                          } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                             throw new UncheckedException("Could not create element group " + elementGroupType, e);
+                             throw new RuntimeException("Could not create element group " + elementGroupType, e);
                          }
                      })
                      .findFirst();
@@ -235,18 +215,11 @@ public final class PageObjectsInjector {
      *
      * @return an element group instance
      */
-    @SuppressWarnings("unchecked")
-    public static <T extends ElementGroup> T createDefaultInstance(Class<T> elementGroupType) {
-
+    public static ElementGroup createDefaultInstance(Class<?> elementGroupType) {
         try {
-            if (isAbstract(elementGroupType)) {
-                return (T) Enhancer.create(elementGroupType,
-                                           new Class[0],
-                                           new DynamicElementGroupInterceptor(elementGroupType));
-            }
-            return elementGroupType.newInstance();
+            return (ElementGroup) elementGroupType.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new UncheckedException("Could not create element group using default constructor", e);
+            throw new RuntimeException("Could not create element group using default constructor", e);
         }
     }
 

@@ -74,41 +74,6 @@ As example, take a login page:
     }
 ```
 
-## Default Interactions
-In the above example for a simple page, the interactions with the elements are fairly common. Tourniquet-pageobjects
-provides some convenience for dealing with such web elements and the interaction by generating the default interactions
-for you. It is only required to declare an abstract method and annotate it with the locator information. The
-according code is injected, depending on the parameters:
-
-* if the element points to <form>, the `submit()` method is invoked, regardless of the parameters passed
-* if no parameter is passed, the element is `click()`ed.
-* if a single parameter is passed, the element is `clear()`ed and afterwards the key sequences defined by the 
-parameter's  `toString()` is send as keys using the `sendKeys()` method.
-
-The methods may return one of the following:
-
-* void
-* WebElement - the element found by the locator
-* the ElementGroup or Page itself, supporting fluent DSLs
-
-With the implicit interactions, the above example would look like this:
-
-```java
-    @Locator("login.jsp")
-    public abstract class LoginPage implements Page {
-        
-        @Locator(by = ID, value = "username")
-        public abstract LoginPage enterUsername(String username);
-        
-        @Locator(by = ID, value = "password")
-        public abstract LoginPage enterPassword(String password);
-        
-        @Locator(by = ID, value = "login")
-        public abstract void pressLogin();
-    }
-```
-
-
 ## Running Tests with Page Objects
 The parts that load the page and locate the elements on the page require a Selenium driver. The default
 case is to run a test with a single driver in one test execution thread. In order to initialize a driver
@@ -195,7 +160,6 @@ Example:
         LoginForm form;
     }
 ```
-
    
 # Timeouts
 When modelling an application page model, certain elements or pageloads have to meet a respones time goal or the 

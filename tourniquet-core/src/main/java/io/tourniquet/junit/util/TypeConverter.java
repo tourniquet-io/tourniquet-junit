@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.tourniquet.junit.UncheckedException;
-
 /**
  * A converter for converting string values into primitive types.
  */
@@ -91,7 +89,7 @@ public final class TypeConverter {
             }
             return (T) type.getMethod(methodName, String.class).invoke(null, value);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new UncheckedException("Could not convert value '" + value + "' to type " + targetType.getName(), e);
+            throw new RuntimeException("Could not convert value '" + value + "' to type " + targetType.getName(), e);
         }
     }
 }

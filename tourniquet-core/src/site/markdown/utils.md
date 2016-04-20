@@ -42,7 +42,7 @@ into a computational context.
 Using the provided methods allows to use exception-throwing methods in a lambda expression without having to deal 
 with exceptions directly in the expression. 
 
-The methods `runUnchecked` will simply wrap any exception into a `UncheckedException`.
+The methods `runUnchecked` will simply wrap any exception into a `RuntimeException`.
 
 The methods `runChecked` will return an `ExecutionResult` allowing to fluently deal with exceptions or access the
 result of the invocation.

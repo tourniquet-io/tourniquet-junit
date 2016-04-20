@@ -18,8 +18,6 @@ package io.tourniquet.junit.util;
 
 import java.util.concurrent.Callable;
 
-import io.tourniquet.junit.UncheckedException;
-
 /**
  * Helper to perform tasks in a functional way without having to explicitly handle exceptions.
  */
@@ -38,7 +36,7 @@ public final class ExecutionHelper {
      *  the result of the task execution
      */
     public static <T> T runUnchecked(Callable<T> call) {
-        return runProtected(call).mapException(Exception.class, UncheckedException::new).get();
+        return runProtected(call).mapException(Exception.class, RuntimeException::new).get();
     }
 
     /**
@@ -49,7 +47,7 @@ public final class ExecutionHelper {
      *  the result of the task execution
      */
     public static void runUnchecked(Runnable runnable) { //NOSONAR
-        runProtected(runnable).mapException(Exception.class, UncheckedException::new).get();
+        runProtected(runnable).mapException(Exception.class, RuntimeException::new).get();
     }
 
     /**

@@ -17,18 +17,15 @@
 package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.Locator.ByLocator.ID;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openqa.selenium.By;
@@ -51,11 +48,6 @@ public class PageObjectsInjectorTest {
     @Mock
     private WebDriver driver;
 
-    @After
-    public void tearDown() throws Exception {
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
-    }
-
     @Test
     public void testInjectMethods() throws Exception {
         //prepare
@@ -76,10 +68,19 @@ public class PageObjectsInjectorTest {
 
         //prepare
         ChildFieldInjectTestGroup group = new ChildFieldInjectTestGroup();
-        new SeleniumContext(() -> driver).init();
+        SeleniumControl ctx = SeleniumControl.builder().driver(() -> driver)
+                                             .baseUrl("http://localhost")
+                                             .build();
         when(driver.findElement(By.id("subgroup"))).thenReturn(element);
         //act
-        PageObjectsInjector.injectFields(group);
+        ctx.apply(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+
+                PageObjectsInjector.injectFields(group);
+
+            }
+        }, description).evaluate();
 
 
         //assert
@@ -87,109 +88,12 @@ public class PageObjectsInjectorTest {
         assertNotNull(group.child);
         //superclass injection
         assertNotNull(group.field);
-        //element subgroup injection
+        //element group injection
         assertNotNull(group.group);
         assertNotNull(group.group.field);
         assertNotNull(group.ctxGroup.field);
         assertNotNull(group.ctxGroup.field);
 
-    }
-
-    @Test
-    public void testAbstractGroup_Click() throws Exception {
-        //prepare
-        new SeleniumContext(() -> driver).init();
-        WebElement element = mock(WebElement.class);
-        when(driver.findElement(By.id("someButton"))).thenReturn(element);
-        when(element.isDisplayed()).thenReturn(true);
-        GroupWithAbstractSubgroup group = new GroupWithAbstractSubgroup();
-
-        //act
-        PageObjectsInjector.injectFields(group);
-
-        //assert
-        assertNotNull(group.subgroup);
-        WebElement e = group.subgroup.pressButton();
-        verify(element).click();
-        assertNotNull(e);
-        assertEquals(element, e);
-        assertEquals("testpage", group.subgroup.toString());
-    }
-
-    @Test
-    public void testAbstractGroup_SubmitForm() throws Exception {
-        //prepare
-        new SeleniumContext(() -> driver).init();
-        WebElement element = mock(WebElement.class);
-        when(driver.findElement(By.id("someForm"))).thenReturn(element);
-        when(element.isDisplayed()).thenReturn(true);
-        when(element.getTagName()).thenReturn("form");
-        GroupWithAbstractSubgroup group = new GroupWithAbstractSubgroup();
-
-        //act
-        PageObjectsInjector.injectFields(group);
-
-        //assert
-        assertNotNull(group.subgroup);
-        group.subgroup.submitForm();
-        verify(element).submit();
-        assertEquals("testpage", group.subgroup.toString());
-    }
-
-    @Test
-    public void testAbstractGroup_sendKeys() throws Exception {
-        //prepare
-        new SeleniumContext(() -> driver).init();
-        WebElement element = mock(WebElement.class);
-        when(driver.findElement(By.id("someInput"))).thenReturn(element);
-        when(element.isDisplayed()).thenReturn(true);
-        GroupWithAbstractSubgroup group = new GroupWithAbstractSubgroup();
-
-        //act
-        PageObjectsInjector.injectFields(group);
-
-        //assert
-        assertNotNull(group.subgroup);
-        AbstractGroup fluentPage = group.subgroup.enterValue("text");
-        verify(element).clear();
-        verify(element).sendKeys("text");
-        assertNotNull(fluentPage);
-        assertEquals(group.subgroup, fluentPage);
-        assertEquals("testpage", fluentPage.toString());
-    }
-
-    @Test(expected = NoSuchMethodException.class)
-    public void testAbstractGroup_nonInjectedMethod() throws Exception {
-        //prepare
-        new SeleniumContext(() -> driver).init();
-        GroupWithAbstractSubgroup group = new GroupWithAbstractSubgroup();
-
-        //act
-        PageObjectsInjector.injectFields(group);
-
-        //assert
-        assertNotNull(group.subgroup);
-        //this method will not be implemented
-        group.subgroup.unimplemented();
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAbstractGroup_twoManyArgs() throws Exception {
-        //prepare
-        new SeleniumContext(() -> driver).init();
-        WebElement element = mock(WebElement.class);
-        when(driver.findElement(By.id("someInput"))).thenReturn(element);
-        when(element.isDisplayed()).thenReturn(true);
-        GroupWithAbstractSubgroup group = new GroupWithAbstractSubgroup();
-
-        //act
-        PageObjectsInjector.injectFields(group);
-
-        //assert
-        assertNotNull(group.subgroup);
-        //this method is not supported
-        group.subgroup.twoParamsMethod("text","2ndParam");
     }
 
     //// Test Page Object classes
@@ -249,36 +153,6 @@ public class PageObjectsInjectorTest {
         void setChild(final Supplier<WebElement> child) {
             this.child = child;
         }
-    }
-
-    public static class GroupWithAbstractSubgroup implements ElementGroup {
-
-        AbstractGroup subgroup;
-
-    }
-
-    public static abstract class AbstractGroup implements ElementGroup {
-
-        @Locator(by = ID, value="someForm")
-        public abstract void submitForm();
-
-        @Locator(by = ID, value="someButton")
-        public abstract WebElement pressButton();
-
-        @Locator(by = ID, value="someInput")
-        public abstract AbstractGroup enterValue(String someText);
-
-        @Locator(by = ID, value="someInput")
-        public abstract AbstractGroup twoParamsMethod(String someText, String secondParam);
-
-        public abstract void unimplemented();
-
-        @Override
-        public String toString() {
-
-            return "testpage";
-        }
-
     }
 
 
