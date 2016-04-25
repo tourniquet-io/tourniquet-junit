@@ -24,6 +24,8 @@ import java.lang.annotation.Target;
 import java.util.Optional;
 import java.util.function.Function;
 
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.TimeoutProvider;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;

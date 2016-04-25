@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 
+import io.tourniquet.selenium.SeleniumContext;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -25,6 +25,8 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.util.Optional;
 
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.TimeoutProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

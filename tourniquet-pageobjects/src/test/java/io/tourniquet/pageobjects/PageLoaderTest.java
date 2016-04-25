@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.tourniquet.measure.ResponseTime;
 import io.tourniquet.measure.ResponseTimeCollector;
 import io.tourniquet.measure.ResponseTimes;
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.TimeoutProvider;
 import io.tourniquet.tx.Transaction;
 import io.tourniquet.tx.TransactionSupport;
 import org.junit.After;

@@ -17,13 +17,14 @@
 package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
-import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
+import static io.tourniquet.selenium.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
 import java.util.Optional;
 
+import io.tourniquet.selenium.SeleniumContext;
 import io.tourniquet.tx.TransactionSupport;
 import net.sf.cglib.proxy.Enhancer;
 import org.openqa.selenium.WebElement;
@@ -86,7 +87,7 @@ public final class PageLoader {
 
     /**
      * Loads the page into the current webdriver. The method waits for the document to be completely loaded and
-     * rendered.<br> If no {@link SeleniumContext} is initialized, an {@link IllegalStateException} is thrown.
+     * rendered.<br> If no {@link io.tourniquet.selenium.SeleniumContext} is initialized, an {@link IllegalStateException} is thrown.
      *
      * @param page
      *         the page handle to load

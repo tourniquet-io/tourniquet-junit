@@ -26,6 +26,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.SeleniumControl;
+import io.tourniquet.selenium.TimeoutProvider;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

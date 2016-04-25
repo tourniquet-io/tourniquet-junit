@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import java.util.function.Supplier;
 import org.openqa.selenium.WebDriver;

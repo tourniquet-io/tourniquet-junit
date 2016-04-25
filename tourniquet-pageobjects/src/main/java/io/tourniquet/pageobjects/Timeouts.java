@@ -16,10 +16,12 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.tourniquet.pageobjects.TimeoutProvider.DEFAULT_TIMEOUT;
+import static io.tourniquet.selenium.TimeoutProvider.DEFAULT_TIMEOUT;
 
 import java.time.Duration;
 import java.util.Optional;
+
+import io.tourniquet.selenium.SeleniumContext;
 
 /**
  * Utility class to get timeout values for various criteria. <br> There are various options for define or obtain a
@@ -52,7 +54,7 @@ public final class Timeouts {
 
     /**
      * Gets the timeout for the specified key. The timeout is retrieved from the timeout provider of the current {@link
-     * SeleniumContext}. The result will be empty if the context is not initialized or no timeout is defined for the
+     * io.tourniquet.selenium.SeleniumContext}. The result will be empty if the context is not initialized or no timeout is defined for the
      * given key.
      *
      * @param timeoutKey

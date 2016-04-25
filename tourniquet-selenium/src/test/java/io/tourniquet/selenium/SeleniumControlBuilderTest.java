@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import io.tourniquet.selenium.SeleniumControl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

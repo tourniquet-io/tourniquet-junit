@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +22,9 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.SeleniumControl;
+import io.tourniquet.selenium.User;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

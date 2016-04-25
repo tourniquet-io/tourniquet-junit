@@ -23,6 +23,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.time.Duration;
 import java.util.Optional;
 
+import io.tourniquet.selenium.SeleniumContext;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;

@@ -16,7 +16,7 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.tourniquet.pageobjects.SeleniumContext.currentDriver;
+import static io.tourniquet.selenium.SeleniumContext.currentDriver;
 import static io.tourniquet.pageobjects.WaitPredicates.documentReady;
 import static io.tourniquet.pageobjects.WaitPredicates.elementDisplayed;
 import static io.tourniquet.pageobjects.WaitPredicates.elementNotDisplayed;

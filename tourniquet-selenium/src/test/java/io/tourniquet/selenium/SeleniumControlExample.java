@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static io.tourniquet.junit.net.NetworkUtils.findAvailablePort;
 import static org.junit.Assert.assertEquals;

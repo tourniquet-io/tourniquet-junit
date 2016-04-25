@@ -42,7 +42,7 @@ The `driver` parameter accepts a Supplier, the `Drivers` enum provides suppliers
 The `baseURL` must be present. It is used to resolve relative paths using the SeleniumContext's `resolve()` method and
 is initially loaded when the rule is evaluated.
 
-See also `io.tourniquet.pageobjects.SeleniumControlExample` in the test source.
+See also `io.tourniquet.selenium.SeleniumControlExample` in the test source.
    
 # Timeouts
 Besides access to the driver, the context may hold a `TimeoutProvider` which can be used to define configurable 

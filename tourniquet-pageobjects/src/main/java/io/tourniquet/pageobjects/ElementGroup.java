@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
 
 import io.tourniquet.junit.util.ExecutionHelper;
+import io.tourniquet.selenium.SeleniumContext;
 import org.openqa.selenium.SearchContext;
 
 /**
