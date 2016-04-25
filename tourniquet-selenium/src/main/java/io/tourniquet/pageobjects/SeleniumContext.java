@@ -16,21 +16,11 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.tourniquet.junit.util.ExecutionHelper.runUnchecked;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import io.tourniquet.junit.UncheckedException;
-import io.tourniquet.junit.util.ClassStreams;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -62,66 +52,15 @@ public class SeleniumContext {
 
     /**
      * Creates a new context. For binding the context to the current thread, invoke the init method.
+     *
      * @param provider
-     *  a provider for a web driver that should be bound to the current context. The driver is obtained during
-     *  intialization of the session.
+     *         a provider for a web driver that should be bound to the current context. The driver is obtained during
+     *         intialization of the session.
      */
     public SeleniumContext(Supplier<WebDriver> provider) {
 
         Objects.requireNonNull(provider, "WebDriver must not be null");
         this.provider = provider;
-    }
-
-    /**
-     * Creates a link from the other classloader to the specified context. That way it is possible to share access to
-     * the same selenium context from different classloader hierarchies.
-     *
-     * @param context
-     *         the context of the current classloader hierarchy
-     * @param cl
-     *         the other classloader in which the access to the given context should possible
-     */
-    public static void init(SeleniumContext context, ClassLoader cl) {
-
-        if (!Objects.equals(context.getClass().getClassLoader(), cl) && context.getDriver().isPresent()) { //NOSONAR
-            try {
-                final Class<?> contextClass = cl.loadClass(context.getClass().getName());
-                final Constructor constr = contextClass.getConstructor(Supplier.class);
-                final Supplier provider = () -> createProxy(context.getDriver().get(), cl);
-                final Object ctx = constr.newInstance(provider);
-                contextClass.getMethod("init").invoke(ctx);
-                final String baseUrl = context.getBaseUrl();
-                if (baseUrl != null) {
-                    contextClass.getMethod("setBaseUrl", String.class).invoke(ctx, baseUrl);
-                }
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
-                    | InvocationTargetException e) {
-                throw new UncheckedException("Could not initialize context", e);
-            }
-        }
-    }
-
-    /**
-     * Create a dynamic proxy that delegates invocation calls to from the other classloader hierarchy to the specified
-     * webdriver. That way, a webdriver can be reused in another classloader without having to serialize it.
-     *
-     * @param webDriver
-     *         the webdriver to create a proxy for
-     * @param cl
-     *         the other classloader from which access to the specified classloader should be possible
-     *
-     * @return a proxy for the webdriver
-     */
-    private static Object createProxy(final WebDriver webDriver, ClassLoader cl) {
-
-        final List<Class> interfaces = ClassStreams.selfAndSupertypes(webDriver.getClass())
-                                                   .flatMap(c -> stream(c.getInterfaces()))
-                                                   .map(c -> runUnchecked(() -> cl.loadClass(c.getName())))
-                                                   .collect(toList());
-        return Proxy.newProxyInstance(cl,
-                                      interfaces.toArray(new Class[interfaces.size()]),
-                                      (proxy, method, args) -> method.invoke(webDriver, args));
-
     }
 
     /**
@@ -137,13 +76,16 @@ public class SeleniumContext {
      * Destroys the context and closes the current driver.
      */
     public void destroy() {
+
         destroy(true);
     }
 
     /**
      * Destroys the context.
+     *
      * @param quitDriver
-     *  set to <code>true</code> to quit the driver, too. In case you want to reuse the driver, set to <code>false</code>
+     *         set to <code>true</code> to quit the driver, too. In case you want to reuse the driver, set to
+     *         <code>false</code>
      */
     public void destroy(boolean quitDriver) {
 
@@ -157,9 +99,9 @@ public class SeleniumContext {
      *
      * @return the context for the current thread.
      */
-    public static Optional<SeleniumContext> currentContext() {
+    public static SeleniumContext currentContext() {
 
-        return CONTEXT.get();
+        return CONTEXT.get().orElseThrow(() -> new IllegalStateException("Context not initialized"));
     }
 
     /**
@@ -167,9 +109,9 @@ public class SeleniumContext {
      *
      * @return the current web driver
      */
-    public static Optional<WebDriver> currentDriver() {
+    public static WebDriver currentDriver() {
 
-        return currentContext().flatMap(SeleniumContext::getDriver);
+        return currentContext().getDriver();
     }
 
     /**
@@ -177,27 +119,30 @@ public class SeleniumContext {
      *
      * @return a Selenium WebDriver
      */
-    public Optional<WebDriver> getDriver() {
+    public WebDriver getDriver() {
 
-        return driver;
+        return driver.orElseThrow(() -> new IllegalStateException("Context not initialized"));
     }
 
     /**
      * Sets the timeout provider for this context.
+     *
      * @param provider
-     *  the provider to be used for timeout settings in this context.
+     *         the provider to be used for timeout settings in this context.
      */
     public void setTimeoutProvider(TimeoutProvider provider) {
+
         Objects.requireNonNull(provider);
         this.timeoutProvider = provider;
     }
 
     /**
      * The timeout provider is a specialized configuration for timeouts used in your page objects model.
-     * @return
-     *  the timeout for the current context.
+     *
+     * @return the timeout for the current context.
      */
-    public TimeoutProvider getTimeoutProvider(){
+    public TimeoutProvider getTimeoutProvider() {
+
         return this.timeoutProvider;
     }
 
@@ -233,18 +178,17 @@ public class SeleniumContext {
      */
     public static String resolve(String relativePath) {
 
-        return currentContext().map(SeleniumContext::getBaseUrl).map(base -> {
-            final StringBuilder buf = new StringBuilder(16);
-            buf.append(base);
-            if (base.charAt(base.length() - 1) != '/') {
-                buf.append('/');
-            }
-            if (relativePath.startsWith("/")) {
-                buf.append(relativePath.substring(1));
-            } else {
-                buf.append(relativePath);
-            }
-            return buf.toString();
-        }).orElse(relativePath);
+        final String base = currentContext().getBaseUrl();
+        final StringBuilder buf = new StringBuilder(16);
+        buf.append(base);
+        if (base.charAt(base.length() - 1) != '/') {
+            buf.append('/');
+        }
+        if (relativePath.startsWith("/")) {
+            buf.append(relativePath.substring(1));
+        } else {
+            buf.append(relativePath);
+        }
+        return buf.toString();
     }
 }

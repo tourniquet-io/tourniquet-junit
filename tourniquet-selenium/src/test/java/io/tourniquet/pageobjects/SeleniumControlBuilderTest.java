@@ -59,7 +59,7 @@ public class SeleniumControlBuilderTest {
         try {
             assertNotNull(ctx);
             assertEquals("myBaseUrl", ctx.getBaseUrl());
-            assertEquals(webDriver, ctx.getDriver().get());
+            assertEquals(webDriver, ctx.currentDriver());
         } finally {
             ctx.after();
         }

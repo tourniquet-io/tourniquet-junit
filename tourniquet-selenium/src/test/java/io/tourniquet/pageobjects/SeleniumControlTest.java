@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
@@ -79,11 +80,8 @@ public class SeleniumControlTest {
 
             @Override
             public void evaluate() throws Throwable {
-
-                SeleniumContext.currentContext().ifPresent(ctx -> {
-                    ctrl.login(new User("test", "pw"));
-                    loggedIn.set(ctrl.isLoggedIn());
-                });
+                ctrl.login(new User("test", "pw"));
+                loggedIn.set(ctrl.isLoggedIn());
             }
         };
         //act
@@ -91,8 +89,8 @@ public class SeleniumControlTest {
 
         //assert
         assertTrue(loggedIn.get());
-        assertEquals("test", user.get().getUsername());
-        assertEquals("pw", user.get().getPassword());
+        Assert.assertEquals("test", user.get().getUsername());
+        Assert.assertEquals("pw", user.get().getPassword());
     }
 
     @Test
@@ -112,11 +110,9 @@ public class SeleniumControlTest {
             @Override
             public void evaluate() throws Throwable {
 
-                SeleniumContext.currentContext().ifPresent(ctx -> {
                     ctrl.login(new User("test", "pw"));
                     ctrl.logout();
                     loggedIn.set(ctrl.isLoggedIn());
-                });
             }
         };
         //act
@@ -132,11 +128,11 @@ public class SeleniumControlTest {
         assertFalse(subject.isLoggedIn());
     }
 
-    @Test
-    public void testGetDriver_outsideTest() throws Exception {
+    @Test(expected = IllegalStateException.class)
+    public void testGetDriver_outsideTest_exception() throws Exception {
 
         //assert
-        assertFalse(subject.getDriver().isPresent());
+        subject.currentDriver();
     }
 
     @Test
@@ -148,7 +144,7 @@ public class SeleniumControlTest {
             @Override
             public void evaluate() throws Throwable {
 
-                assertEquals(webDriver, subject.getDriver().get());
+                assertEquals(webDriver, subject.currentDriver());
 
             }
         };
@@ -163,10 +159,10 @@ public class SeleniumControlTest {
         assertEquals("http://testBaseUrl", subject.getBaseUrl());
     }
 
-    @Test
-    public void testCurrentContext_outsideTest_notSet() throws Exception {
+    @Test(expected = IllegalStateException.class)
+    public void testCurrentContext_outsideTest_exception() throws Exception {
 
-        assertFalse(subject.currentContext().isPresent());
+        subject.currentContext();
     }
 
     @Test
@@ -179,7 +175,7 @@ public class SeleniumControlTest {
             @Override
             public void evaluate() throws Throwable {
 
-                ctx.set(subject.currentContext().get());
+                ctx.set(subject.currentContext());
             }
         };
 
@@ -190,11 +186,10 @@ public class SeleniumControlTest {
         assertNotNull(ctx.get());
     }
 
-    @Test
-    public void testCurrentDriver_outsideTest_notSet() throws Exception {
+    @Test(expected = IllegalStateException.class)
+    public void testCurrentDriver_outsideTest_notSet_exception() throws Exception {
 
-        assertNotNull(subject.currentDriver());
-        assertFalse(subject.currentDriver().isPresent());
+        subject.currentDriver();
     }
 
     @Test
@@ -207,7 +202,7 @@ public class SeleniumControlTest {
             @Override
             public void evaluate() throws Throwable {
 
-                driver.set(subject.currentDriver().get());
+                driver.set(subject.currentDriver());
             }
         };
 
@@ -257,7 +252,7 @@ public class SeleniumControlTest {
                 @Override
                 public void evaluate() throws Throwable {
 
-                    SeleniumContext context = SeleniumContext.currentContext().get();
+                    SeleniumContext context = SeleniumContext.currentContext();
                     assertSame(ctx, context);
                 }
             }, description).evaluate();
@@ -265,7 +260,7 @@ public class SeleniumControlTest {
 
         //assert
         } finally {
-            SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+            SeleniumContext.currentContext().destroy();
         }
 
     }

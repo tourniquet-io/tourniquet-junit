@@ -17,19 +17,15 @@
 package io.tourniquet.pageobjects;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.tourniquet.junit.util.TestClassLoader;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
@@ -61,19 +57,38 @@ public class SeleniumContextTest {
         subject = new SeleniumContext(() -> webDriver);
     }
 
+    private void assertContextInitialized() {
+
+        assertNotNull(subject.getDriver());
+        assertNotNull(SeleniumContext.currentContext());
+        assertNotNull(SeleniumContext.currentDriver());
+    }
+
+    private void assertContextDestroyed() {
+
+        try {
+            subject.getDriver();
+            throw new AssertionError("IllegalStateException expected");
+        } catch (IllegalStateException x){}
+        try {
+            SeleniumContext.currentContext();
+            throw new AssertionError("IllegalStateException expected");
+        } catch (IllegalStateException x){}
+        try {
+            SeleniumContext.currentDriver();
+            throw new AssertionError("IllegalStateException expected");
+        } catch (IllegalStateException x){}
+    }
+
     @Test
     public void testInit_destroy() throws Exception {
 
         subject.init();
         try {
-            assertTrue(subject.getDriver().isPresent());
-            assertTrue(SeleniumContext.currentContext().isPresent());
-            assertTrue(SeleniumContext.currentDriver().isPresent());
+            assertContextInitialized();
         } finally {
             subject.destroy();
-            assertFalse(subject.getDriver().isPresent());
-            assertFalse(SeleniumContext.currentContext().isPresent());
-            assertFalse(SeleniumContext.currentDriver().isPresent());
+            assertContextDestroyed();
             verify(webDriver).quit();
         }
     }
@@ -83,72 +98,28 @@ public class SeleniumContextTest {
 
         subject.init();
         try {
-            assertTrue(subject.getDriver().isPresent());
-            assertTrue(SeleniumContext.currentContext().isPresent());
-            assertTrue(SeleniumContext.currentDriver().isPresent());
+            assertContextInitialized();
         } finally {
             subject.destroy(false);
-            assertFalse(subject.getDriver().isPresent());
-            assertFalse(SeleniumContext.currentContext().isPresent());
-            assertFalse(SeleniumContext.currentDriver().isPresent());
+            assertContextDestroyed();
             verify(webDriver, times(0)).quit();
         }
     }
 
-    @Test
-    public void testInitClassloader_withBaseUrl() throws Exception {
-        subject.init();
-        subject.setBaseUrl("testURL");
-        try (TestClassLoader cl = new TestClassLoader()){
-            SeleniumContext.init(subject, cl);
 
-            final Class contextClass = cl.loadClass(SeleniumContext.class.getName());
-            final Optional currentContext = (Optional) contextClass.getMethod("currentContext").invoke(null);
-            assertTrue(currentContext.isPresent());
-            final Optional currentDriver = (Optional) contextClass.getMethod("currentDriver").invoke(null);
-            assertTrue(currentDriver.isPresent());
-            final Object driver = currentDriver.get();
-            assertTrue(Proxy.isProxyClass(driver.getClass()));
-            assertEquals("testURL",contextClass.getMethod("getBaseUrl").invoke(currentContext.get()));
-        } finally {
-            subject.destroy();
-        }
+    @Test(expected = IllegalStateException.class)
+    public void testCurrentContext_outsideTest_exception() throws Exception {
+        SeleniumContext.currentContext();
     }
 
-    @Test
-    public void testInitClassloader_withoutBaseUrl() throws Exception {
-        subject.init();
-        try (TestClassLoader cl = new TestClassLoader()){
-            SeleniumContext.init(subject, cl);
-
-            final Class contextClass = cl.loadClass(SeleniumContext.class.getName());
-            final Optional currentContext = (Optional) contextClass.getMethod("currentContext").invoke(null);
-            assertTrue(currentContext.isPresent());
-            final Optional currentDriver = (Optional) contextClass.getMethod("currentDriver").invoke(null);
-            assertTrue(currentDriver.isPresent());
-            final Object driver = currentDriver.get();
-            assertTrue(Proxy.isProxyClass(driver.getClass()));
-            assertNull(contextClass.getMethod("getBaseUrl").invoke(currentContext.get()));
-        } finally {
-            subject.destroy();
-        }
-
+    @Test(expected = IllegalStateException.class)
+    public void testCurrentDriver_outsideTest_exception() throws Exception {
+        SeleniumContext.currentDriver();
     }
 
-
-    @Test
-    public void testCurrentContext_outsideTest_empty() throws Exception {
-        assertFalse(SeleniumContext.currentContext().isPresent());
-    }
-
-    @Test
-    public void testCurrentDriver_outsideTest_empty() throws Exception {
-        assertFalse(SeleniumContext.currentDriver().isPresent());
-    }
-
-    @Test
-    public void testGetDriver_outsideTest_empty() throws Exception {
-        assertFalse(subject.getDriver().isPresent());
+    @Test(expected = IllegalStateException.class)
+    public void testGetDriver_outsideTest_exception() throws Exception {
+        subject.getDriver();
     }
 
     @Test
@@ -162,13 +133,9 @@ public class SeleniumContextTest {
         subject.setBaseUrl(null);
     }
 
-    @Test
-    public void testResolve_outsideTest_equals() throws Exception {
-        //prepare
-        //act
-        String path = SeleniumContext.resolve("relativePath");
-        //assert
-        assertEquals("relativePath", path);
+    @Test(expected = IllegalStateException.class)
+    public void testResolve_outsideTest_exception() throws Exception {
+        SeleniumContext.resolve("relativePath");
     }
 
     @Test
@@ -247,7 +214,7 @@ public class SeleniumContextTest {
 
         //assert
         assertNotNull(provider);
-        assertEquals(TimeoutProvider.DEFAULT_PROVIDER, provider);
+        Assert.assertEquals(TimeoutProvider.DEFAULT_PROVIDER, provider);
     }
 
 
@@ -264,6 +231,6 @@ public class SeleniumContextTest {
 
         //assert
         assertNotNull(provider);
-        assertEquals(custom, provider);
+        Assert.assertEquals(custom, provider);
     }
 }
