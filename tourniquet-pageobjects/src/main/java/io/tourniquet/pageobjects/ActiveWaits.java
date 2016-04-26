@@ -87,8 +87,8 @@ public final class ActiveWaits {
      *  active wait for document rendering complete
      */
     public static ActiveWait untilDocumentReady() {
-        return timeout -> currentDriver().ifPresent(driver -> new WebDriverWait(driver, timeout.getSeconds(), 50).until(
-                documentReady()));
+        return timeout -> new WebDriverWait(currentDriver(), timeout.getSeconds(), 50).until(
+                documentReady());
     }
 
 

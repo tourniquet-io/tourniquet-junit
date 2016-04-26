@@ -16,6 +16,8 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.selenium.SeleniumContext.currentDriver;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -77,11 +79,8 @@ public @interface Locator {
         URL(null) {
             @Override
             public Optional<WebElement> locate(String selector) {
-                return SeleniumContext.currentDriver().flatMap(
-                        d -> {
-                            d.navigate().to(SeleniumContext.resolve(selector));
-                            return Optional.empty();
-                        });
+                currentDriver().navigate().to(SeleniumContext.resolve(selector));
+                return Optional.empty();
             }
         },
         ID(By::id),
@@ -108,7 +107,7 @@ public @interface Locator {
          * @return a reference to the element
          */
         public Optional<WebElement> locate(String selector) {
-            return SeleniumContext.currentDriver().flatMap(d -> locate(d, selector));
+            return locate(currentDriver(), selector);
         }
 
         /**

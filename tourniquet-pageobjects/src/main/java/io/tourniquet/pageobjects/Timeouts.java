@@ -16,6 +16,7 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.selenium.SeleniumContext.currentContext;
 import static io.tourniquet.selenium.TimeoutProvider.DEFAULT_TIMEOUT;
 
 import java.time.Duration;
@@ -54,8 +55,8 @@ public final class Timeouts {
 
     /**
      * Gets the timeout for the specified key. The timeout is retrieved from the timeout provider of the current {@link
-     * io.tourniquet.selenium.SeleniumContext}. The result will be empty if the context is not initialized or no timeout is defined for the
-     * given key.
+     * io.tourniquet.selenium.SeleniumContext}. The result will be empty if the context is not initialized or no timeout
+     * is defined for the given key.
      *
      * @param timeoutKey
      *         the key of the the timeout to retrieve
@@ -64,9 +65,7 @@ public final class Timeouts {
      */
     public static Optional<Duration> getOptionalTimeout(String timeoutKey) {
 
-        return SeleniumContext.currentContext()
-                              .map(SeleniumContext::getTimeoutProvider)
-                              .flatMap(tp -> tp.getTimeoutFor(timeoutKey));
+        return currentContext().getTimeoutProvider().getTimeoutFor(timeoutKey);
     }
 
     /**
@@ -97,10 +96,7 @@ public final class Timeouts {
      */
     public static Duration getTimeout(final String timeoutKey) {
 
-        return SeleniumContext.currentContext()
-                              .map(SeleniumContext::getTimeoutProvider)
-                              .flatMap(tp -> tp.getTimeoutFor(timeoutKey))
-                              .orElse(DEFAULT_TIMEOUT);
+        return currentContext().getTimeoutProvider().getTimeoutFor(timeoutKey).orElse(DEFAULT_TIMEOUT);
     }
 
     /**
@@ -138,15 +134,13 @@ public final class Timeouts {
      * Gets the timeout for a locator or use a default if the locator is empty. When a locator is provided, its timeout
      * respectively its configured timeout is used. Note that in case the locator defines a timeout key but no timeout
      * is configured for that key, the fallbacks specified for this method are used instead of the locator's timeout
-     * value
-     * <br> If the locator is empty, the configured timeout for the
-     * specified fallback key is used. If no timeout is configured for that key, the fallback timeout (milliseconds)
-     * is used.
+     * value <br> If the locator is empty, the configured timeout for the specified fallback key is used. If no timeout
+     * is configured for that key, the fallback timeout (milliseconds) is used.
      *
      * @param locator
-     *         the locator from which to obtain the timeout. If the locator defines no timeout key, the timeout value
-     *         is used. If a key is defined, the configured timeout for that key is used. If the no timeout is
-     *         configured for that key, the fallbacks apply.
+     *         the locator from which to obtain the timeout. If the locator defines no timeout key, the timeout value is
+     *         used. If a key is defined, the configured timeout for that key is used. If the no timeout is configured
+     *         for that key, the fallbacks apply.
      * @param fallbacKey
      *         the key of the configured timeout that should be used, if the locator is empty
      * @param fallbackTimeoutMillis

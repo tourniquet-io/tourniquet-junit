@@ -23,6 +23,7 @@ import java.time.Duration;
 
 import io.tourniquet.selenium.SeleniumContext;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -52,9 +53,14 @@ public class ActiveWaitsTest {
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
+    @Before
+    public void setUp() throws Exception {
+        new SeleniumContext(() -> webDriver).init();
+    }
+
     @After
     public void tearDown() throws Exception {
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        SeleniumContext.currentContext().destroy();
     }
 
     @Test

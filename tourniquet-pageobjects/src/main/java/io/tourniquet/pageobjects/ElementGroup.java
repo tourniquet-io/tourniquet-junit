@@ -40,9 +40,7 @@ public interface ElementGroup {
      */
     default SearchContext getSearchContext() {
 
-        return SeleniumContext.currentDriver()
-                              .orElseThrow(() -> new IllegalStateException(
-                                      "Could not obtain current driver outside of test execution"));
+        return SeleniumContext.currentDriver();
     }
 
     /**

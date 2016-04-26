@@ -72,7 +72,9 @@ public class PageLoaderTest {
         rtc.stopCollecting();
         ResponseTimes.current().onMeasureEnd(null);
         ResponseTimes.current().clear();
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        try {
+            SeleniumContext.currentContext().destroy();
+        } catch(IllegalStateException e){}
     }
 
     @Test

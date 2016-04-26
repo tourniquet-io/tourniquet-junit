@@ -18,12 +18,11 @@ package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.ActiveWaits.untilElementDisplayed;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
+import static io.tourniquet.selenium.SeleniumContext.currentDriver;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.time.Duration;
-import java.util.Optional;
 
-import io.tourniquet.selenium.SeleniumContext;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -52,7 +51,7 @@ public final class WebElementLocator {
     public static WebElement locate(Locator loc) {
 
         LOG.debug("Locating element with {}={} (timeout={})", loc.by().name(), loc.value(), getTimeout(loc));
-        return waitForElement(loc.by().withSelector(loc.value()), getTimeout(loc)).get();
+        return waitForElement(loc.by().withSelector(loc.value()), getTimeout(loc));
     }
 
     /**
@@ -75,8 +74,6 @@ public final class WebElementLocator {
                   context);
         return waitForElement(context, loc.by().withSelector(loc.value()), getTimeout(loc));
     }
-
-
 
     /**
      * Waits for the presence of a specific web element wait a timeout is reached. The method will succeed in any case.
@@ -105,14 +102,13 @@ public final class WebElementLocator {
      * @param by
      *         the locator for the element
      * @param timeout
-     *         the timeout. If the timeout is reached, a
-     *         {@link org.openqa.selenium.NoSuchElementException} is thrown
+     *         the timeout. If the timeout is reached, a {@link org.openqa.selenium.NoSuchElementException} is thrown
      *
      * @return the element found
      */
-    public static Optional<WebElement> waitForElement(final By by, final Duration timeout) {
+    public static WebElement waitForElement(final By by, final Duration timeout) {
 
-        return SeleniumContext.currentDriver().map(d -> waitForElement(d, by, timeout));
+        return waitForElement(currentDriver(), by, timeout);
     }
 
 }

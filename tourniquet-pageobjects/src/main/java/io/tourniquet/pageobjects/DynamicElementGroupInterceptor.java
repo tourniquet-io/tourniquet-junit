@@ -16,6 +16,8 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.selenium.SeleniumContext.currentDriver;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
@@ -24,7 +26,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.tourniquet.selenium.SeleniumContext;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.openqa.selenium.SearchContext;
@@ -95,10 +96,8 @@ class DynamicElementGroupInterceptor implements MethodInterceptor {
      */
     SearchContext getSearchContext() {
 
-        return context.map(ctx -> getSearchContext())
-                      .orElse(SeleniumContext.currentDriver()
-                                             .orElseThrow(() -> new IllegalStateException(
-                                                     "No Selenium context initialized")));
+        return context.map(ElementGroup::getSearchContext)
+                      .orElse(currentDriver());
     }
 
     /**

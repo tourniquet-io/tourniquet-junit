@@ -17,7 +17,6 @@
 package io.tourniquet.pageobjects;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -66,8 +65,6 @@ public class WebElementLocatorTest {
     private SeleniumControl ctx;
 
 
-
-
     @Test
     public void testLocate() throws Throwable {
         //prepare
@@ -95,7 +92,7 @@ public class WebElementLocatorTest {
         when(searchContext.findElement(By.id("testId"))).thenReturn(webElement);
 
         //act
-        WebElement element = WebElementLocator.locate(searchContext, locator);
+        WebElement element = selenium.execute(() -> WebElementLocator.locate(searchContext, locator));
 
         //assert
         assertNotNull(element);
@@ -142,7 +139,7 @@ public class WebElementLocatorTest {
         try {
             WebElementLocator.locate(searchContext, locator);
         } finally {
-            SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+            SeleniumContext.currentContext().destroy();
             Duration dur = Duration.between(start, Instant.now());
             System.out.printf("timed out after %s ms\n", dur.toMillis());
             assertTrue(dur.compareTo(Duration.ofMillis(450)) > 0);
@@ -158,23 +155,12 @@ public class WebElementLocatorTest {
         assertNotNull(WebElementLocator.waitForElement(searchContext, By.id("test"), TIMEOUT_10S));
     }
 
-    @Test
-    public void testWaitForElement_noDriver_noElement() throws Throwable {
+    @Test(expected = IllegalStateException.class)
+    public void testWaitForElement_noDriver_Exception() throws Throwable {
 
         when(selenium.getMockDriver().findElement(By.id("test"))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        assertFalse(WebElementLocator.waitForElement(By.id("test"), TIMEOUT_10S).isPresent());
-    }
-
-    @Test
-    public void testWaitForElement_noContext() throws Throwable {
-
-        when(selenium.getMockDriver().findElement(By.id("test"))).thenReturn(webElement);
-        when(webElement.isDisplayed()).thenReturn(true);
-        selenium.execute(() -> {
-            assertTrue(WebElementLocator.waitForElement(By.id("test"), TIMEOUT_10S).isPresent());
-            return null;
-        });
+        WebElementLocator.waitForElement(By.id("test"), TIMEOUT_10S);
     }
 
     @Test(expected = TimeoutException.class)
@@ -183,7 +169,7 @@ public class WebElementLocatorTest {
         when(selenium.getMockDriver().findElement(By.id("test"))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(false);
         selenium.execute(() -> {
-            assertTrue(WebElementLocator.waitForElement(By.id("test"), TIMEOUT_1S).isPresent());
+            WebElementLocator.waitForElement(By.id("test"), TIMEOUT_1S);
             return null;
         });
     }

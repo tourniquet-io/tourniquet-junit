@@ -54,7 +54,9 @@ public class PageObjectsInjectorTest {
 
     @After
     public void tearDown() throws Exception {
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        try {
+            SeleniumContext.currentContext().destroy();
+        }catch(IllegalStateException e){}
     }
 
     @Test
