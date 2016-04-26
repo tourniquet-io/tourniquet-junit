@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -78,11 +78,10 @@ public class SeleniumControl extends ExternalResource {
 
         this.managedContext = getSeleniumContext();
         this.managedContext.ifPresent(SeleniumContext::init);
-        SeleniumContext.currentContext().get().setBaseUrl(baseUrl);
-        SeleniumContext.currentDriver().ifPresent(d -> {
-            d.get(baseUrl);
-            driverInit.ifPresent(di -> di.accept(d.manage()));
-        });
+        SeleniumContext.currentContext().setBaseUrl(baseUrl);
+        final WebDriver driver = SeleniumContext.currentDriver();
+        driver.get(baseUrl);
+        driverInit.ifPresent(di -> di.accept(driver.manage()));
         this.startTime = Instant.now();
     }
 
@@ -114,10 +113,12 @@ public class SeleniumControl extends ExternalResource {
      * @return an optional containing a managed context or the empty optional if a context is already active
      */
     private Optional<SeleniumContext> getSeleniumContext() {
-        if(!SeleniumContext.currentContext().isPresent()){
+        try {
+            SeleniumContext.currentContext();
+            return Optional.empty();
+        } catch (IllegalStateException e){
             return Optional.of(new SeleniumContext(driverProvider));
         }
-        return Optional.empty();
     }
 
     /**
@@ -127,20 +128,20 @@ public class SeleniumControl extends ExternalResource {
      *         the user to login
      */
     public final void login(User user) {
-        currentDriver().filter(d -> sessionActionsEnabled()).ifPresent(d -> {
-            loginAction.accept(user, d);
+        if(sessionActionsEnabled()) {
+            loginAction.accept(user, currentDriver());
             loggedIn.set(true);
-        });
+        }
     }
 
     /**
      * Performs the logout action
      */
     public final void logout() {
-        currentDriver().filter(d -> sessionActionsEnabled()).ifPresent(d -> {
-            this.logoutAction.accept(d);
+        if(sessionActionsEnabled()){
+            this.logoutAction.accept(currentDriver());
             loggedIn.set(false);
-        });
+        }
     }
 
     private boolean sessionActionsEnabled() {
@@ -171,11 +172,11 @@ public class SeleniumControl extends ExternalResource {
     }
 
     /**
-     * Returns the driver of this context.
+     * Returns the current context driver.
      *
-     * @return may be null if the test is not running.
+     * @return the driver. If no context is initialized, an {@link IllegalStateException} is thrown.
      */
-    public Optional<WebDriver> getDriver() {
+    public WebDriver currentDriver() {
 
         return SeleniumContext.currentDriver();
     }
@@ -183,9 +184,9 @@ public class SeleniumControl extends ExternalResource {
     /**
      * Returns the current context. The context is only available during test execution
      *
-     * @return an Optional holding the current context.
+     * @return the current selenium context
      */
-    public Optional<SeleniumContext> currentContext() {
+    public SeleniumContext currentContext() {
 
         return SeleniumContext.currentContext();
     }
@@ -200,16 +201,6 @@ public class SeleniumControl extends ExternalResource {
         return Optional.ofNullable(this.testDuration).orElseThrow(() -> new IllegalStateException("Test not finished"));
     }
 
-    /**
-     * Returns the currentContext driver. If this method is invoked outside of a test execution, the returned Optional
-     * is empty
-     *
-     * @return the optional of a driver
-     */
-    public Optional<WebDriver> currentDriver() {
-
-        return currentContext().flatMap(ctx -> ctx.getDriver());
-    }
 
     /**
      * Creates a new context builder for fluent setup and instantiation.

@@ -45,6 +45,7 @@
 		<module>tourniquet-measure</module>
 		<module>tourniquet-tx</module>
 		<module>tourniquet-pageobjects</module>
+		<module>tourniquet-selenium</module>
 	</modules>
 
 	<dependencies>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;

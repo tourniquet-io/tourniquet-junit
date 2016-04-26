@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import io.tourniquet.selenium.SeleniumControl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -59,7 +60,7 @@ public class SeleniumControlBuilderTest {
         try {
             assertNotNull(ctx);
             assertEquals("myBaseUrl", ctx.getBaseUrl());
-            assertEquals(webDriver, ctx.getDriver().get());
+            assertEquals(webDriver, ctx.currentDriver());
         } finally {
             ctx.after();
         }

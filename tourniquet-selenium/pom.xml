@@ -15,7 +15,9 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>tourniquet-junit</artifactId>
@@ -23,18 +25,14 @@
         <version>0.4.6-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tourniquet-pageobjects</artifactId>
-	<version>0.4.6-SNAPSHOT</version>
+    <artifactId>tourniquet-selenium</artifactId>
+    <version>0.4.6-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
-    <description>A small library to define a pageobject model for testing applications with selenium.</description>
+    <description>Library for Selenium Context handling.</description>
+
 
     <dependencies>
-        <dependency>
-            <groupId>io.tourniquet.junit</groupId>
-            <artifactId>tourniquet-tx</artifactId>
-            <version>0.4.6-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-core</artifactId>
@@ -42,8 +40,9 @@
         </dependency>
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
-            <artifactId>tourniquet-selenium</artifactId>
+            <artifactId>tourniquet-http</artifactId>
             <version>0.4.6-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
         <!-- Selenium dependencies -->
         <dependency>

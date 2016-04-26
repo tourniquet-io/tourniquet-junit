@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
+import io.tourniquet.selenium.SeleniumContext;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.Description;
@@ -53,7 +54,9 @@ public class PageObjectsInjectorTest {
 
     @After
     public void tearDown() throws Exception {
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        try {
+            SeleniumContext.currentContext().destroy();
+        }catch(IllegalStateException e){}
     }
 
     @Test

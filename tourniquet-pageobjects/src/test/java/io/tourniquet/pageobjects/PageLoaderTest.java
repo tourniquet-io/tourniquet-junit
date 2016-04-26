@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.tourniquet.measure.ResponseTime;
 import io.tourniquet.measure.ResponseTimeCollector;
 import io.tourniquet.measure.ResponseTimes;
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.TimeoutProvider;
 import io.tourniquet.tx.Transaction;
 import io.tourniquet.tx.TransactionSupport;
 import org.junit.After;
@@ -70,7 +72,9 @@ public class PageLoaderTest {
         rtc.stopCollecting();
         ResponseTimes.current().onMeasureEnd(null);
         ResponseTimes.current().clear();
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        try {
+            SeleniumContext.currentContext().destroy();
+        } catch(IllegalStateException e){}
     }
 
     @Test

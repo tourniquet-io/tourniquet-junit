@@ -17,9 +17,9 @@
 package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
-import static io.tourniquet.pageobjects.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
 import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
+import static io.tourniquet.selenium.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 
 import java.util.Optional;
@@ -64,21 +64,24 @@ public final class PageLoader {
     }
 
     /**
-     * Creates a new instance of the specified page. If the page type denotes an abstract class, a dynamic proxy
-     * (using CGLib) is created, providing injected implementations for the abstract methods.
+     * Creates a new instance of the specified page. If the page type denotes an abstract class, a dynamic proxy (using
+     * CGLib) is created, providing injected implementations for the abstract methods.
+     *
      * @param pageType
-     *  the type of the page to create
+     *         the type of the page to create
      * @param <T>
-     *  the type of the page to create
-     * @return
-     *  an instance of the page
+     *         the type of the page to create
+     *
+     * @return an instance of the page
+     *
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
     @SuppressWarnings("unchecked")
     private static <T extends Page> T newInstance(final Class<T> pageType)
             throws InstantiationException, IllegalAccessException {
-        if(isAbstract(pageType)){
+
+        if (isAbstract(pageType)) {
             return (T) Enhancer.create(pageType, new Class[0], new DynamicElementGroupInterceptor(pageType));
         }
         return pageType.newInstance();
@@ -86,20 +89,18 @@ public final class PageLoader {
 
     /**
      * Loads the page into the current webdriver. The method waits for the document to be completely loaded and
-     * rendered.<br> If no {@link SeleniumContext} is initialized, an {@link IllegalStateException} is thrown.
+     * rendered.<br> If no {@link io.tourniquet.selenium.SeleniumContext} is initialized, an {@link
+     * IllegalStateException} is thrown.
      *
      * @param page
      *         the page handle to load
      */
     public static void loadPage(Page page) {
 
-        SeleniumContext.currentDriver().map(driver -> {
-            final Optional<Locator> locator = Optional.ofNullable(page.getClass().getAnnotation(Locator.class));
-            locator.flatMap(l -> l.by().locate(l.value())).ifPresent(WebElement::click);
-            WaitChain.wait(untilDocumentReady())
-                     .orTimeoutAfter(getTimeout(locator, RENDER_TIMEOUT));
-            return Void.TYPE;
-        }).orElseThrow(() -> new IllegalStateException("Context not initialized"));
+        final Optional<Locator> locator = Optional.ofNullable(page.getClass().getAnnotation(Locator.class));
+        locator.flatMap(l -> l.by().locate(l.value())).ifPresent(WebElement::click);
+        WaitChain.wait(untilDocumentReady()).orTimeoutAfter(getTimeout(locator, RENDER_TIMEOUT));
+
     }
 
 }

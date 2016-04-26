@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.selenium;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import java.time.Duration;
 import java.util.Optional;
 
+import io.tourniquet.selenium.TimeoutProvider;
 import org.junit.Test;
 
 /**

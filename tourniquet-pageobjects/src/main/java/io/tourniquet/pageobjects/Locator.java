@@ -16,6 +16,8 @@
 
 package io.tourniquet.pageobjects;
 
+import static io.tourniquet.selenium.SeleniumContext.currentDriver;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -24,6 +26,8 @@ import java.lang.annotation.Target;
 import java.util.Optional;
 import java.util.function.Function;
 
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.TimeoutProvider;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -75,11 +79,8 @@ public @interface Locator {
         URL(null) {
             @Override
             public Optional<WebElement> locate(String selector) {
-                return SeleniumContext.currentDriver().flatMap(
-                        d -> {
-                            d.navigate().to(SeleniumContext.resolve(selector));
-                            return Optional.empty();
-                        });
+                currentDriver().navigate().to(SeleniumContext.resolve(selector));
+                return Optional.empty();
             }
         },
         ID(By::id),
@@ -106,7 +107,7 @@ public @interface Locator {
          * @return a reference to the element
          */
         public Optional<WebElement> locate(String selector) {
-            return SeleniumContext.currentDriver().flatMap(d -> locate(d, selector));
+            return locate(currentDriver(), selector);
         }
 
         /**
