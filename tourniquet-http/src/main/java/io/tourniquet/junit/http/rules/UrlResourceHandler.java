@@ -36,7 +36,7 @@ public class UrlResourceHandler extends ResourceHttpHandler{
     }
 
     @Override
-    protected void writeResource(final OutputStream outputStream) throws IOException {
+    protected void writeResource(final OutputStream outputStream, String queryString) throws IOException {
             try(InputStream inputStream = resource.openStream()){
                 IOUtils.copy(inputStream, outputStream);
             }

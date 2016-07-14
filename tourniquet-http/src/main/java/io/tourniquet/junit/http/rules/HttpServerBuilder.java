@@ -17,15 +17,15 @@
 package io.tourniquet.junit.http.rules;
 
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.junit.rules.TemporaryFolder;
 
 import io.tourniquet.junit.Builder;
 import io.tourniquet.junit.net.NetworkUtils;
 import io.tourniquet.junit.rules.TemporaryFile;
 import io.tourniquet.junit.util.CallStack;
 import io.tourniquet.junit.util.ResourceResolver;
-import org.junit.rules.TemporaryFolder;
 
 /**
  * A Builder for creating an embedded HTTP server. Hostname and tcpPort can be optionally specified and which resources
@@ -36,7 +36,7 @@ public class HttpServerBuilder implements Builder<HttpServer> {
     private int tcpPort = -1;
     private String serverHostname = "localhost";
     private final ResourceResolver resolver = new ResourceResolver(true);
-    private final Map<String, Object> resources = new ConcurrentHashMap<>();
+    private final Map<String, Object> resources = new LinkedHashMap<>();
 
     @Override
     public HttpServer build() {

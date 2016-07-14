@@ -38,7 +38,7 @@ public class ByteArrayHandler extends ResourceHttpHandler {
     }
 
     @Override
-    protected void writeResource(final OutputStream outputStream) throws IOException {
+    protected void writeResource(final OutputStream outputStream, String queryString) throws IOException {
         outputStream.write(data, 0, data.length);
     }
 }

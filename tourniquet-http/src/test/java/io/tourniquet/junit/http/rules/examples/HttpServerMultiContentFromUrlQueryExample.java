@@ -28,15 +28,18 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
-public class HttpServerContentFromUrlExample {
+public class HttpServerMultiContentFromUrlQueryExample {
 
-    private final URL resource = HttpServerContentFromUrlExample.class.getResource("index.html");
+    private final URL resource1 = HttpServerMultiContentFromUrlQueryExample.class.getResource("index.html");
+    private final URL resource2 = HttpServerMultiContentFromUrlQueryExample.class.getResource("index.html_query");
 
     @Rule
-    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html", resource).build();
+    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html", resource1)
+                                                      .contentFrom("/index.html?param=value", resource2)
+                                                      .build();
 
     @Test
-    public void testHttpServerGet() throws Exception {
+    public void testHttpServerGet_defaultResource() throws Exception {
         //prepare
 
         //act
@@ -52,4 +55,23 @@ public class HttpServerContentFromUrlExample {
             assertTrue(pageAsText.contains("Test Content Body"));
         }
     }
+
+    @Test
+    public void testHttpServerGet_alternateResource() throws Exception {
+        //prepare
+
+        //act
+        try (final WebClient webClient = new WebClient()) {
+
+            final HtmlPage page = webClient.getPage(server.getBaseUrl() + "/index.html?param=value");
+            final String pageAsXml = page.asXml();
+            final String pageAsText = page.asText();
+
+            //assert
+            assertEquals("Alternate Content", page.getTitleText());
+            assertTrue(pageAsXml.contains("<body>"));
+            assertTrue(pageAsText.contains("Alternate Content Body"));
+        }
+    }
+
 }

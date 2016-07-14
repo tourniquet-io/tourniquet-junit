@@ -18,12 +18,13 @@ package io.tourniquet.junit.http.rules.examples;
 
 import static org.junit.Assert.assertEquals;
 
-import com.gargoylesoftware.htmlunit.TextPage;
-import com.gargoylesoftware.htmlunit.WebClient;
-import io.tourniquet.junit.http.rules.HttpServer;
-import io.tourniquet.junit.http.rules.HttpServerBuilder;
 import org.junit.Rule;
 import org.junit.Test;
+import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.WebClient;
+
+import io.tourniquet.junit.http.rules.HttpServer;
+import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
 public class HttpServerResponseStubbingExample {
 
@@ -44,6 +45,45 @@ public class HttpServerResponseStubbingExample {
 
             //assert
             assertEquals("someContent", pageAsText);
+        }
+
+    }
+
+    @Test
+    public void testHttpServerGetWithQuery() throws Exception {
+        //prepare
+        server.onGet("/index.html").respond("someContent");
+        server.onGet("/index.html?param=value").respond("otherContent");
+
+        //act
+        try (final WebClient webClient = new WebClient()) {
+
+            final TextPage page1 = webClient.getPage(server.getBaseUrl() + "/index.html");
+            final String page1AsText = page1.getContent();
+
+            final TextPage page2 = webClient.getPage(server.getBaseUrl() + "/index.html?param=value");
+            final String page2AsText = page2.getContent();
+
+            //assert
+            assertEquals("someContent", page1AsText);
+            assertEquals("otherContent", page2AsText);
+        }
+
+    }
+
+    @Test
+    public void testHttpServerGetWithQuery_notMatching() throws Exception {
+        //prepare
+        server.onGet("/index.html?param=value").respond("otherContent");
+
+        //act
+        try (final WebClient webClient = new WebClient()) {
+
+            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html?other=value");
+            final String pageAsText = page.getContent();
+
+            //assert
+            assertEquals("", pageAsText);
         }
 
     }

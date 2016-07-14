@@ -22,27 +22,42 @@ import static org.junit.Assert.assertTrue;
 import java.net.URL;
 import org.junit.Rule;
 import org.junit.Test;
+import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
-public class HttpServerContentFromUrlExample {
+public class HttpServerContentFromUrlQueryExample {
 
-    private final URL resource = HttpServerContentFromUrlExample.class.getResource("index.html");
+    private final URL resource = HttpServerContentFromUrlQueryExample.class.getResource("index.html");
 
     @Rule
-    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html", resource).build();
+    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html?param=value", resource).build();
 
     @Test
-    public void testHttpServerGet() throws Exception {
+    public void testHttpServerGet_notMatching_empty() throws Exception {
         //prepare
 
         //act
         try (final WebClient webClient = new WebClient()) {
 
-            final HtmlPage page = webClient.getPage(server.getBaseUrl() + "/index.html");
+            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html?other=value");
+
+            //assert
+            assertEquals("", page.getContent());
+        }
+    }
+
+    @Test
+    public void testHttpServerGet_matchingQuery() throws Exception {
+        //prepare
+
+        //act
+        try (final WebClient webClient = new WebClient()) {
+
+            final HtmlPage page = webClient.getPage(server.getBaseUrl() + "/index.html?param=value");
             final String pageAsXml = page.asXml();
             final String pageAsText = page.asText();
 
@@ -52,4 +67,5 @@ public class HttpServerContentFromUrlExample {
             assertTrue(pageAsText.contains("Test Content Body"));
         }
     }
+
 }

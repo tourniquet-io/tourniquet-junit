@@ -27,19 +27,22 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
 
 import io.tourniquet.junit.net.NetworkUtils;
 import io.tourniquet.junit.rules.ExternalResource;
 import io.tourniquet.junit.rules.TemporaryFile;
 import io.tourniquet.junit.rules.TemporaryZipFile;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.PathResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
-import org.junit.rules.TemporaryFolder;
-import org.slf4j.Logger;
 
 /**
  * Server rule that starts an embedded http server, that serves static content. The server may be instantiated directly
@@ -51,10 +54,16 @@ public class HttpServer extends ExternalResource {
     private static final Logger LOG = getLogger(HttpServer.class);
 
     private final String hostname;
+
     private final int port;
+
     private final Map<String, Object> resources;
+
     private Undertow server;
+
     private PathHandler pathHandler;
+
+    private Map<String, QueryHttpHandler> queryHandlers = new HashMap<>();
 
     /**
      * Creates a http server on localhost, running on an available tcp port. The server won't server any static
@@ -79,7 +88,8 @@ public class HttpServer extends ExternalResource {
     }
 
     /**
-     * Creates a http server for the specified hostname and tcp port. The server serves the content on the context paths
+     * Creates a http server for the specified hostname and tcp port. The server serves the content on the context
+     * paths
      * provided in the resource map.
      *
      * @param hostname
@@ -117,7 +127,10 @@ public class HttpServer extends ExternalResource {
             final Object resource = entry.getValue();
             addResource(path, resource);
         }
-        this.server = Undertow.builder().addHttpListener(this.port, this.hostname).setHandler(pathHandler).build();
+
+        this.server = Undertow.builder().addHttpListener(this.port, this.hostname)
+                              .setHandler(pathHandler)
+                              .build();
         LOG.info("Starting HTTP server");
         this.server.start();
         LOG.info("HTTP Server running");
@@ -129,7 +142,7 @@ public class HttpServer extends ExternalResource {
      * in the zip are hosted on the specified path as root folder. </li> <li>{@link java.net.URL} pointing to a zip
      * resource, same as the TemporaryZipFile but the zip has to be predined</li> </ul>
      *
-     * @param path
+     * @param pathWithQuery
      *         the path to the resource
      * @param resource
      *         a resource to add. The method can handle various types of resources.
@@ -137,31 +150,55 @@ public class HttpServer extends ExternalResource {
      * @throws IOException
      * @throws URISyntaxException
      */
-    void addResource(final String path, final Object resource) {
+    void addResource(final String pathWithQuery, final Object resource) {
+        int querySeparator = pathWithQuery.indexOf('?');
+        final String path;
+        final Optional<String> query;
+        if(querySeparator != -1) {
+            path = pathWithQuery.substring(0, querySeparator);
+            query = Optional.of(pathWithQuery.substring(querySeparator + 1));
+        } else {
+            path = pathWithQuery;
+            query = Optional.empty();
+        }
 
         try {
             if (resource instanceof TemporaryZipFile) {
                 final URL url = ((TemporaryZipFile) resource).getFile().toURI().toURL();
-                this.pathHandler.addPrefixPath(path, createZipResourceHandler(url));
+                addPrefixPath(path, createZipResourceHandler(url));
             } else if (resource instanceof TemporaryFolder) {
                 final Path resourcePath = ((TemporaryFolder) resource).getRoot().toPath();
-                this.pathHandler.addPrefixPath(path, new ResourceHandler(new PathResourceManager(resourcePath, 1024)));
+                addPrefixPath(path, new ResourceHandler(new PathResourceManager(resourcePath, 1024)));
             } else if (resource instanceof TemporaryFile) {
                 final Path resourcePath = ((TemporaryFile) resource).getFile().toPath();
-                this.pathHandler.addExactPath(path, new PathResourceHandler(resourcePath));
+                addExactPath(path, query, new PathResourceHandler(resourcePath));
             } else if (resource instanceof URL) {
                 final URL url = (URL) resource;
                 if (url.getPath().endsWith(".zip")) {
-                    this.pathHandler.addPrefixPath(path, createZipResourceHandler(url));
+                    addPrefixPath(path, createZipResourceHandler(url));
                 } else {
-                    this.pathHandler.addExactPath(path, new UrlResourceHandler(url));
+                    addExactPath(path, query, new UrlResourceHandler(url));
                 }
             } else if (resource instanceof byte[]) {
-                this.pathHandler.addExactPath(path, new ByteArrayHandler((byte[]) resource));
+                addExactPath(path, query, new ByteArrayHandler((byte[]) resource));
             }
         } catch (IOException e) {
             throw new AssertionError("Could not add Resource", e);
         }
+    }
+
+    private void addPrefixPath(String path, HttpHandler httpHandler) {
+        this.pathHandler.addPrefixPath(path, httpHandler);
+    }
+
+    private void addExactPath(String path, Optional<String> query, ResourceHttpHandler handler) {
+
+        final QueryHttpHandler queryHandler = this.queryHandlers.computeIfAbsent(
+                path,
+                (p) -> new QueryHttpHandler(handler));
+
+        query.ifPresent(q -> queryHandler.registerQueryHandler(q, handler));
+        this.pathHandler.addExactPath(path, queryHandler);
     }
 
     /**
@@ -174,10 +211,15 @@ public class HttpServer extends ExternalResource {
      *
      * @throws IOException
      */
-    private ResourceHandler createZipResourceHandler(final URL zipFile) throws IOException {
+    private ResourceHandler createZipResourceHandler(final URL zipFile) {
 
-        final FileSystem fileSystem = newFileSystem(URI.create("jar:" + zipFile),
-                                                    Collections.<String, Object>emptyMap());
+        final FileSystem fileSystem;
+        try {
+            fileSystem = newFileSystem(URI.create("jar:" + zipFile),
+                    Collections.<String, Object>emptyMap());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not access zip file", e);
+        }
         final ResourceManager resMgr = new FileSystemResourceManager(fileSystem);
         return new ResourceHandler(resMgr);
     }
@@ -237,5 +279,4 @@ public class HttpServer extends ExternalResource {
             throw new AssertionError("Invalid base URL", e);
         }
     }
-
 }
