@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 
@@ -126,7 +125,7 @@ public class HttpServer extends ExternalResource {
         for (Map.Entry<String, Object> entry : this.resources.entrySet()) {
             final String path = entry.getKey();
             final Object resource = entry.getValue();
-            addResource(path, Optional.empty(), resource);
+            addResource(path, resource);
         }
 
         this.server = Undertow.builder().addHttpListener(this.port, this.hostname)
@@ -143,53 +142,62 @@ public class HttpServer extends ExternalResource {
      * in the zip are hosted on the specified path as root folder. </li> <li>{@link java.net.URL} pointing to a zip
      * resource, same as the TemporaryZipFile but the zip has to be predined</li> </ul>
      *
-     * @param path
+     * @param pathWithQuery
      *         the path to the resource
-     * @param query
      * @param resource
      *         a resource to add. The method can handle various types of resources.
      *
      * @throws IOException
      * @throws URISyntaxException
      */
-    void addResource(final String path, Optional<String> query, final Object resource) {
+    void addResource(final String pathWithQuery, final Object resource) {
+        int querySeparator = pathWithQuery.indexOf('?');
+        final String path;
+        final Optional<String> query;
+        if(querySeparator != -1) {
+            path = pathWithQuery.substring(0, querySeparator);
+            query = Optional.of(pathWithQuery.substring(querySeparator + 1));
+        } else {
+            path = pathWithQuery;
+            query = Optional.empty();
+        }
 
         try {
             if (resource instanceof TemporaryZipFile) {
                 final URL url = ((TemporaryZipFile) resource).getFile().toURI().toURL();
-                addPrefixPath(path, () -> createZipResourceHandler(url));
+                addPrefixPath(path, createZipResourceHandler(url));
             } else if (resource instanceof TemporaryFolder) {
                 final Path resourcePath = ((TemporaryFolder) resource).getRoot().toPath();
-                addPrefixPath(path, () -> new ResourceHandler(new PathResourceManager(resourcePath, 1024)));
+                addPrefixPath(path, new ResourceHandler(new PathResourceManager(resourcePath, 1024)));
             } else if (resource instanceof TemporaryFile) {
                 final Path resourcePath = ((TemporaryFile) resource).getFile().toPath();
-                addExactPath(path, query, () -> new PathResourceHandler(resourcePath));
+                addExactPath(path, query, new PathResourceHandler(resourcePath));
             } else if (resource instanceof URL) {
                 final URL url = (URL) resource;
                 if (url.getPath().endsWith(".zip")) {
-                    addPrefixPath(path, () -> createZipResourceHandler(url));
+                    addPrefixPath(path, createZipResourceHandler(url));
                 } else {
-                    addExactPath(path, query, () -> new UrlResourceHandler(url));
+                    addExactPath(path, query, new UrlResourceHandler(url));
                 }
             } else if (resource instanceof byte[]) {
-                addExactPath(path, query, () -> new ByteArrayHandler((byte[]) resource));
+                addExactPath(path, query, new ByteArrayHandler((byte[]) resource));
             }
         } catch (IOException e) {
             throw new AssertionError("Could not add Resource", e);
         }
     }
 
-    private void addPrefixPath(String path, Supplier<HttpHandler> httpHandler) {
-        this.pathHandler.addPrefixPath(path, httpHandler.get());
+    private void addPrefixPath(String path, HttpHandler httpHandler) {
+        this.pathHandler.addPrefixPath(path, httpHandler);
     }
 
-    private void addExactPath(String path, Optional<String> query, Supplier<ResourceHttpHandler> factory) {
+    private void addExactPath(String path, Optional<String> query, ResourceHttpHandler handler) {
 
         final QueryHttpHandler queryHandler = this.queryHandlers.computeIfAbsent(
                 path,
-                (p) -> new QueryHttpHandler(factory.get()));
+                (p) -> new QueryHttpHandler(handler));
 
-        query.ifPresent(q -> queryHandler.registerQueryHandler(q, factory));
+        query.ifPresent(q -> queryHandler.registerQueryHandler(q, handler));
         this.pathHandler.addExactPath(path, queryHandler);
     }
 

@@ -2,7 +2,6 @@ package io.tourniquet.junit.http.rules;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -51,8 +50,8 @@ public class QueryHttpHandler implements HttpHandler {
      * @return
      *  this handler
      */
-    public HttpHandler registerQueryHandler(String query, Supplier<? extends HttpHandler> handler) {
-        this.queryHandlers.put(query, handler.get());
+    public HttpHandler registerQueryHandler(String query, HttpHandler handler) {
+        this.queryHandlers.put(query, handler);
         return this;
     }
 }

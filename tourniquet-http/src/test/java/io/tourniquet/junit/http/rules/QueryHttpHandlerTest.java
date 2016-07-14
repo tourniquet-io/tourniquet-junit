@@ -49,7 +49,7 @@ public class QueryHttpHandlerTest {
         HttpHandler queryHandler = mock(HttpHandler.class);
 
         //act
-        subject.registerQueryHandler("param=value", () -> queryHandler);
+        subject.registerQueryHandler("param=value", queryHandler);
         subject.handleRequest(exchange.getExchange());
 
         //assert
@@ -64,7 +64,7 @@ public class QueryHttpHandlerTest {
         exchange.getExchange().setQueryString("param=value");
 
         //act
-        subject.registerQueryHandler("param=value", () -> queryHandler);
+        subject.registerQueryHandler("param=value", queryHandler);
 
         subject.handleRequest(exchange.getExchange());
 
@@ -81,7 +81,7 @@ public class QueryHttpHandlerTest {
         exchange.getExchange().setQueryString("param=value");
 
         //act
-        subject.registerQueryHandler("other=value", () -> queryHandler);
+        subject.registerQueryHandler("other=value", queryHandler);
 
         subject.handleRequest(exchange.getExchange());
 

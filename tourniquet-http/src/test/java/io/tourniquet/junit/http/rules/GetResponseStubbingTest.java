@@ -19,7 +19,6 @@ package io.tourniquet.junit.http.rules;
 import static org.mockito.Mockito.verify;
 
 import java.nio.charset.Charset;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -49,7 +48,7 @@ public class GetResponseStubbingTest {
 
 
         //assert
-        verify(httpServer).addResource("path", Optional.empty(), "test".getBytes(Charset.defaultCharset()));
+        verify(httpServer).addResource("path", "test".getBytes(Charset.defaultCharset()));
     }
 
     @Test
@@ -62,7 +61,7 @@ public class GetResponseStubbingTest {
 
 
         //assert
-        verify(httpServer).addResource("path", Optional.of("param=value"), "test".getBytes(Charset.defaultCharset()));
+        verify(httpServer).addResource("path?param=value", "test".getBytes(Charset.defaultCharset()));
     }
 
 }
