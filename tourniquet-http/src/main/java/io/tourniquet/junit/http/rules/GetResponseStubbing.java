@@ -19,7 +19,7 @@ package io.tourniquet.junit.http.rules;
 import static java.nio.charset.Charset.defaultCharset;
 
 /**
- * Class for fluently create http get responses.
+ * Class for fluently create http GET responses.
  */
 public class GetResponseStubbing {
 

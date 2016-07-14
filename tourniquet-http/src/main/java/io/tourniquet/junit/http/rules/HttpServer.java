@@ -266,6 +266,10 @@ public class HttpServer extends ExternalResource {
         return new GetResponseStubbing(this).resource(resource);
     }
 
+    public PostResponseStubbing onPost(String s) {
+        return null;
+    }
+
     /**
      * Creates an URL to the root path of the http server, i.e. 'http://localhost:8080/'
      *

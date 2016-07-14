@@ -26,7 +26,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
-public class HttpServerResponseStubbingExample {
+public class HttpServerGetResponseStubbingExample {
 
 
     @Rule
