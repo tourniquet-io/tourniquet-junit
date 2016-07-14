@@ -25,7 +25,7 @@ import io.undertow.server.HttpServerExchange;
 /**
  * A base class for serving the content of a single resource via Undertow HTTP. <br> This Undertow {@link
  * io.undertow.server.HttpHandler} that dispatches an incoming thread and writes data to the response's output stream.
- * Implementing classes have to implement the {@link #writeResource(java.io.OutputStream)} method in order to write the
+ * Implementing classes have to implement the {@link #writeResource(java.io.OutputStream, String)} method in order to write the
  * resource content to the stream.
  */
 public abstract class ResourceHttpHandler implements HttpHandler {
@@ -37,7 +37,7 @@ public abstract class ResourceHttpHandler implements HttpHandler {
             exchange.dispatch(this);
         } else {
             exchange.startBlocking();
-            writeResource(exchange.getOutputStream());
+            writeResource(exchange.getOutputStream(), exchange.getQueryString());
         }
     }
 
@@ -46,6 +46,11 @@ public abstract class ResourceHttpHandler implements HttpHandler {
      *
      * @param outputStream
      *         the response's outputstream onto which the resource content can be written.
+     * @param queryString
+     *         the query string of the incoming request. Handlers may decide to provide different resource upon
+     *         different query parameters.
      */
-    protected abstract void writeResource(final OutputStream outputStream) throws IOException;
+    protected abstract void writeResource(final OutputStream outputStream, String queryString) throws IOException;
+
+
 }

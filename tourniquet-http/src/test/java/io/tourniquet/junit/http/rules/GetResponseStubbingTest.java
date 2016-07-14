@@ -19,8 +19,7 @@ package io.tourniquet.junit.http.rules;
 import static org.mockito.Mockito.verify;
 
 import java.nio.charset.Charset;
-
-import org.junit.Before;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -39,21 +38,31 @@ public class GetResponseStubbingTest {
     @InjectMocks
     private GetResponseStubbing subject;
 
-    @Before
-    public void setUp() throws Exception {
-        subject.resource("path");
-    }
 
     @Test
     public void testRespond() throws Exception {
         //prepare
+        subject.resource("path");
 
         //act
         subject.respond("test");
 
 
         //assert
-        verify(httpServer).addResource("path", "test".getBytes(Charset.defaultCharset()));
+        verify(httpServer).addResource("path", Optional.empty(), "test".getBytes(Charset.defaultCharset()));
+    }
+
+    @Test
+    public void testRespond_toQuery() throws Exception {
+        //prepare
+        subject.resource("path?param=value");
+
+        //act
+        subject.respond("test");
+
+
+        //assert
+        verify(httpServer).addResource("path", Optional.of("param=value"), "test".getBytes(Charset.defaultCharset()));
     }
 
 }

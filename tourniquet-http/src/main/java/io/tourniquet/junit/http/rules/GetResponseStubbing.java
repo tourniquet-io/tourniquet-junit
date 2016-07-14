@@ -16,7 +16,9 @@
 
 package io.tourniquet.junit.http.rules;
 
-import java.nio.charset.Charset;
+import static java.nio.charset.Charset.defaultCharset;
+
+import java.util.Optional;
 
 /**
  * Class for fluently create http get responses.
@@ -25,6 +27,7 @@ public class GetResponseStubbing {
 
     private final HttpServer server;
     private String path;
+    private String query;
 
     /**
      * Creates a get response stubbing for the given http server.
@@ -43,8 +46,24 @@ public class GetResponseStubbing {
      *
      */
     public GetResponseStubbing respond(final String someContent) {
-            server.addResource(this.path, someContent.getBytes(Charset.defaultCharset()));
+        server.addResource(getPath(), getQuery(), someContent.getBytes(defaultCharset()));
         return this;
+    }
+
+    private String getPath() {
+        int querySeparator = this.path.indexOf('?');
+        if(querySeparator != -1){
+            return this.path.substring(0, querySeparator);
+        }
+        return path;
+    }
+
+    private Optional<String> getQuery() {
+        int querySeparator = this.path.indexOf('?');
+        if(querySeparator != -1){
+            return Optional.of(this.path.substring(querySeparator+1));
+        }
+        return Optional.empty();
     }
 
     /**

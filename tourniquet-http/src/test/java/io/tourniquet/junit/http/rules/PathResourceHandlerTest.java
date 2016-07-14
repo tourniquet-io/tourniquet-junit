@@ -20,14 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
-
-import io.undertow.connector.ByteBufferPool;
-import io.undertow.connector.PooledByteBuffer;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.server.ServerConnection;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -38,14 +33,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PathResourceHandlerTest {
 
-    @Mock
-    private ServerConnection serverConnection;
-
-    @Mock
-    private ByteBufferPool byteBufferPool;
-
-    @Mock
-    private PooledByteBuffer pooledByteBuffer;
+    @Rule
+    public HttpServerExchangeMock exchange = new HttpServerExchangeMock();
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Path path;
@@ -62,21 +51,16 @@ public class PathResourceHandlerTest {
     @Test
     public void testHandleRequest() throws Exception {
         //prepare
-        final ByteBuffer buffer = ByteBuffer.allocate(8);
-        final HttpServerExchange exchange = new HttpServerExchange(serverConnection);
-        when(serverConnection.getByteBufferPool()).thenReturn(byteBufferPool);
-        when(byteBufferPool.allocate()).thenReturn(pooledByteBuffer);
-        when(pooledByteBuffer.getBuffer()).thenReturn(buffer);
         when(path.getFileSystem().provider()).thenReturn(provider);
         when(provider.newInputStream(path)).thenReturn(new ByteArrayInputStream("test".getBytes()));
 
         //act
-        subject.handleRequest(exchange);
+        subject.handleRequest(exchange.getExchange());
 
         //assert
-        buffer.rewind();
+        exchange.getBuffer().rewind();
         byte[] data = new byte[4];
-        buffer.get(data);
+        exchange.getBuffer().get(data);
         assertEquals("test", new String(data));
     }
 }
