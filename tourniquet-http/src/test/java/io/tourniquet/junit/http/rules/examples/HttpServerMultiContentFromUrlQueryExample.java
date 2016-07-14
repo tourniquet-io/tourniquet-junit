@@ -22,36 +22,42 @@ import static org.junit.Assert.assertTrue;
 import java.net.URL;
 import org.junit.Rule;
 import org.junit.Test;
-import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
-public class HttpServerContentFromUrlQueryExample {
+public class HttpServerMultiContentFromUrlQueryExample {
 
-    private final URL resource = HttpServerContentFromUrlQueryExample.class.getResource("index.html");
+    private final URL resource1 = HttpServerMultiContentFromUrlQueryExample.class.getResource("index.html");
+    private final URL resource2 = HttpServerMultiContentFromUrlQueryExample.class.getResource("index.html_query");
 
     @Rule
-    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html?param=value", resource).build();
+    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html", resource1)
+                                                      .contentFrom("/index.html?param=value", resource2)
+                                                      .build();
 
     @Test
-    public void testHttpServerGet_notMatching_empty() throws Exception {
+    public void testHttpServerGet_defaultResource() throws Exception {
         //prepare
 
         //act
         try (final WebClient webClient = new WebClient()) {
 
-            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html?other=value");
+            final HtmlPage page = webClient.getPage(server.getBaseUrl() + "/index.html");
+            final String pageAsXml = page.asXml();
+            final String pageAsText = page.asText();
 
             //assert
-            assertEquals("", page.getContent());
+            assertEquals("Test Content", page.getTitleText());
+            assertTrue(pageAsXml.contains("<body>"));
+            assertTrue(pageAsText.contains("Test Content Body"));
         }
     }
 
     @Test
-    public void testHttpServerGet_matchingQuery() throws Exception {
+    public void testHttpServerGet_alternateResource() throws Exception {
         //prepare
 
         //act
@@ -62,9 +68,9 @@ public class HttpServerContentFromUrlQueryExample {
             final String pageAsText = page.asText();
 
             //assert
-            assertEquals("Test Content", page.getTitleText());
+            assertEquals("Alternate Content", page.getTitleText());
             assertTrue(pageAsXml.contains("<body>"));
-            assertTrue(pageAsText.contains("Test Content Body"));
+            assertTrue(pageAsText.contains("Alternate Content Body"));
         }
     }
 
