@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.rules.TemporaryFolder;
-import org.slf4j.Logger;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import io.tourniquet.junit.net.NetworkUtils;
 import io.tourniquet.junit.rules.ExternalResource;
@@ -43,6 +43,8 @@ import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.PathResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
+import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
 
 /**
  * Server rule that starts an embedded http server, that serves static content. The server may be instantiated directly
@@ -64,6 +66,7 @@ public class HttpServer extends ExternalResource {
     private PathHandler pathHandler;
 
     private Map<String, QueryHttpHandler> queryHandlers = new HashMap<>();
+    private Map<String, FilteringHttpHandler> postHandlers = new HashMap<>();
 
     /**
      * Creates a http server on localhost, running on an available tcp port. The server won't server any static
@@ -201,6 +204,13 @@ public class HttpServer extends ExternalResource {
         this.pathHandler.addExactPath(path, queryHandler);
     }
 
+    void addAction(String path, Predicate<HttpExchange> filter, Consumer<HttpExchange> handler){
+
+        this.postHandlers.putIfAbsent(path, new FilteringHttpHandler());
+        this.postHandlers.get(path).addHandler(filter, handler);
+        this.pathHandler.addExactPath(path, this.postHandlers.get(path));
+    }
+
     /**
      * Creates the resource handle for a zip file, specified by the URL.
      *
@@ -266,8 +276,8 @@ public class HttpServer extends ExternalResource {
         return new GetResponseStubbing(this).resource(resource);
     }
 
-    public PostResponseStubbing onPost(String s) {
-        return null;
+    public PostResponseStubbing onPost(String resource) {
+        return new PostResponseStubbing(this).resource(resource);
     }
 
     /**

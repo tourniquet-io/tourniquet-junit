@@ -16,20 +16,24 @@
 
 package io.tourniquet.junit.http.rules.examples;
 
+import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.getString;
+import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.param;
+import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.post;
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Rule;
-import org.junit.Test;
-import com.gargoylesoftware.htmlunit.TextPage;
-import com.gargoylesoftware.htmlunit.WebClient;
 
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.junit.Rule;
+import org.junit.Test;
 
 public class HttpServerPostResponseStubbingExample {
-
 
     @Rule
     public HttpServer server = new HttpServerBuilder().port(55555).build();
@@ -37,18 +41,15 @@ public class HttpServerPostResponseStubbingExample {
     @Test
     public void testHttpServerGet_noParams() throws Exception {
         //prepare
-        server.onPost("/index.html").respond("someContent");
+        server.onPost("/action.do").respond("someContent");
 
         //act
-        try (final WebClient webClient = new WebClient()) {
-
-            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html");
-            final String pageAsText = page.getContent();
-
-            //assert
-            assertEquals("someContent", pageAsText);
+        //act
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do"))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
         }
-
     }
 
     @Test
@@ -57,16 +58,15 @@ public class HttpServerPostResponseStubbingExample {
         final Map<String, String> params = new HashMap<>();
         params.put("field1", "value1");
         params.put("field2", "value2");
-        server.onPost("/index.html").withParams(params).respond("someContent");
+        server.onPost("/action.do").withParams(params).respond("someContent");
 
         //act
-        try (final WebClient webClient = new WebClient()) {
-
-            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html");
-            final String pageAsText = page.getContent();
-
-            //assert
-            assertEquals("someContent", pageAsText);
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do",
+                                                                  param("field1", "value1"),
+                                                                  param("field2", "value2")))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
         }
 
     }
@@ -75,38 +75,38 @@ public class HttpServerPostResponseStubbingExample {
     public void testHttpServerGet_withPayload() throws Exception {
         //prepare
         byte[] data = "Test Content".getBytes();
-        server.onPost("/index.html").withPayload(data).respond("someContent");
+        server.onPost("/action.do").withPayload(data).respond("someContent");
 
         //act
-        try (final WebClient webClient = new WebClient()) {
-
-            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html");
-            final String pageAsText = page.getContent();
-
-            //assert
-            assertEquals("someContent", pageAsText);
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do",data))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
         }
-
     }
 
     @Test
     public void testHttpServerGet_reactOnRequest() throws Exception {
         //prepare
-        final Map<String, String> params = new HashMap<>();
-        params.put("field1", "value1");
-        params.put("field2", "value2");
-        server.onPost("/index.html").withParams(params).execute(x -> {}).respond("someContent");
+        server.onPost("/action.do").execute(x -> {
+            try {
+                x.getOutputStream().write("someContent".getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         //act
-        try (final WebClient webClient = new WebClient()) {
-
-            final TextPage page = webClient.getPage(server.getBaseUrl() + "/index.html");
-            final String pageAsText = page.getContent();
-
-            //assert
-            assertEquals("someContent", pageAsText);
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do"))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
         }
-
     }
+
+    //=========== helper methods to create requests =================
+
+
+
 
 }

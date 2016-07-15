@@ -42,9 +42,8 @@ public class GetResponseStubbing {
      *  this stubbing
      *
      */
-    public GetResponseStubbing respond(final String someContent) {
+    public void respond(final String someContent) {
         server.addResource(path, someContent.getBytes(defaultCharset()));
-        return this;
     }
 
     /**
