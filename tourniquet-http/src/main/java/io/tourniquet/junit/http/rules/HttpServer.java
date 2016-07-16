@@ -16,6 +16,7 @@
 
 package io.tourniquet.junit.http.rules;
 
+import static io.tourniquet.junit.http.rules.HttpPredicates.matchesQuery;
 import static java.nio.file.FileSystems.newFileSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -27,7 +28,7 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -65,8 +66,7 @@ public class HttpServer extends ExternalResource {
 
     private PathHandler pathHandler;
 
-    private Map<String, QueryHttpHandler> queryHandlers = new HashMap<>();
-    private Map<String, FilteringHttpHandler> postHandlers = new HashMap<>();
+    private Map<String, FilteringHttpHandler> actionHandlers = new LinkedHashMap<>();
 
     /**
      * Creates a http server on localhost, running on an available tcp port. The server won't server any static
@@ -91,8 +91,7 @@ public class HttpServer extends ExternalResource {
     }
 
     /**
-     * Creates a http server for the specified hostname and tcp port. The server serves the content on the context
-     * paths
+     * Creates a http server for the specified hostname and tcp port. The server serves the content on the context paths
      * provided in the resource map.
      *
      * @param hostname
@@ -131,9 +130,7 @@ public class HttpServer extends ExternalResource {
             addResource(path, resource);
         }
 
-        this.server = Undertow.builder().addHttpListener(this.port, this.hostname)
-                              .setHandler(pathHandler)
-                              .build();
+        this.server = Undertow.builder().addHttpListener(this.port, this.hostname).setHandler(pathHandler).build();
         LOG.info("Starting HTTP server");
         this.server.start();
         LOG.info("HTTP Server running");
@@ -154,10 +151,11 @@ public class HttpServer extends ExternalResource {
      * @throws URISyntaxException
      */
     void addResource(final String pathWithQuery, final Object resource) {
+
         int querySeparator = pathWithQuery.indexOf('?');
         final String path;
         final Optional<String> query;
-        if(querySeparator != -1) {
+        if (querySeparator != -1) {
             path = pathWithQuery.substring(0, querySeparator);
             query = Optional.of(pathWithQuery.substring(querySeparator + 1));
         } else {
@@ -174,41 +172,33 @@ public class HttpServer extends ExternalResource {
                 addPrefixPath(path, new ResourceHandler(new PathResourceManager(resourcePath, 1024)));
             } else if (resource instanceof TemporaryFile) {
                 final Path resourcePath = ((TemporaryFile) resource).getFile().toPath();
-                addExactPath(path, query, new PathResourceHandler(resourcePath));
+                addAction(path, matchesQuery(query), new PathResourceHandler(resourcePath));
             } else if (resource instanceof URL) {
                 final URL url = (URL) resource;
                 if (url.getPath().endsWith(".zip")) {
                     addPrefixPath(path, createZipResourceHandler(url));
                 } else {
-                    addExactPath(path, query, new UrlResourceHandler(url));
+                    addAction(path, matchesQuery(query), new UrlResourceHandler(url));
                 }
             } else if (resource instanceof byte[]) {
-                addExactPath(path, query, new ByteArrayHandler((byte[]) resource));
+                addAction(path, matchesQuery(query), new ByteArrayResourceHandler((byte[]) resource));
             }
         } catch (IOException e) {
             throw new AssertionError("Could not add Resource", e);
         }
     }
 
+
     private void addPrefixPath(String path, HttpHandler httpHandler) {
+
         this.pathHandler.addPrefixPath(path, httpHandler);
     }
 
-    private void addExactPath(String path, Optional<String> query, ResourceHttpHandler handler) {
+    void addAction(String path, Predicate<HttpExchange> filter, Consumer<HttpExchange> handler) {
 
-        final QueryHttpHandler queryHandler = this.queryHandlers.computeIfAbsent(
-                path,
-                (p) -> new QueryHttpHandler(handler));
-
-        query.ifPresent(q -> queryHandler.registerQueryHandler(q, handler));
-        this.pathHandler.addExactPath(path, queryHandler);
-    }
-
-    void addAction(String path, Predicate<HttpExchange> filter, Consumer<HttpExchange> handler){
-
-        this.postHandlers.putIfAbsent(path, new FilteringHttpHandler());
-        this.postHandlers.get(path).addHandler(filter, handler);
-        this.pathHandler.addExactPath(path, this.postHandlers.get(path));
+        this.actionHandlers.putIfAbsent(path, new FilteringHttpHandler());
+        this.actionHandlers.get(path).addHandler(filter, handler);
+        this.pathHandler.addExactPath(path, this.actionHandlers.get(path));
     }
 
     /**
@@ -225,8 +215,7 @@ public class HttpServer extends ExternalResource {
 
         final FileSystem fileSystem;
         try {
-            fileSystem = newFileSystem(URI.create("jar:" + zipFile),
-                    Collections.<String, Object>emptyMap());
+            fileSystem = newFileSystem(URI.create("jar:" + zipFile), Collections.<String, Object>emptyMap());
         } catch (IOException e) {
             throw new RuntimeException("Could not access zip file", e);
         }
@@ -264,20 +253,16 @@ public class HttpServer extends ExternalResource {
     }
 
     /**
-     * Entry point for fluently defining response for http GET requests.
+     * Entry point for fluently defining response for http requests.
      *
-     * @param resource
-     *         the resource that should be retrieved via http GET.
+     * @param method
+     *         the request method for which a response should be defined
      *
-     * @return a stubbing defining what to respond on a get request on the specified resource.
+     * @return a stubbing defining what to respond on a request.
      */
-    public GetResponseStubbing onGet(final String resource) {
+    public ResponseStubbing on(HttpMethod method) {
 
-        return new GetResponseStubbing(this).resource(resource);
-    }
-
-    public PostResponseStubbing onPost(String resource) {
-        return new PostResponseStubbing(this).resource(resource);
+        return new ResponseStubbing(this).method(method);
     }
 
     /**

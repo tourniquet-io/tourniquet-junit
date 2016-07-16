@@ -22,7 +22,7 @@ import java.io.OutputStream;
 /**
  * Handler for serving data from a byte array.
  */
-public class ByteArrayHandler extends ResourceHttpHandler {
+public class ByteArrayResourceHandler extends ResourceHandler {
 
     private final byte[] data;
 
@@ -32,7 +32,7 @@ public class ByteArrayHandler extends ResourceHttpHandler {
      *  the data to be served by this handler. The array is copied so that modifications to it won't affect the data
      *  served by this handler.
      */
-    public ByteArrayHandler(final byte[] resource) { //NOSONAR
+    public ByteArrayResourceHandler(final byte[] resource) { //NOSONAR
         this.data = new byte[resource.length];
         System.arraycopy(resource, 0, this.data, 0, resource.length);
     }

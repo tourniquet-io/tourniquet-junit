@@ -16,15 +16,15 @@
 
 package io.tourniquet.junit.http.rules.examples;
 
+import static io.tourniquet.junit.http.rules.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Rule;
-import org.junit.Test;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
-
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
+import org.junit.Rule;
+import org.junit.Test;
 
 public class HttpServerGetResponseStubbingExample {
 
@@ -35,7 +35,7 @@ public class HttpServerGetResponseStubbingExample {
     @Test
     public void testHttpServerGet() throws Exception {
         //prepare
-        server.onGet("/index.html").respond("someContent");
+        server.on(GET).resource("/index.html").respond("someContent");
 
         //act
         try (final WebClient webClient = new WebClient()) {
@@ -52,8 +52,8 @@ public class HttpServerGetResponseStubbingExample {
     @Test
     public void testHttpServerGetWithQuery() throws Exception {
         //prepare
-        server.onGet("/index.html").respond("someContent");
-        server.onGet("/index.html?param=value").respond("otherContent");
+        server.on(GET).resource("/index.html?param=value").respond("otherContent");
+        server.on(GET).resource("/index.html").respond("someContent");
 
         //act
         try (final WebClient webClient = new WebClient()) {
@@ -74,7 +74,7 @@ public class HttpServerGetResponseStubbingExample {
     @Test
     public void testHttpServerGetWithQuery_notMatching() throws Exception {
         //prepare
-        server.onGet("/index.html?param=value").respond("otherContent");
+        server.on(GET).resource("/index.html?param=value").respond("otherContent");
 
         //act
         try (final WebClient webClient = new WebClient()) {

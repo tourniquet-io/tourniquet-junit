@@ -16,14 +16,13 @@
 
 package io.tourniquet.junit.http.rules.examples;
 
+import static io.tourniquet.junit.http.rules.HttpMethod.POST;
 import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.getString;
 import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.param;
 import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.post;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.tourniquet.junit.http.rules.HttpServer;
 import io.tourniquet.junit.http.rules.HttpServerBuilder;
@@ -39,9 +38,9 @@ public class HttpServerPostResponseStubbingExample {
     public HttpServer server = new HttpServerBuilder().port(55555).build();
 
     @Test
-    public void testHttpServerGet_noParams() throws Exception {
+    public void testHttpServerPost_noParams() throws Exception {
         //prepare
-        server.onPost("/action.do").respond("someContent");
+        server.on(POST).resource("/action.do").respond("someContent");
 
         //act
         //act
@@ -53,12 +52,13 @@ public class HttpServerPostResponseStubbingExample {
     }
 
     @Test
-    public void testHttpServerGet_withParams() throws Exception {
+    public void testHttpServerPost_withParams() throws Exception {
         //prepare
-        final Map<String, String> params = new HashMap<>();
-        params.put("field1", "value1");
-        params.put("field2", "value2");
-        server.onPost("/action.do").withParams(params).respond("someContent");
+        server.on(POST)
+              .resource("/action.do")
+              .withParam("field1", "value1")
+              .withParam("field2", "value2")
+              .respond("someContent");
 
         //act
         try (CloseableHttpClient client = HttpClients.createDefault();
@@ -72,23 +72,23 @@ public class HttpServerPostResponseStubbingExample {
     }
 
     @Test
-    public void testHttpServerGet_withPayload() throws Exception {
+    public void testHttpServerPost_withPayload() throws Exception {
         //prepare
         byte[] data = "Test Content".getBytes();
-        server.onPost("/action.do").withPayload(data).respond("someContent");
+        server.on(POST).resource("/action.do").withPayload(data).respond("someContent");
 
         //act
         try (CloseableHttpClient client = HttpClients.createDefault();
-             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do",data))) {
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do", data))) {
             String content = getString(response.getEntity());
             assertEquals("someContent", content);
         }
     }
 
     @Test
-    public void testHttpServerGet_reactOnRequest() throws Exception {
+    public void testHttpServerPost_reactOnRequest() throws Exception {
         //prepare
-        server.onPost("/action.do").execute(x -> {
+        server.on(POST).resource("/action.do").execute(x -> {
             try {
                 x.getOutputStream().write("someContent".getBytes());
             } catch (IOException e) {
@@ -105,8 +105,5 @@ public class HttpServerPostResponseStubbingExample {
     }
 
     //=========== helper methods to create requests =================
-
-
-
 
 }

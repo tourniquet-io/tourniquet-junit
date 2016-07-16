@@ -18,9 +18,7 @@ package io.tourniquet.junit.http.rules;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
+import java.util.function.Consumer;
 
 /**
  * A base class for serving the content of a single resource via Undertow HTTP. <br> This Undertow {@link
@@ -28,16 +26,15 @@ import io.undertow.server.HttpServerExchange;
  * Implementing classes have to implement the {@link #writeResource(java.io.OutputStream, String)} method in order to write the
  * resource content to the stream.
  */
-public abstract class ResourceHttpHandler implements HttpHandler {
+public abstract class ResourceHandler implements Consumer<HttpExchange> {
 
     @Override
-    public void handleRequest(final HttpServerExchange exchange) throws Exception {
+    public void accept(final HttpExchange httpExchange) {
 
-        if (exchange.isInIoThread()) {
-            exchange.dispatch(this);
-        } else {
-            exchange.startBlocking();
-            writeResource(exchange.getOutputStream(), exchange.getQueryString());
+        try {
+            writeResource(httpExchange.getOutputStream(), httpExchange.getQueryString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -51,6 +48,4 @@ public abstract class ResourceHttpHandler implements HttpHandler {
      *         different query parameters.
      */
     protected abstract void writeResource(final OutputStream outputStream, String queryString) throws IOException;
-
-
 }

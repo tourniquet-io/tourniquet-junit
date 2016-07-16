@@ -16,8 +16,8 @@
 
 package io.tourniquet.junit.http.rules;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -30,7 +30,7 @@ import io.undertow.server.HttpServerExchange;
  */
 public class FilteringHttpHandler implements HttpHandler {
 
-    private Map<Predicate<HttpExchange>, Consumer<HttpExchange>> handlers = new ConcurrentHashMap<>();
+    private Map<Predicate<HttpExchange>, Consumer<HttpExchange>> handlers = new LinkedHashMap<>();
 
     @Override
     public void handleRequest(final HttpServerExchange exchange) throws Exception {
@@ -50,6 +50,13 @@ public class FilteringHttpHandler implements HttpHandler {
 
     }
 
+    /**
+     * Adds a new handler that will receive requests, when specified predicate returns true.
+     * @param filter
+     *  the filter that activates the handler
+     * @param handler
+     *  the handler to process the request.
+     */
     public void addHandler(Predicate<HttpExchange> filter, Consumer<HttpExchange> handler) {
 
         this.handlers.put(filter, handler);
