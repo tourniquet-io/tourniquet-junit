@@ -24,7 +24,7 @@ public class ResponseStubbing {
     private HttpMethod method = HttpMethod.GET;
     private final Map<String, String> params = new HashMap<>();
     private Optional<String> path = Optional.empty();
-    private Optional<byte[]> refPayload = Optional.empty();
+    private Optional<byte[]> payload = Optional.empty();
 
     ResponseStubbing(HttpServer server) {
 
@@ -112,7 +112,7 @@ public class ResponseStubbing {
         if (method == HttpMethod.GET) {
             throw new IllegalArgumentException("payload is not supported for get");
         }
-        this.refPayload = Optional.ofNullable(data);
+        this.payload = Optional.ofNullable(data);
         return this;
     }
 
@@ -184,7 +184,7 @@ public class ResponseStubbing {
     private Predicate<HttpExchange> getPredicate() {
         return matchesMethod(method).and(matchesPath(getPath()))
                                     .and(matchesParams(params, method))
-                                    .and(matchedPayload(refPayload));
+                                    .and(matchedPayload(payload));
     }
 
 }
