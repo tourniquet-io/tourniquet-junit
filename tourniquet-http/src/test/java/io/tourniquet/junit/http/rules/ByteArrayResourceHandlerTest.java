@@ -16,52 +16,39 @@
 
 package io.tourniquet.junit.http.rules;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
 
-import java.nio.charset.Charset;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GetResponseStubbingTest {
-
-    @Mock
-    private HttpServer httpServer;
+public class ByteArrayResourceHandlerTest {
 
     /**
      * The class under test
      */
-    @InjectMocks
-    private GetResponseStubbing subject;
+    private ByteArrayResourceHandler subject = new ByteArrayResourceHandler("test".getBytes());
+
+    @Rule
+    public HttpServerExchangeMock exchange = new HttpServerExchangeMock();
 
 
     @Test
-    public void testRespond() throws Exception {
+    public void testHandleRequest() throws Exception {
+
         //prepare
-        subject.resource("path");
+        exchange.getExchange().startBlocking();
 
         //act
-        subject.respond("test");
-
-
-        //assert
-        verify(httpServer).addResource("path", "test".getBytes(Charset.defaultCharset()));
-    }
-
-    @Test
-    public void testRespond_toQuery() throws Exception {
-        //prepare
-        subject.resource("path?param=value");
-
-        //act
-        subject.respond("test");
-
+        subject.accept(new HttpExchange(exchange.getExchange()));
 
         //assert
-        verify(httpServer).addResource("path?param=value", "test".getBytes(Charset.defaultCharset()));
-    }
+        exchange.getBuffer().rewind();
+        byte[] data = new byte[4];
+        exchange.getBuffer().get(data);
+        assertEquals("test", new String(data));
 
+    }
 }

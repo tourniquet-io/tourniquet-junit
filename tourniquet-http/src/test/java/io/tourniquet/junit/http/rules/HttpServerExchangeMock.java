@@ -1,17 +1,19 @@
 package io.tourniquet.junit.http.rules;
 
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.nio.ByteBuffer;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.ServerConnection;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * Mock for initializing a HttpServerExchange
@@ -31,7 +33,7 @@ public class HttpServerExchangeMock implements TestRule {
     @Override
     public Statement apply(Statement base, Description description) {
 
-        this.serverConnection = mock(ServerConnection.class);
+        this.serverConnection = mock(ServerConnection.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
         this.byteBufferPool = mock(ByteBufferPool.class);
         this.pooledByteBuffer = mock(PooledByteBuffer.class);
 

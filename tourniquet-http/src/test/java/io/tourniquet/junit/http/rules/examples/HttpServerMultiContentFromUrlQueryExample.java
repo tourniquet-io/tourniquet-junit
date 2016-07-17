@@ -34,8 +34,8 @@ public class HttpServerMultiContentFromUrlQueryExample {
     private final URL resource2 = HttpServerMultiContentFromUrlQueryExample.class.getResource("index.html_query");
 
     @Rule
-    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html", resource1)
-                                                      .contentFrom("/index.html?param=value", resource2)
+    public HttpServer server = new HttpServerBuilder().contentFrom("/index.html?param=value", resource2)
+                                                      .contentFrom("/index.html", resource1)
                                                       .build();
 
     @Test

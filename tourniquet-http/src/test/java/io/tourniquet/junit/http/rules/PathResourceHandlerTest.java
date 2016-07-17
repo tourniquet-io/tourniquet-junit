@@ -53,9 +53,10 @@ public class PathResourceHandlerTest {
         //prepare
         when(path.getFileSystem().provider()).thenReturn(provider);
         when(provider.newInputStream(path)).thenReturn(new ByteArrayInputStream("test".getBytes()));
+        exchange.getExchange().startBlocking();
 
         //act
-        subject.handleRequest(exchange.getExchange());
+        subject.accept(new HttpExchange(exchange.getExchange()));
 
         //assert
         exchange.getBuffer().rewind();

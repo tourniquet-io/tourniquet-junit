@@ -30,6 +30,10 @@ import io.tourniquet.junit.util.ResourceResolver;
 /**
  * A Builder for creating an embedded HTTP server. Hostname and tcpPort can be optionally specified and which resources
  * the server should host.
+ * <br>
+ * When defining content and in case you mix paths with and without queries, that the paths without query are defined
+ * after paths with queries as these will also match requests with queries defined.
+ *
  */
 public class HttpServerBuilder implements Builder<HttpServer> {
 

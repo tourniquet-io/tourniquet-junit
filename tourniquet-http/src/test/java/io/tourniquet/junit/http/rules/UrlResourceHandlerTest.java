@@ -41,9 +41,9 @@ public class UrlResourceHandlerTest {
     @Test
     public void testHandleRequest() throws Exception {
         //prepare
-
+        exchange.getExchange().startBlocking();
         //act
-        subject.handleRequest(exchange.getExchange());
+        subject.accept(new HttpExchange(exchange.getExchange()));
 
         //assert
         exchange.getBuffer().rewind();

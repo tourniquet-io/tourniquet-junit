@@ -18,36 +18,49 @@ package io.tourniquet.junit.http.rules;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ByteArrayHandlerTest {
+public class ResourceHandlerTest {
 
-    /**
-     * The class under test
-     */
-    private ByteArrayHandler subject = new ByteArrayHandler("test".getBytes());
 
     @Rule
     public HttpServerExchangeMock exchange = new HttpServerExchangeMock();
 
+    /**
+     * The class under test
+     */
+    private ResourceHandler subject;
+
+    @Before
+    public void setUp() throws Exception {
+        subject = new ResourceHandler() {
+
+            @Override
+            protected void writeResource(final OutputStream outputStream, String queryString) throws IOException {
+                final byte[] data = "test".getBytes();
+                outputStream.write(data, 0, data.length);
+            }
+        };
+    }
 
     @Test
     public void testHandleRequest() throws Exception {
-
         //prepare
-
+        exchange.getExchange().startBlocking();
         //act
-        subject.handleRequest(exchange.getExchange());
+        subject.accept(new HttpExchange(exchange.getExchange()));
 
         //assert
         exchange.getBuffer().rewind();
         byte[] data = new byte[4];
         exchange.getBuffer().get(data);
         assertEquals("test", new String(data));
-
     }
 }
