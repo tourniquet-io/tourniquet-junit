@@ -104,6 +104,4 @@ public class HttpServerPostResponseStubbingExample {
         }
     }
 
-    //=========== helper methods to create requests =================
-
 }
