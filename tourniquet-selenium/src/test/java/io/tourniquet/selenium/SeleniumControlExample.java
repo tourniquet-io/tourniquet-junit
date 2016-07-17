@@ -20,6 +20,7 @@ import static io.tourniquet.junit.net.NetworkUtils.findAvailablePort;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import io.tourniquet.junit.http.rules.HttpMethod;
 import io.tourniquet.junit.http.rules.HttpServer;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -48,8 +49,8 @@ public class SeleniumControlExample {
     //prepare some synthetic resources so the driver can receive actual content
     @BeforeClass
     public static void setUp() throws Exception {
-        http.onGet("home").respond("HOME");
-        http.onGet("home/page1").respond("PAGE1");
+        http.on(HttpMethod.GET).resource("/home/page1").respond("PAGE1");
+        http.on(HttpMethod.GET).resource("/home").respond("HOME");
     }
 
     //check if the baseURL is loaded initially
