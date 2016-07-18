@@ -99,6 +99,7 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
+
 * Handling query parameter
 ```java
     @Rule
@@ -116,6 +117,7 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
+
 * Handling answering to POST requests
 ```java
     @Rule
@@ -140,6 +142,7 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
+
 * Match a specific payload body
 ```java
     @Rule
@@ -159,6 +162,7 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
+
 * Match form parameters
 ```java
     @Rule
@@ -183,8 +187,6 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
-    
-
 
 ### Limitations
 Currently only the GET and POST methods is supported. POST is only configurable via Stubbing API.
