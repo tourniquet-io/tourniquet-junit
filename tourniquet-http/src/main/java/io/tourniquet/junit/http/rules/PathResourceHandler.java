@@ -25,7 +25,7 @@ import java.nio.file.Path;
  * ResourceHandler that serves resources from a FileSystem {@link java.nio.file.Path}. The path may be of a physical
  * {@link java.nio.file.FileSystem} or a virtual one, such as a ZipFileSystem.
  */
-public class PathResourceHandler extends ResourceHttpHandler {
+public class PathResourceHandler extends ResourceHandler {
 
     private final Path path;
 
@@ -39,7 +39,7 @@ public class PathResourceHandler extends ResourceHttpHandler {
     }
 
     @Override
-    protected void writeResource(final OutputStream outputStream) throws IOException {
+    protected void writeResource(final OutputStream outputStream, String queryString) throws IOException {
             Files.copy(path, outputStream);
     }
 }

@@ -1,8 +1,50 @@
 # pageobjects
 Pageobjects is a helper library for defining a [Page Object Model](http://martinfowler.com/bliki/PageObject.html)
-to be used with Selenium. Pages and ElementGroups can be defined as classes, where all the single elements
-of the page or element group can be declaratively defined using an annotation.
-The framework helps you locating the elements and injecting a default getter (Supplier) for that element, 
+to be used with Selenium. 
+
+## Why tourniquet-pageobjects?
+Selenium itself already provides a convenient way of declaring a model, using the `By` 
+locators and a set of operations on the page, for example:
+
+```java
+    public class LoginPage {
+    
+        WebDriver driver;
+        By username = By.id("username");
+        By password = By.id("password");
+        By login = By.id("login");
+        
+        public LoginPage(WebDriver driver) {
+            this.driver = driver;
+        }
+        
+        public void enterUsername(String username){
+            driver.findElement(username).sendKeys(username);
+        }
+        public void enterPassword(String password){
+            driver.findElement(password).sendKeys(password);
+        }
+        public void pressLogin(){
+            driver.findElement(login).click();
+        }
+        
+    }
+```
+
+This approach is good for most cases, but require a lot of repetitive code, because typically you only want to
+locate an element and either click it or enter input to it - in case of a form, you want to submit it. Further, for 
+defining a fluent API on the model objects, you have to add a `return this;` On top of that, if certain elements only
+appear after a certain action, you want to wait until the element to click appears. The syntax for creating a dynamic
+ wait get easily quite complex and difficult to read.
+ 
+Tourniquet helps you to reduce effort for creating a page object model and generate conventional code. Locations of 
+elements and the time to wait for those are declared using annotations. But not only elements can be annotated, 
+but methods as well. The default implementations for entering input or clicking elements may be omitted and 
+automatically injected. 
+
+To simplify reuse parts of the UI or its widgets, elements can be grouped and nested. Pages and ElementGroups can be 
+defined as classes, where all the single elements of the page or element group can be defined using an 
+annotation. The framework helps you locating the elements and injecting a default getter (Supplier) for that element, 
 including waiting for the presence of the element.
 
 On top of that, it includes support for declaring user transactions for the execution time can be measured. 
@@ -11,7 +53,7 @@ All measured times can be collected and process, i.e. for performance analysis.
 ## Usage
 
 This library requires a Java 8 JRE to run. If you write code for Java 7 production environments, but
- and your build and test execution environment supports Java 8 - Selenium tests can be executed in a 
+ your build and test execution environment supports Java 8 - Selenium tests can be executed in a 
  different JVM than the system under test - you may put your Selenium based tests in a separate
  Maven module, and configure only that module to compile for Java 8. I.e. by adding the compiler
  plugin configuration.
@@ -74,10 +116,45 @@ As example, take a login page:
     }
 ```
 
+## Default Interactions
+In the above example for a simple page, the interactions with the elements are fairly common. Tourniquet-pageobjects
+provides some convenience for dealing with such web elements and the interaction by generating the default interactions
+for you. It is only required to declare an abstract method and annotate it with the locator information. The
+according code is injected, depending on the parameters:
+
+* if the element points to <form>, the `submit()` method is invoked, regardless of the parameters passed
+* if no parameter is passed, the element is `click()`ed.
+* if a single parameter is passed, the element is `clear()`ed and afterwards the key sequences defined by the 
+parameter's  `toString()` is send as keys using the `sendKeys()` method.
+
+The methods may return one of the following:
+
+* void
+* WebElement - the element found by the locator
+* the ElementGroup or Page itself, supporting fluent DSLs
+
+With the implicit interactions, the above example would look like this:
+
+```java
+    @Locator("login.jsp")
+    public abstract class LoginPage implements Page {
+        
+        @Locator(by = ID, value = "username")
+        public abstract LoginPage enterUsername(String username);
+        
+        @Locator(by = ID, value = "password")
+        public abstract LoginPage enterPassword(String password);
+        
+        @Locator(by = ID, value = "login")
+        public abstract void pressLogin();
+    }
+```
+
+
 ## Running Tests with Page Objects
 The parts that load the page and locate the elements on the page require a Selenium driver. The default
-case is to run a test with a single driver in one test execution thread. In order to initialize a driver
-for the current test, the library provides a test rule that has to be added to the test:
+scenario is to run a test with a single driver in one test execution thread. In order to initialize a driver
+for the current test, the `tourniquet-selenium` module provides a test rule that has to be added to the test:
 
 ```java
     public class PageObjectTest {
@@ -85,7 +162,7 @@ for the current test, the library provides a test rule that has to be added to t
         @Rule
         public SeleniumControl selenium = SeleniumControl.builder()
                                                          .baseUrl(basePath)
-                                                         .driver(() -> new FirefoxDriver())
+                                                         .driver(Drivers.FIREFOX)
                                                          .build();
                                                          
          //...
@@ -160,6 +237,7 @@ Example:
         LoginForm form;
     }
 ```
+
    
 # Timeouts
 When modelling an application page model, certain elements or pageloads have to meet a respones time goal or the 

@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.tourniquet.junit.UncheckedException;
 import org.junit.Test;
 
 /**
@@ -289,7 +290,7 @@ public class ExecutionResultTest {
         ExecutionResult<Object> result = ExecutionResult.ofSuccess(null);
 
         //act
-        ExecutionResult<Object> chainingValue = result.mapException(Exception.class, RuntimeException::new);
+        ExecutionResult<Object> chainingValue = result.mapException(Exception.class, UncheckedException::new);
         assertEquals(result, chainingValue);
         //assert
     }

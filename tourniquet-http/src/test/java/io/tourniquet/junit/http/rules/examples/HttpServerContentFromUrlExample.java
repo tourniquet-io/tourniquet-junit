@@ -20,13 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
-
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import io.tourniquet.junit.http.rules.HttpServer;
-import io.tourniquet.junit.http.rules.HttpServerBuilder;
 import org.junit.Rule;
 import org.junit.Test;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
+import io.tourniquet.junit.http.rules.HttpServer;
+import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
 public class HttpServerContentFromUrlExample {
 

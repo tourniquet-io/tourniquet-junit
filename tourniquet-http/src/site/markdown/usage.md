@@ -71,9 +71,18 @@ the context root defined by path while all files in the zip files are entries re
 ```
 
 ####Definition via Stubbing API
-If the server is created with the constructor and not with the builder, the provided content can only be defined 
-using the stubbing API. 
+The behavior of the server can be defined using a stubbing API which allows fine grained behavior configuration on
+ various criteria. Apart from this, if the server is created with the constructor and not with the builder, the 
+ provided content can only be defined using the stubbing API. 
+ 
+Stubbing is started by invoking the `on()` method on the server, passing the expected `HttpMethod`. With the fluent
+ API various matching criteria like resource path - with or without query, parameters or body can be chosen. Stubbing
+ is finished by either invoking the `respond()` method, defining fixed content to be returned or `execute()` allowing
+ full access on the request and response objects, allowing to dynamically react on the reuqest, if that is needed.
 
+**Examples:**
+
+* Defining static content for GET requests
 ```java
     @Rule
     HttpServer http = new HttpServer();
@@ -89,7 +98,93 @@ using the stubbing API.
             assertEquals("someContent", page.getContent());
         }
     }
-``` 
+```
+* Handling query parameter
+```java
+    @Rule
+    HttpServer http = new HttpServer();
+    
+    @Test
+    public void testHttpServerGet() throws Exception {
+        //define content via stubbing
+        http.onGet("/index.html?queryParam=value").respond("someContent");
+        
+        //test using html unit
+        try (final WebClient webClient = new WebClient()) {
+            final TextPage page = webClient.getPage(http.getBaseUrl() + "/index.html");
+            assertEquals("someContent", page.getContent());
+        }
+    }
+```
+* Handling answering to POST requests
+```java
+    @Rule
+    HttpServer http = new HttpServer();
+    
+    @Test
+    public void testHttpServerPost() throws Exception {
+        //prepare
+        server.on(POST).resource("/action.do").execute(x -> {
+            try {
+                x.getOutputStream().write("someContent".getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        //act
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do"))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
+        }
+    }
+```
+* Match a specific payload body
+```java
+    @Rule
+    HttpServer http = new HttpServer();
+    
+    @Test
+    public void testHttpServerPost() throws Exception {
+        //prepare
+        byte[] data = "Test Content".getBytes();
+        server.on(POST).resource("/action.do").withPayload(data).respond("someContent");
+
+        //act
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do", data))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
+        }
+    }
+```
+* Match form parameters
+```java
+    @Rule
+    HttpServer http = new HttpServer();
+    
+    @Test
+    public void testHttpServerPost() throws Exception {
+        //prepare
+        server.on(POST)
+              .resource("/action.do")
+              .withParam("field1", "value1")
+              .withParam("field2", "value2")
+              .respond("someContent");
+
+        //act
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do",
+                                                                  param("field1", "value1"),
+                                                                  param("field2", "value2")))) {
+            String content = getString(response.getEntity());
+            assertEquals("someContent", content);
+        }
+    }
+```
+    
+
 
 ### Limitations
-Currently only the GET method is supported.
+Currently only the GET and POST methods is supported. POST is only configurable via Stubbing API.

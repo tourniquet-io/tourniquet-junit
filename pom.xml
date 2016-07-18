@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>io.tourniquet.junit</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.4.5</version>
+		<version>0.4.6</version>
 		<relativePath>./tourniquet-parent</relativePath>
 	</parent>
 
 	<artifactId>tourniquet-junit</artifactId>
-	<version>0.4.5</version>
+	<version>0.4.6</version>
 	<packaging>pom</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -45,6 +45,7 @@
 		<module>tourniquet-measure</module>
 		<module>tourniquet-tx</module>
 		<module>tourniquet-pageobjects</module>
+		<module>tourniquet-selenium</module>
 	</modules>
 
 	<dependencies>

@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
 
 import io.tourniquet.junit.util.ExecutionHelper;
+import io.tourniquet.selenium.SeleniumContext;
 import org.openqa.selenium.SearchContext;
 
 /**
@@ -39,9 +40,7 @@ public interface ElementGroup {
      */
     default SearchContext getSearchContext() {
 
-        return SeleniumContext.currentDriver()
-                              .orElseThrow(() -> new IllegalStateException(
-                                      "Could not obtain current driver outside of test execution"));
+        return SeleniumContext.currentDriver();
     }
 
     /**

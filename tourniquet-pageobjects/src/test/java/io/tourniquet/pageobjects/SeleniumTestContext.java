@@ -23,6 +23,8 @@ import static org.mockito.Mockito.withSettings;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.tourniquet.selenium.SeleniumControl;
+import io.tourniquet.selenium.TimeoutProvider;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;

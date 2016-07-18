@@ -20,11 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.Optional;
 
+import io.tourniquet.selenium.SeleniumContext;
+import io.tourniquet.selenium.TimeoutProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +47,7 @@ public class TimeoutsTest {
 
     @Mock
     private TimeoutProvider provider;
+
     private SeleniumContext ctx;
 
     @Before
@@ -52,12 +56,14 @@ public class TimeoutsTest {
         when(locator.timeout()).thenReturn(60);
         this.ctx = new SeleniumContext(() -> webDriver);
         this.ctx.setTimeoutProvider(provider);
+        this.ctx.init();
+        when(provider.getTimeoutFor(anyString())).thenReturn(Optional.empty());
 
     }
 
     @After
     public void tearDown() throws Exception {
-        SeleniumContext.currentContext().ifPresent(SeleniumContext::destroy);
+        SeleniumContext.currentContext().destroy();
     }
 
     @Test
@@ -224,6 +230,7 @@ public class TimeoutsTest {
     public void testGetTimeout_optionalTimeout_fallbackKeyIgnored() throws Exception {
         //prepare
         Optional<Locator> loc = Optional.of(locator);
+
 
         //act
         Duration timeout = Timeouts.getTimeout(loc, "fallbackKey");

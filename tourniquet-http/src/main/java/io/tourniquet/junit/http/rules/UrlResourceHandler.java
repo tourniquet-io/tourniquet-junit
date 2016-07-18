@@ -24,10 +24,10 @@ import java.net.URL;
 import org.apache.commons.io.IOUtils;
 
 /**
- * A {@link ResourceHttpHandler} that serves the content of a URL. It's intended for serving classpath resources
+ * A {@link ResourceHandler} that serves the content of a URL. It's intended for serving classpath resources
  * referenced by URL but it may also serves resource from the local filesystem or from a network resource.
  */
-public class UrlResourceHandler extends ResourceHttpHandler{
+public class UrlResourceHandler extends ResourceHandler {
 
     private final URL resource;
 
@@ -36,7 +36,7 @@ public class UrlResourceHandler extends ResourceHttpHandler{
     }
 
     @Override
-    protected void writeResource(final OutputStream outputStream) throws IOException {
+    protected void writeResource(final OutputStream outputStream, String queryString) throws IOException {
             try(InputStream inputStream = resource.openStream()){
                 IOUtils.copy(inputStream, outputStream);
             }
