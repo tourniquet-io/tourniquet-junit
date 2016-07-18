@@ -112,7 +112,7 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         
         //test using html unit
         try (final WebClient webClient = new WebClient()) {
-            final TextPage page = webClient.getPage(http.getBaseUrl() + "/index.html");
+            final TextPage page = webClient.getPage(http.getBaseUrl() + "/index.html?queryParam=value");
             assertEquals("someContent", page.getContent());
         }
     }
