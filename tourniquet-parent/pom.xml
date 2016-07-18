@@ -28,7 +28,7 @@
 
     <artifactId>parent</artifactId>
     <groupId>io.tourniquet.junit</groupId>
-    <version>0.4.6</version>
+    <version>0.4.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>A testing framework for developing unit tests that required
