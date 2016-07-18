@@ -82,7 +82,7 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
 
 **Examples:**
 
-* Defining static content for GET requests
+*Defining static content for GET requests*
 ```java
     @Rule
     HttpServer http = new HttpServer();
@@ -99,7 +99,8 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
-* Handling query parameter
+
+*Handling query parameter*
 ```java
     @Rule
     HttpServer http = new HttpServer();
@@ -111,12 +112,13 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         
         //test using html unit
         try (final WebClient webClient = new WebClient()) {
-            final TextPage page = webClient.getPage(http.getBaseUrl() + "/index.html");
+            final TextPage page = webClient.getPage(http.getBaseUrl() + "/index.html?queryParam=value");
             assertEquals("someContent", page.getContent());
         }
     }
 ```
-* Handling answering to POST requests
+
+*Handling answering to POST requests*
 ```java
     @Rule
     HttpServer http = new HttpServer();
@@ -140,7 +142,8 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
-* Match a specific payload body
+
+*Match a specific payload body*
 ```java
     @Rule
     HttpServer http = new HttpServer();
@@ -159,7 +162,8 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
-* Match form parameters
+
+*Match form parameters*
 ```java
     @Rule
     HttpServer http = new HttpServer();
@@ -183,8 +187,6 @@ Stubbing is started by invoking the `on()` method on the server, passing the exp
         }
     }
 ```
-    
-
 
 ### Limitations
 Currently only the GET and POST methods is supported. POST is only configurable via Stubbing API.
