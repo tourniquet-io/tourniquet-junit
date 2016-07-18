@@ -22,7 +22,6 @@
 
     <home name="JCR" uri="index.confluence">
         <child name="Usage" uri="../markdown/usage.md"/>
-        <child name="Content Loader" uri="../markdown/content-loader.md"/>
     </home>
 
     <label>jcr</label>
