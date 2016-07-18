@@ -75,8 +75,8 @@ This library requires a Java 8 JRE to run. If you write code for Java 7 producti
 
 The library contains two base types for declaring your page objects:
 
-- `ElementGroup` defines an arbitrary set of elements that are logically bound together
-- `Page` is a special element group declaring a page of your application. 
+* `ElementGroup` defines an arbitrary set of elements that are logically bound together
+* `Page` is a special element group declaring a page of your application. 
 
 Both are interfaces that may be implemented by your page object model and define default methods providing
 some logic for navigating and element location.
@@ -122,7 +122,7 @@ provides some convenience for dealing with such web elements and the interaction
 for you. It is only required to declare an abstract method and annotate it with the locator information. The
 according code is injected, depending on the parameters:
 
-* if the element points to <form>, the `submit()` method is invoked, regardless of the parameters passed
+* if the element points to `&lt;form&gt;`, the `submit()` method is invoked, regardless of the parameters passed
 * if no parameter is passed, the element is `click()`ed.
 * if a single parameter is passed, the element is `clear()`ed and afterwards the key sequences defined by the 
 parameter's  `toString()` is send as keys using the `sendKeys()` method.
