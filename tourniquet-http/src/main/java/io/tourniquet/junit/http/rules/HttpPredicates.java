@@ -16,14 +16,16 @@
 
 package io.tourniquet.junit.http.rules;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.groupingBy;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -80,25 +82,28 @@ final class HttpPredicates {
         }));
     }
 
-    private static Predicate<Map.Entry<String, String>> matchesParam(Supplier<Map<String, String>> requestParams) {
+    private static Predicate<Map.Entry<String, String>> matchesParam(Supplier<Map<String, List<String>>> requestParams) {
 
-        final Map<String, String> params = requestParams.get();
-        return e -> params.containsKey(e.getKey()) && params.get(e.getKey()).equals(e.getValue());
+        final Map<String, List<String>> params = requestParams.get();
+        return e -> params.containsKey(e.getKey()) && params.get(e.getKey()).contains(e.getValue());
     }
 
-    private static Map<String,String> getQueryParams(final HttpExchange x) {
-        return parseQuerySring(x.getQueryString());
-    }
-
-    private static Map<String, String> getFormParams(final HttpExchange x) {
-        return parseQuerySring(new String(x.getPayload()));
-    }
-
-    private static Map<String, String> parseQuerySring(final String payload) {
-        if (payload.matches("[^\\s&=]+=[^&=]*((&amp;|&)[^\\s&=]+=[^&=]*)*")) {
-            return Stream.of(payload.split("&"))
+    private static Map<String,List<String>> getQueryParams(final HttpExchange x) {
+        String query = x.getQueryString();
+        if (query.matches("[^\\s&=]+=[^&=]*((&amp;|&)[^\\s&=]+=[^&=]*)*")) {
+            return Stream.of(query.split("&amp;|&"))
                          .map(nameValuePair -> nameValuePair.split("="))
-                         .collect(toMap(s -> s[0], s -> s[1]));
+                         .collect(groupingBy(s -> s[0], Collectors.mapping(s -> s[1], Collectors.toList())));
+        }
+        return Collections.emptyMap();
+    }
+
+    private static Map<String, List<String>> getFormParams(final HttpExchange x) {
+        String payload = new String(x.getPayload());
+        if (payload.matches("[^\\s&=:]+(:|=).*((&amp;|&|\\n)[^\\s&=:]+(:|=).*)*")) {
+            return Stream.of(payload.split("&amp;|&|\\n"))
+                         .map(nameValuePair -> nameValuePair.split(":|="))
+                         .collect(groupingBy(s -> s[0], Collectors.mapping(s -> s[1], Collectors.toList())));
         }
         return Collections.emptyMap();
     }
