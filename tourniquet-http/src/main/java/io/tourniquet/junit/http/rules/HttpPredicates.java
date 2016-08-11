@@ -71,7 +71,7 @@ final class HttpPredicates {
      * @return
      *  the predicate
      */
-    public static Predicate<HttpExchange> matchesParams(Map<String,String> params, HttpMethod method) {
+    public static Predicate<HttpExchange> matchesParams(Map<String,List<String>> params, HttpMethod method) {
 
         return x -> params.entrySet().stream().allMatch(matchesParam(() -> {
             if (method == HttpMethod.POST) {
@@ -82,10 +82,10 @@ final class HttpPredicates {
         }));
     }
 
-    private static Predicate<Map.Entry<String, String>> matchesParam(Supplier<Map<String, List<String>>> requestParams) {
+    private static Predicate<Map.Entry<String, List<String>>> matchesParam(Supplier<Map<String, List<String>>> requestParams) {
 
         final Map<String, List<String>> params = requestParams.get();
-        return e -> params.containsKey(e.getKey()) && params.get(e.getKey()).contains(e.getValue());
+        return e -> params.containsKey(e.getKey()) && params.get(e.getKey()).stream().anyMatch(s -> e.getValue().contains(s));
     }
 
     private static Map<String,List<String>> getQueryParams(final HttpExchange x) {

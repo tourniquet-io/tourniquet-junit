@@ -20,17 +20,20 @@ import static io.tourniquet.junit.http.rules.HttpPredicates.matchedPayload;
 import static io.tourniquet.junit.http.rules.HttpPredicates.matchesMethod;
 import static io.tourniquet.junit.http.rules.HttpPredicates.matchesParams;
 import static io.tourniquet.junit.http.rules.HttpPredicates.matchesPath;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.groupingBy;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -40,7 +43,7 @@ public class ResponseStubbing {
 
     private final HttpServer server;
     private HttpMethod method = HttpMethod.GET;
-    private final Map<String, String> params = new HashMap<>();
+    private final Map<String, List<String>> params = new HashMap<>();
     private Optional<String> path = Optional.empty();
     private Optional<byte[]> payload = Optional.empty();
 
@@ -89,8 +92,7 @@ public class ResponseStubbing {
      * @return this stubbing.
      */
     public ResponseStubbing withParams(Map<String, String> params) {
-
-        this.params.putAll(params);
+        params.entrySet().forEach(e -> withParam(e.getKey(), e.getValue()));
         return this;
     }
 
@@ -109,8 +111,8 @@ public class ResponseStubbing {
      * @return this stubbing.
      */
     public ResponseStubbing withParam(String name, String value) {
-
-        this.params.put(name, value);
+        this.params.putIfAbsent(name, new ArrayList<>());
+        this.params.get(name).add(value);
         return this;
     }
 
@@ -182,7 +184,7 @@ public class ResponseStubbing {
      */
     public void execute(Consumer<HttpExchange> exchangeHandler) {
         //TODO don't mix query params with non query params
-        withParams(getQueryParams());
+        params.putAll(getQueryParams());
         this.server.addAction(getPath(), getPredicate(), exchangeHandler);
 
     }
@@ -202,14 +204,14 @@ public class ResponseStubbing {
      *
      * @return a map of key-value pairs resembling the query parameters
      */
-    private Map<String, String> getQueryParams() {
+    private Map<String, List<String>> getQueryParams() {
 
         return this.path.map(p -> {
             int idx = p.indexOf('?');
             if (idx != -1) {
-                return (Map<String, String>) Arrays.stream(p.substring(idx + 1).split("(&amp;|&)"))
+                return (Map<String, List<String>>) Arrays.stream(p.substring(idx + 1).split("(&amp;|&)"))
                                                    .map(kv -> kv.split("="))
-                                                   .collect(toMap(kv -> kv[0], kv -> kv[1]));
+                                                   .collect(groupingBy(s -> s[0], Collectors.mapping(s -> s[1], Collectors.toList())));
             }
             return null;
         }).orElse(Collections.emptyMap());
