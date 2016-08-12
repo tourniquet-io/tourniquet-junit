@@ -20,11 +20,11 @@
     <parent>
         <artifactId>tourniquet-junit</artifactId>
         <groupId>io.tourniquet.junit</groupId>
-        <version>0.4.7-SNAPSHOT</version>
+        <version>0.4.7</version>
     </parent>
 
     <artifactId>tourniquet-selenium</artifactId>
-    <version>0.4.7-SNAPSHOT</version>
+    <version>0.4.7</version>
 
     <name>${project.artifactId}</name>
     <description>Library for Selenium Context handling.</description>
@@ -34,12 +34,12 @@
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-core</artifactId>
-            <version>0.4.7-SNAPSHOT</version>
+            <version>0.4.7</version>
         </dependency>
         <dependency>
             <groupId>io.tourniquet.junit</groupId>
             <artifactId>tourniquet-http</artifactId>
-            <version>0.4.7-SNAPSHOT</version>
+            <version>0.4.7</version>
             <scope>test</scope>
         </dependency>
         <!-- Selenium dependencies -->
