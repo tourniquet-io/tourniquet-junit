@@ -23,14 +23,14 @@ import static io.tourniquet.junit.http.rules.examples.HttpClientHelper.post;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-
-import io.tourniquet.junit.http.rules.HttpServer;
-import io.tourniquet.junit.http.rules.HttpServerBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Rule;
 import org.junit.Test;
+
+import io.tourniquet.junit.http.rules.HttpServer;
+import io.tourniquet.junit.http.rules.HttpServerBuilder;
 
 public class HttpServerPostResponseStubbingExample {
 
@@ -101,6 +101,27 @@ public class HttpServerPostResponseStubbingExample {
              CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do"))) {
             String content = getString(response.getEntity());
             assertEquals("someContent", content);
+        }
+    }
+
+    @Test
+    public void testHttpServerPost_postFormData() throws Exception {
+        //prepare
+        server.on(POST).resource("/action.do")
+              .withParam("formParam", "value1")
+              .execute(x -> {
+            try {
+                x.getOutputStream().write(x.getPayload());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        //act
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(post("http://localhost:55555/action.do", "formParam:value1"))) {
+            String content = getString(response.getEntity());
+            assertEquals("formParam:value1", content); //if payload is returned form data matched
         }
     }
 

@@ -30,7 +30,7 @@ import io.undertow.server.HttpServerExchange;
  */
 public class FilteringHttpHandler implements HttpHandler {
 
-    private Map<Predicate<HttpExchange>, Consumer<HttpExchange>> handlers = new LinkedHashMap<>();
+    private final Map<Predicate<HttpExchange>, Consumer<HttpExchange>> handlers = new LinkedHashMap<>();
 
     @Override
     public void handleRequest(final HttpServerExchange exchange) throws Exception {

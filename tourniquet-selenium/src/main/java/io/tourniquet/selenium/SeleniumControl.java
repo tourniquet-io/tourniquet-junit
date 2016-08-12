@@ -117,6 +117,7 @@ public class SeleniumControl extends ExternalResource {
             SeleniumContext.currentContext();
             return Optional.empty();
         } catch (IllegalStateException e){
+            LOG.debug("No current context present, creating new one", e);
             return Optional.of(new SeleniumContext(driverProvider));
         }
     }

@@ -16,6 +16,7 @@
 
 package io.tourniquet.junit.http.rules.examples;
 
+import static io.tourniquet.junit.http.rules.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -58,6 +59,26 @@ public class HttpServerContentFromUrlQueryExample {
         try (final WebClient webClient = new WebClient()) {
 
             final HtmlPage page = webClient.getPage(server.getBaseUrl() + "/index.html?param=value");
+            final String pageAsXml = page.asXml();
+            final String pageAsText = page.asText();
+
+            //assert
+            assertEquals("Test Content", page.getTitleText());
+            assertTrue(pageAsXml.contains("<body>"));
+            assertTrue(pageAsText.contains("Test Content Body"));
+        }
+    }
+
+    @Test
+    public void testHttpServerGet_matchingQuery_duplicateParams() throws Exception {
+        //prepare
+
+        server.on(GET).resource("/index.html?param=value1&param=value2").respond(resource);
+
+        //act
+        try (final WebClient webClient = new WebClient()) {
+
+            final HtmlPage page = webClient.getPage(server.getBaseUrl() + "/index.html?param=value1&param=value2");
             final String pageAsXml = page.asXml();
             final String pageAsText = page.asText();
 
