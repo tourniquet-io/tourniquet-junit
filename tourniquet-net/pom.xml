@@ -35,10 +35,6 @@
             <artifactId>tourniquet-core</artifactId>
             <version>0.4.6-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

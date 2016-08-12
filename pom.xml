@@ -31,22 +31,74 @@
 	<description>The tourniquet root module</description>
 
 	<modules>
-		<module>tourniquet-core</module>
-		<module>tourniquet-security</module>
-		<module>tourniquet-net</module>
-		<module>tourniquet-inject</module>
-		<module>tourniquet-file</module>
-		<module>tourniquet-jcr</module>
-		<module>tourniquet-ldap</module>
-		<module>tourniquet-all</module>
 		<module>tourniquet-parent</module>
-		<module>tourniquet-http</module>
-		<module>tourniquet-pdf</module>
+		<module>tourniquet-core</module>
+		<module>tourniquet-file</module>
+		<module>tourniquet-net</module>
+		<module>tourniquet-security</module>
 		<module>tourniquet-measure</module>
 		<module>tourniquet-tx</module>
-		<module>tourniquet-pageobjects</module>
-		<module>tourniquet-selenium</module>
 	</modules>
+
+	<!--
+		//TQT-21
+		Tourniquet is organized in sub-modules to speed up the built during development. All modules that have
+		dependencies to external libraries that are not common (i.e. like apache commons), are organized as separate
+		module that can be included in the build by activating the corresponding profile. In order to build all
+		modules, the mod-all profile should be activated.
+	-->
+	<profiles>
+		<profile>
+			<id>mod-ldap</id>
+			<modules>
+				<module>tourniquet-ldap</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mod-http</id>
+			<modules>
+				<module>tourniquet-http</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mod-cdi</id>
+			<modules>
+				<module>tourniquet-inject</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mod-jcr</id>
+			<modules>
+				<module>tourniquet-jcr</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mod-selenium</id>
+			<modules>
+				<module>tourniquet-pageobjects</module>
+				<module>tourniquet-selenium</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mod-pdf</id>
+			<modules>
+				<module>tourniquet-pdf</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mod-all</id>
+			<modules>
+				<module>tourniquet-http</module>
+				<module>tourniquet-inject</module>
+				<module>tourniquet-jcr</module>
+				<module>tourniquet-ldap</module>
+				<module>tourniquet-pageobjects</module>
+				<module>tourniquet-selenium</module>
+				<module>tourniquet-pdf</module>
+				<module>tourniquet-all</module>
+			</modules>
+		</profile>
+	</profiles>
 
 	<dependencies>
 		<!-- JUnit is required by all modules and won't be added as dependency as tourniquet consumers
