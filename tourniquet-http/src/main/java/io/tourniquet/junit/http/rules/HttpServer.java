@@ -62,11 +62,12 @@ public class HttpServer extends ExternalResource {
 
     private final Map<String, Object> resources;
 
+    private final Map<String, FilteringHttpHandler> actionHandlers = new LinkedHashMap<>();
+
     private Undertow server;
 
     private PathHandler pathHandler;
 
-    private Map<String, FilteringHttpHandler> actionHandlers = new LinkedHashMap<>();
 
     /**
      * Creates a http server on localhost, running on an available tcp port. The server won't server any static
@@ -155,12 +156,12 @@ public class HttpServer extends ExternalResource {
         int querySeparator = pathWithQuery.indexOf('?');
         final String path;
         final Optional<String> query;
-        if (querySeparator != -1) {
-            path = pathWithQuery.substring(0, querySeparator);
-            query = Optional.of(pathWithQuery.substring(querySeparator + 1));
-        } else {
+        if (querySeparator == -1) {
             path = pathWithQuery;
             query = Optional.empty();
+        } else {
+            path = pathWithQuery.substring(0, querySeparator);
+            query = Optional.of(pathWithQuery.substring(querySeparator + 1));
         }
 
         try {
