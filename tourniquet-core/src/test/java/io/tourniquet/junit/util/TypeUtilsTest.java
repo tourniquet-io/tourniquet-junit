@@ -17,13 +17,16 @@
 package io.tourniquet.junit.util;
 
 import static org.hamcrest.core.Is.isA;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 /**
+ *
  */
-public class TypeConverterTest {
+public class TypeUtilsTest {
 
     @Test
     public void convertTo_() throws Exception {
@@ -31,7 +34,7 @@ public class TypeConverterTest {
         String input = "true";
         Class type = boolean.class;
         //Act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //Assert
         assertThat(result, isA(type));
@@ -43,7 +46,7 @@ public class TypeConverterTest {
         String input = "true";
         Class type = boolean.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -55,7 +58,7 @@ public class TypeConverterTest {
         String input = "true";
         Class type = Boolean.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -67,7 +70,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = byte.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -79,7 +82,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = Byte.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -91,7 +94,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = short.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -103,7 +106,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = Short.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -115,7 +118,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = int.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -127,7 +130,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = Integer.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -139,7 +142,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = long.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -151,7 +154,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = Long.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -163,7 +166,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = float.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -175,7 +178,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = Float.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -187,7 +190,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = double.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -199,7 +202,7 @@ public class TypeConverterTest {
         String input = "1";
         Class type = Double.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
@@ -211,9 +214,37 @@ public class TypeConverterTest {
         String input = "1";
         Class type = String.class;
         //act
-        Object result = TypeConverter.convert(input).to(type);
+        Object result = TypeUtils.convert(input).to(type);
 
         //assert
         assertThat(result, isA(type));
     }
+
+    @Test
+    public void testIsAbstract_nonAbstract_false() throws Exception {
+        //prepare
+
+        //act
+        assertFalse(TypeUtils.isAbstract(ConcreteClass.class));
+
+        //assert
+
+    }
+
+    @Test
+    public void testIsAbstract_abstract_true() throws Exception {
+        //prepare
+
+        //act
+        assertTrue(TypeUtils.isAbstract(AbstractClass.class));
+
+        //assert
+
+    }
+
+    //// Test types
+
+    public static class ConcreteClass{}
+    public static abstract class AbstractClass{}
+
 }
