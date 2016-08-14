@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.junit.util;
 
 import java.lang.reflect.Modifier;
 

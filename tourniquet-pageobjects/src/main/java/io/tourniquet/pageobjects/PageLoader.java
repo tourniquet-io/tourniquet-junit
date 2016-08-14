@@ -18,7 +18,7 @@ package io.tourniquet.pageobjects;
 
 import static io.tourniquet.pageobjects.ActiveWaits.untilDocumentReady;
 import static io.tourniquet.pageobjects.Timeouts.getTimeout;
-import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
+import static io.tourniquet.junit.util.TypeUtils.isAbstract;
 import static io.tourniquet.selenium.TimeoutProvider.RENDER_TIMEOUT;
 import static io.tourniquet.tx.TransactionHelper.addTransactionSupport;
 

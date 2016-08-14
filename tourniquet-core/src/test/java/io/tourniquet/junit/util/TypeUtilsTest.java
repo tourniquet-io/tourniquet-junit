@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tourniquet.pageobjects;
+package io.tourniquet.junit.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
