@@ -101,9 +101,10 @@ final class HttpPredicates {
     private static Map<String, List<String>> getFormParams(final HttpExchange x) {
         String payload = new String(x.getPayload());
         if (payload.matches("[^\\s&=:]+(:|=).*((&amp;|&|\\n)[^\\s&=:]+(:|=).*)*")) {
-            return Stream.of(payload.split("&amp;|&|\\n"))
+            return Stream.of(payload.split("&amp;|&\\n?"))
                          .map(nameValuePair -> nameValuePair.split(":|="))
-                         .collect(groupingBy(s -> s[0], Collectors.mapping(s -> s[1], Collectors.toList())));
+                         .collect(groupingBy(s -> s[0], Collectors.mapping(s -> s.length > 1 ? s[1] : "", Collectors
+                                 .toList())));
         }
         return Collections.emptyMap();
     }
