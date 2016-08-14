@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import io.tourniquet.junit.util.TestExecutionContext;
-import io.tourniquet.junit.util.TypeConverter;
+import io.tourniquet.junit.util.TypeUtils;
 
 /**
  * Rule for accessing test parameters. Test parameters allow to configure a test with external parameters. The default
@@ -94,7 +94,7 @@ public class ParameterProvider extends BaseRule {
      */
     public <T> Optional<T> getValue(String key, Class<T> type) {
 
-        return provider.apply(key).map(value -> TypeConverter.convert(value).to(type));
+        return provider.apply(key).map(value -> TypeUtils.convert(value).to(type));
     }
 
     /**
