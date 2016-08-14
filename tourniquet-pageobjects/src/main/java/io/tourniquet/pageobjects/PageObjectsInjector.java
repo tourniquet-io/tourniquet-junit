@@ -16,7 +16,7 @@
 
 package io.tourniquet.pageobjects;
 
-import static io.tourniquet.pageobjects.TypeUtils.isAbstract;
+import static io.tourniquet.junit.util.TypeUtils.isAbstract;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
